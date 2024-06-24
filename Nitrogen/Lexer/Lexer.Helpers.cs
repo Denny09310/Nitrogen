@@ -4,6 +4,12 @@ namespace Nitrogen;
 
 internal partial class Lexer
 {
+    private static readonly Dictionary<string, TokenKind> _keywords = new()
+    {
+        ["true"] = TokenKind.True,
+        ["false"] = TokenKind.False,
+    };
+
     private char Advance()
     {
         var current = Peek();

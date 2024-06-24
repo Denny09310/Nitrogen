@@ -15,5 +15,8 @@ internal enum TokenKind
     Plus,
     EOF,
     WhiteSpace,
-    NewLine
+    NewLine,
+    Identifier,
+    True,
+    False
 }

@@ -49,6 +49,11 @@ internal partial class Lexer(SourceText source)
             return LexInteger();
         }
 
+        if (char.IsLetter(current) || current == '_')
+        {
+            return LexIdentifier();
+        }
+
         return LexPunctuation(current);
     }
 
@@ -60,6 +65,21 @@ internal partial class Lexer(SourceText source)
         }
 
         return CreateToken(TokenKind.Float);
+    }
+
+    private Token LexIdentifier()
+    {
+        while ((char.IsLetterOrDigit(Peek()) || Peek() == '_') && !IsLastCharacter())
+        {
+            Consume();
+        }
+
+        if (_keywords.TryGetValue(_buffer.ToString(), out var keyword))
+        {
+            return CreateToken(kind: keyword);
+        }
+
+        return CreateToken(TokenKind.Identifier);
     }
 
     private Token LexInteger()
