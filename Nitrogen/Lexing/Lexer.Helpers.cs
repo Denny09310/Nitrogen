@@ -8,6 +8,7 @@ internal partial class Lexer
     {
         ["true"] = TokenKind.True,
         ["false"] = TokenKind.False,
+        ["print"] = TokenKind.Print,
     };
 
     private char Advance()
@@ -18,12 +19,6 @@ internal partial class Lexer
         _index++;
 
         return current;
-    }
-
-    private void AdvanceNewLine()
-    {
-        _line++;
-        _column = 1;
     }
 
     private char Consume()
@@ -40,8 +35,7 @@ internal partial class Lexer
 
         object? value = kind switch
         {
-            TokenKind.Integer => int.Parse(lexeme),
-            TokenKind.Float => float.Parse(lexeme),
+            TokenKind.Number => double.Parse(lexeme),
             _ => null,
         };
 

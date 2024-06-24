@@ -10,8 +10,7 @@ internal readonly record struct Token
 
 internal enum TokenKind
 {
-    Integer,
-    Float,
+    Number,
     Plus,
     EOF,
     WhiteSpace,
@@ -21,5 +20,7 @@ internal enum TokenKind
     False,
     Minus,
     Star,
-    Slash
+    Slash,
+    Print,
+    Semicolon
 }
