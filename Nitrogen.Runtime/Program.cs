@@ -1,4 +1,5 @@
 ﻿using Nitrogen.Lexing;
+using Nitrogen.Parsing;
 
 if (args is [var _])
 {
@@ -30,8 +31,6 @@ void Run(string source)
     var lexer = Lexer.FromSource(source);
     var tokens = lexer.Tokenize();
 
-    foreach (var token in tokens)
-    {
-        Console.WriteLine(token);
-    }
+    var parser = new Parser(tokens);
+    var expressions = parser.Parse();
 }
