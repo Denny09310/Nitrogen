@@ -1,4 +1,4 @@
-﻿using Nitrogen.Syntax.Expressions.Abstractions;
+﻿using Nitrogen.Syntax.Abstractions;
 
 namespace Nitrogen.Syntax.Expressions;
 

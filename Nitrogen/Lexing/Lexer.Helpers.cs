@@ -8,6 +8,7 @@ internal partial class Lexer
     {
         ["true"] = TokenKind.True,
         ["false"] = TokenKind.False,
+        ["print"] = TokenKind.Print,
     };
 
     private char Advance()

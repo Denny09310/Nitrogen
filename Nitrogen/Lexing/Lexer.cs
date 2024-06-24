@@ -101,6 +101,7 @@ internal partial class Lexer(SourceText source)
             case '-': return CreateToken(TokenKind.Minus);
             case '*': return CreateToken(TokenKind.Star);
             case '/': return CreateToken(TokenKind.Slash);
+            case ';': return CreateToken(TokenKind.Semicolon);
             default: throw new UnreachableException($"The character '{current}' can't be tokenized");
         }
     }

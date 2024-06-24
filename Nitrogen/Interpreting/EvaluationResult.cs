@@ -1,4 +1,6 @@
-﻿namespace Nitrogen.Interpreting;
+﻿using System.Globalization;
+
+namespace Nitrogen.Interpreting;
 
 internal readonly struct EvaluationResult(object? value)
 {
@@ -28,4 +30,11 @@ internal readonly struct EvaluationResult(object? value)
         (double string1, double string2) => string1 + string2,
         _ => throw new InvalidOperationException($"Unsupported operation between types {left.Value?.GetType()} and {right.Value?.GetType()}."),
     };
+
+    public override string? ToString()
+    {
+        if (Value == null) return "nil";
+        if (Value is double double1) return double1.ToString(CultureInfo.InvariantCulture);
+        return base.ToString();
+    }
 }

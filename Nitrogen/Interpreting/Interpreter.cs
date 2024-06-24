@@ -1,47 +1,40 @@
-﻿using Nitrogen.Syntax;
-using Nitrogen.Syntax.Expressions;
-using Nitrogen.Syntax.Expressions.Abstractions;
-
+﻿using Nitrogen.Syntax.Abstractions;
+using Nitrogen.Syntax.Statements;
 using System.Diagnostics;
 
 namespace Nitrogen.Interpreting;
 
-internal class Interpreter
+internal partial class Interpreter
 {
-    public void Evaluate(List<IExpression> expressions)
+    public void Execute(List<IStatement> expressions)
     {
         foreach (var expression in expressions)
         {
-            Evaluate(expression);
+            Execute(expression);
         }
     }
 
-    private object? Evaluate(IExpression expr) => expr switch
+#pragma warning disable S3241 // Methods should not return values that are never used
+
+    private object? Execute(IStatement stmt) => stmt switch
     {
-        BinaryExpression expression => Evaluate(expression),
-        LiteralExpression expression => Evaluate(expression),
-        _ => throw new UnreachableException("Expression not recognized.")
+        PrintStatement statement => Execute(statement),
+        ExpressionStatement statement => Execute(statement),
+        _ => throw new UnreachableException($"Statement {stmt.GetType()} not recognized.")
     };
 
-    private object? Evaluate(BinaryExpression expression)
+#pragma warning restore S3241 // Methods should not return values that are never used
+
+    private object? Execute(PrintStatement statement)
     {
-        var left = new EvaluationResult(Evaluate(expression.Left));
-        var right = new EvaluationResult(Evaluate(expression.Right));
+        var value = new EvaluationResult(Evaluate(statement.Expression));
+        Console.WriteLine(value);
 
-        var @operator = expression.Operator;
-
-        return @operator.Kind switch
-        {
-            TokenKind.Plus => left + right,
-            TokenKind.Minus => left - right,
-            TokenKind.Star => left * right,
-            TokenKind.Slash => left / right,
-            _ => throw new UnreachableException($"{@operator.Lexeme} not supported.")
-        };
+        return null;
     }
 
-    private object? Evaluate(LiteralExpression expression)
+    private object? Execute(ExpressionStatement statement)
     {
-        return expression.Literal;
+        return Evaluate(statement.Expression);
     }
 }

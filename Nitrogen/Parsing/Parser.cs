@@ -1,26 +1,26 @@
 ﻿using Nitrogen.Syntax;
+using Nitrogen.Syntax.Abstractions;
 using Nitrogen.Syntax.Expressions;
-using Nitrogen.Syntax.Expressions.Abstractions;
-
+using Nitrogen.Syntax.Statements;
 using System.Diagnostics;
 
 namespace Nitrogen.Parsing;
 
 internal partial class Parser(List<Token> tokens)
 {
-    private readonly List<IExpression> _expressions = [];
+    private readonly List<IStatement> _statements = [];
 
     private int _index;
 
-    public List<IExpression> Parse()
+    public List<IStatement> Parse()
     {
         while (!IsLastToken())
         {
-            if (ParseExpression() is not IExpression expression) continue;
-            _expressions.Add(expression);
+            if (ParseStatement() is not IStatement statement) continue;
+            _statements.Add(statement);
         }
 
-        return _expressions;
+        return _statements;
     }
 
     private IExpression ParseAdditiveExpression()
@@ -44,6 +44,13 @@ internal partial class Parser(List<Token> tokens)
         return expression;
     }
 
+    private ExpressionStatement ParseExpressionStatement()
+    {
+        var statement = new ExpressionStatement(ParseExpression());
+        Consume(TokenKind.Semicolon, "Expect ';' after statement.");
+        return statement;
+    }
+
     private IExpression ParseMoltiplicativeExpression()
         => ParseBinaryExpression(ParsePrimaryExpression, TokenKind.Star, TokenKind.Slash);
 
@@ -58,6 +65,19 @@ internal partial class Parser(List<Token> tokens)
 
         throw new UnreachableException($"Token '{current.Lexeme}' not recognized.");
     }
+
+    private PrintStatement ParsePrintStatement()
+    {
+        var expression = ParseExpression();
+        Consume(TokenKind.Semicolon, "Expect ';' after statement.");
+        return new PrintStatement(expression);
+    }
+
+    private IStatement ParseStatement()
+    {
+        if (Match(TokenKind.Print)) return ParsePrintStatement();
+        return ParseExpressionStatement();
+    }
 }
 
 internal partial class Parser
@@ -68,6 +88,17 @@ internal partial class Parser
     {
         _index++;
         return Peek(-1);
+    }
+
+    private void Consume(TokenKind kind, string message)
+    {
+        if (Peek().Kind == kind)
+        {
+            Consume();
+            return;
+        }
+
+        throw new InvalidOperationException(message);
     }
 
     private bool IsLastToken() => tokens[_index] is { Kind: TokenKind.EOF };

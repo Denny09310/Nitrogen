@@ -2,6 +2,8 @@
 using Nitrogen.Lexing;
 using Nitrogen.Parsing;
 
+namespace Nitrogen.Runtime;
+
 internal static class Program
 {
     private static readonly Interpreter _interpreter = new();
@@ -34,7 +36,7 @@ internal static class Program
             Console.WriteLine(_sintaxTree.Print(expressions));
         }
 
-        _interpreter.Evaluate(expressions);
+        _interpreter.Execute(expressions);
     }
 
     static void RunInteractive()
