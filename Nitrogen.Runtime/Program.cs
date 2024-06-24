@@ -1,39 +1,64 @@
-﻿using Nitrogen.Lexing;
+﻿using Nitrogen.Interpreting;
+using Nitrogen.Lexing;
 using Nitrogen.Parsing;
 
-if (args is [var _])
-{
-    // TODO: Read the file and send the content to the lexer
-}
-else
-{
-    RunInteractive();
-}
+namespace Nitrogen.Runtime;
 
-void RunInteractive()
+internal static class Program
 {
-    const string Prompt = "> ";
-    const string ExitCommand = "exit";
+    private static readonly Interpreter _interpreter = new();
+    private static readonly AbstractSyntaxTree _sintaxTree = new();
 
-    while (true)
+    public static bool ShowAbstractSyntaxTree { get; set; }
+
+    private static void Main(string[] args)
     {
-        Console.Write(Prompt);
-
-        if (Console.ReadLine() is not string source) continue;
-        if (source == ExitCommand) break;
-
-        Run(source);
+        if (args is [var _])
+        {
+            // TODO: Read the file and send the content to the lexer
+        }
+        else
+        {
+            RunInteractive();
+        }
     }
-}
 
-void Run(string source)
-{
-    var lexer = Lexer.FromSource(source);
-    var tokens = lexer.Tokenize();
+    static void Run(string source)
+    {
+        var lexer = Lexer.FromSource(source);
+        var tokens = lexer.Tokenize();
 
-    var parser = new Parser(tokens);
-    var expressions = parser.Parse();
+        var parser = new Parser(tokens);
+        var expressions = parser.Parse();
 
-    var ast = new AbstractSyntaxTree();
-    Console.WriteLine(ast.Print(expressions));
+        if (ShowAbstractSyntaxTree)
+        {
+            Console.WriteLine(_sintaxTree.Print(expressions));
+        }
+
+        _interpreter.Execute(expressions);
+    }
+
+    static void RunInteractive()
+    {
+        const string Prompt = "> ";
+        const string ExitCommand = "exit";
+        const string ShowAbstractSyntaxTreeCommand = "show-ast";
+
+        while (true)
+        {
+            Console.Write(Prompt);
+
+            if (Console.ReadLine() is not string source) continue;
+            if (source == ExitCommand) break;
+            if (source == ShowAbstractSyntaxTreeCommand)
+            {
+                ShowAbstractSyntaxTree = !ShowAbstractSyntaxTree;
+                Console.WriteLine($"{(ShowAbstractSyntaxTree ? "Showing" : "Hiding")} Abstract Syntax Tree");
+                continue;
+            }
+
+            Run(source);
+        }
+    }
 }
