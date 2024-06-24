@@ -30,7 +30,7 @@ internal partial class Lexer(SourceText source)
 
     private Token? Lex()
     {
-        var current = Consume();
+        char current = Peek();
 
         if (current is '\n')
         {
@@ -46,7 +46,7 @@ internal partial class Lexer(SourceText source)
 
         if (char.IsDigit(current))
         {
-            return LexInteger();
+            return LexNumber();
         }
 
         if (char.IsLetter(current) || current == '_')
@@ -54,17 +54,7 @@ internal partial class Lexer(SourceText source)
             return LexIdentifier();
         }
 
-        return LexPunctuation(current);
-    }
-
-    private Token LexFloat()
-    {
-        while ((!char.IsDigit(Peek()) || Peek() is '.') && !IsLastCharacter())
-        {
-            Consume();
-        }
-
-        return CreateToken(TokenKind.Float);
+        return LexPunctuation();
     }
 
     private Token LexIdentifier()
@@ -82,29 +72,29 @@ internal partial class Lexer(SourceText source)
         return CreateToken(TokenKind.Identifier);
     }
 
-    private Token LexInteger()
+    private void LexNewLine()
     {
-        while (char.IsDigit(Peek()) && !IsLastCharacter())
+        Consume();
+
+        _line++;
+        _column = 1;
+
+        CreateToken(TokenKind.NewLine);
+    }
+
+    private Token LexNumber()
+    {
+        while ((char.IsDigit(Peek()) || Peek() is '.') && !IsLastCharacter())
         {
             Consume();
         }
 
-        if (Peek() is not '.')
-        {
-            return CreateToken(TokenKind.Integer);
-        }
-
-        return LexFloat();
+        return CreateToken(TokenKind.Number);
     }
 
-    private void LexNewLine()
+    private Token LexPunctuation()
     {
-        AdvanceNewLine();
-        CreateToken(TokenKind.NewLine);
-    }
-
-    private Token LexPunctuation(char current)
-    {
+        var current = Consume();
         switch (current)
         {
             case '+': return CreateToken(TokenKind.Plus);
