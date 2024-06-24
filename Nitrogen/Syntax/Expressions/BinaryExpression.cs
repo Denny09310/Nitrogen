@@ -1,7 +1,7 @@
-﻿using Nitrogen.Parsing.Expressions.Abstractions;
-using Nitrogen.Syntax;
+﻿using Nitrogen.Syntax;
+using Nitrogen.Syntax.Expressions.Abstractions;
 
-namespace Nitrogen.Parsing.Expressions;
+namespace Nitrogen.Syntax.Expressions;
 
 internal class BinaryExpression(IExpression left, Token @operator, IExpression right) : IExpression
 {

@@ -1,6 +1,6 @@
-﻿using Nitrogen.Parsing.Expressions;
-using Nitrogen.Parsing.Expressions.Abstractions;
-using Nitrogen.Syntax;
+﻿using Nitrogen.Syntax;
+using Nitrogen.Syntax.Expressions;
+using Nitrogen.Syntax.Expressions.Abstractions;
 
 using System.Diagnostics;
 
@@ -51,7 +51,7 @@ internal partial class Parser(List<Token> tokens)
     {
         Token current = Consume();
 
-        if (current is { Kind: TokenKind.Integer or TokenKind.Float })
+        if (current is { Kind: TokenKind.Number })
         {
             return new LiteralExpression(current.Value);
         }

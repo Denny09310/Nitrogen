@@ -1,6 +1,5 @@
-﻿using Nitrogen.Parsing.Expressions;
-using Nitrogen.Parsing.Expressions.Abstractions;
-
+﻿using Nitrogen.Syntax.Expressions;
+using Nitrogen.Syntax.Expressions.Abstractions;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text;

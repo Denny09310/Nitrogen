@@ -1,6 +1,6 @@
-﻿using Nitrogen.Parsing.Expressions.Abstractions;
+﻿using Nitrogen.Syntax.Expressions.Abstractions;
 
-namespace Nitrogen.Parsing.Expressions;
+namespace Nitrogen.Syntax.Expressions;
 
 internal class LiteralExpression(object? literal) : IExpression
 {
