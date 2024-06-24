@@ -1,0 +1,1 @@
+﻿[global: System.Runtime.CompilerServices.InternalsVisibleTo("Nitrogen.Runtime")]
