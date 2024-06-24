@@ -33,4 +33,7 @@ void Run(string source)
 
     var parser = new Parser(tokens);
     var expressions = parser.Parse();
+
+    var ast = new AbstractSyntaxTree();
+    Console.WriteLine(ast.Print(expressions));
 }

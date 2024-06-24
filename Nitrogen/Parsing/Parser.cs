@@ -12,7 +12,7 @@ internal partial class Parser(List<Token> tokens)
 
     private int _index;
 
-    public IList<IExpression> Parse()
+    public List<IExpression> Parse()
     {
         while (!IsLastToken())
         {
