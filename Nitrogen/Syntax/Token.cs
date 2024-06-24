@@ -32,7 +32,7 @@ internal enum TokenKind
     Semicolon,
     Colon,
     Question,
-    Quote,
+    DoubleQuote,
     SingleQuote,
     SquareLeft,
     SquareRight,
@@ -51,4 +51,5 @@ internal enum TokenKind
     BangEqual,
     LessEqual,
     GreaterEqual,
+    String,
 }

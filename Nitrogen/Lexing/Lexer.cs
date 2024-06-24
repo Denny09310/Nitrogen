@@ -54,6 +54,11 @@ internal partial class Lexer(SourceText source)
             return LexIdentifier();
         }
 
+        if (current == '"')
+        {
+            return LexString();
+        }
+
         return LexPunctuation();
     }
 
@@ -109,7 +114,7 @@ internal partial class Lexer(SourceText source)
             case ',': return CreateToken(TokenKind.Comma);
             case ';': return CreateToken(TokenKind.Semicolon);
             case ':': return CreateToken(TokenKind.Colon);
-            case '"': return CreateToken(TokenKind.Quote);
+            case '"': return CreateToken(TokenKind.DoubleQuote);
             case '\'': return CreateToken(TokenKind.SingleQuote);
             case '[': return CreateToken(TokenKind.SquareLeft);
             case ']': return CreateToken(TokenKind.SquareRight);
@@ -144,6 +149,21 @@ internal partial class Lexer(SourceText source)
             default:
                 throw new UnreachableException($"The character '{current}' can't be tokenized");
         }
+    }
+
+    private Token? LexString()
+    {
+        Advance();
+
+        while (Peek() != '"' && !IsLastCharacter())
+        {
+            if (Peek() == '\\') Consume();
+            Consume();
+        }
+
+        Advance();
+
+        return CreateToken(TokenKind.String);
     }
 
     private void LexWhiteSpace()

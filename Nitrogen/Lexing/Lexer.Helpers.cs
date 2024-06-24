@@ -38,6 +38,7 @@ internal partial class Lexer
         object? value = kind switch
         {
             TokenKind.Number => double.Parse(lexeme),
+            TokenKind.String => lexeme.Replace("\\\"", "\""),
             _ => null,
         };
 
