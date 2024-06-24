@@ -111,7 +111,29 @@ internal partial class Lexer(SourceText source)
             case '-': return CreateToken(TokenKind.Minus);
             case '*': return CreateToken(TokenKind.Star);
             case '/': return CreateToken(TokenKind.Slash);
-            default: throw new UnreachableException($"The character '{current}' can't be tokenized");
+			case '\\': return CreateToken(TokenKind.BackSlash);
+			case '(': return CreateToken(TokenKind.LeftParenthesis);
+			case ')': return CreateToken(TokenKind.RightParenthesis);
+			case '!': return CreateToken(TokenKind.Exclamation);
+			case '?': return CreateToken(TokenKind.Question);
+			case '=': return CreateToken(TokenKind.Equal);
+			case '<': return CreateToken(TokenKind.Less);
+			case '>': return CreateToken(TokenKind.Greater);
+			case '.': return CreateToken(TokenKind.Dot);
+			case ',': return CreateToken(TokenKind.Comma);
+			case ';': return CreateToken(TokenKind.Semicolon);
+			case ':': return CreateToken(TokenKind.Colon);
+			case '"': return CreateToken(TokenKind.Quote);
+			case '\'': return CreateToken(TokenKind.SingleQuote);
+			case '[': return CreateToken(TokenKind.SquareLeft);
+			case ']': return CreateToken(TokenKind.SquareRight);
+			case '{': return CreateToken(TokenKind.CurlyLeft);
+			case '}': return CreateToken(TokenKind.CurlyRight);
+			case '%': return CreateToken(TokenKind.Percentage);
+			case '&': return CreateToken(TokenKind.Ampersand);
+			case '|': return CreateToken(TokenKind.VerticalBar);
+
+			default: throw new UnreachableException($"The character '{current}' can't be tokenized");
         }
     }
 
