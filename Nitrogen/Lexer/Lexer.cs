@@ -108,6 +108,9 @@ internal partial class Lexer(SourceText source)
         switch (current)
         {
             case '+': return CreateToken(TokenKind.Plus);
+            case '-': return CreateToken(TokenKind.Minus);
+            case '*': return CreateToken(TokenKind.Star);
+            case '/': return CreateToken(TokenKind.Slash);
             default: throw new UnreachableException($"The character '{current}' can't be tokenized");
         }
     }

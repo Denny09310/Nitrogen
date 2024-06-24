@@ -18,5 +18,8 @@ internal enum TokenKind
     NewLine,
     Identifier,
     True,
-    False
+    False,
+    Minus,
+    Star,
+    Slash
 }
