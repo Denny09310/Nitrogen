@@ -112,6 +112,11 @@ internal readonly struct EvaluationResult(object? value)
         return this == result;
     }
 
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Value);
+    }
+
     public override string? ToString()
     {
         if (Value == null) return "nil";

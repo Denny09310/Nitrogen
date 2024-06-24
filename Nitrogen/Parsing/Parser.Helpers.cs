@@ -1,4 +1,5 @@
-﻿using Nitrogen.Syntax;
+﻿using Nitrogen.Exceptions;
+using Nitrogen.Syntax;
 
 namespace Nitrogen.Parsing;
 
@@ -14,12 +15,13 @@ internal partial class Parser
 
     private Token Consume(TokenKind kind, string message)
     {
-        if (Peek().Kind == kind)
+        var token = Peek();
+        if (token.Kind == kind)
         {
             return Consume();
         }
 
-        throw new InvalidOperationException(message);
+        throw new ParseException(token, message);
     }
 
     private bool IsLastToken() => tokens[_index] is { Kind: TokenKind.EOF };
@@ -36,4 +38,18 @@ internal partial class Parser
     }
 
     private Token Peek(int count = 0) => tokens[_index + count];
+
+    private void Synchronize()
+    {
+        Token current = Peek();
+        while (!IsLastToken())
+        {
+            if (current is { Kind: TokenKind.Semicolon or TokenKind.RightBrace })
+            {
+                break;
+            }
+
+            current = Consume();
+        }
+    }
 }

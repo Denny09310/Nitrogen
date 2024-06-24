@@ -126,10 +126,10 @@ internal partial class Lexer(SourceText source)
             case ':': return CreateToken(TokenKind.Colon);
             case '"': return CreateToken(TokenKind.DoubleQuote);
             case '\'': return CreateToken(TokenKind.SingleQuote);
-            case '[': return CreateToken(TokenKind.SquareLeft);
-            case ']': return CreateToken(TokenKind.SquareRight);
-            case '{': return CreateToken(TokenKind.CurlyLeft);
-            case '}': return CreateToken(TokenKind.CurlyRight);
+            case '[': return CreateToken(TokenKind.LeftBracket);
+            case ']': return CreateToken(TokenKind.RightBracket);
+            case '{': return CreateToken(TokenKind.LeftBrace);
+            case '}': return CreateToken(TokenKind.RightBrace);
             case '%': return CreateToken(TokenKind.Percentage);
 
             case '-':

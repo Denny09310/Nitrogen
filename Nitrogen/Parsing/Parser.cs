@@ -1,27 +1,34 @@
-﻿using Nitrogen.Syntax;
+﻿using Nitrogen.Exceptions;
+using Nitrogen.Syntax;
 using Nitrogen.Syntax.Abstractions;
 using Nitrogen.Syntax.Expressions;
 using Nitrogen.Syntax.Statements;
-
-using System.Diagnostics;
 
 namespace Nitrogen.Parsing;
 
 internal partial class Parser(List<Token> tokens)
 {
+    private readonly List<ParseException> _errors = [];
     private readonly List<IStatement> _statements = [];
-
     private int _index;
 
-    public List<IStatement> Parse()
+    public (List<IStatement>, List<ParseException>) Parse()
     {
         while (!IsLastToken())
         {
-            if (ParseStatement() is not IStatement statement) continue;
-            _statements.Add(statement);
+            try
+            {
+                if (ParseStatement() is not IStatement statement) continue;
+                _statements.Add(statement);
+            }
+            catch (ParseException ex)
+            {
+                _errors.Add(ex);
+                Synchronize();
+            }
         }
 
-        return _statements;
+        return (_statements, _errors);
     }
 
     private IExpression ParseAdditiveExpression()
@@ -35,14 +42,17 @@ internal partial class Parser(List<Token> tokens)
         var expression = ParseOrExpression();
         if (Match(TokenKind.Equal))
         {
+            var equal = Peek(-1);
             var value = ParseOrExpression();
+
+            Consume(TokenKind.Semicolon, "Expect ';' after assignment.");
 
             if (expression is IdentifierExpression identifier)
             {
                 return new AssignmentExpression(identifier.Name, value);
             }
 
-            throw new InvalidOperationException("Invalid assingment target.");
+            throw new ParseException(equal, "Invalid assingment target.");
         }
 
         return expression;
@@ -114,7 +124,7 @@ internal partial class Parser(List<Token> tokens)
             return new IdentifierExpression(current);
         }
 
-        throw new UnreachableException($"Token '{current.Lexeme}' not recognized.");
+        throw new ParseException(current, $"Token '{current.Lexeme}' not recognized.");
     }
 
     private PrintStatement ParsePrintStatement()

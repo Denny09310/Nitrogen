@@ -2,6 +2,8 @@
 using Nitrogen.Interpreting;
 using Nitrogen.Lexing;
 using Nitrogen.Parsing;
+using Nitrogen.Syntax;
+using Nitrogen.Syntax.Abstractions;
 
 namespace Nitrogen.Runtime;
 
@@ -15,9 +17,21 @@ internal static class Program
     private static void CaptureErrors(List<SyntaxException> errors)
     {
         Console.ForegroundColor = ConsoleColor.Red;
-        foreach (SyntaxException error in errors)
+        foreach (var error in errors)
         {
             Console.WriteLine($"{error.Message}, Line {error.Location.Line} Col {error.Location.Column}");
+        }
+
+        Console.WriteLine();
+        Console.ResetColor();
+    }
+
+    private static void CaptureErrors(List<ParseException> errors)
+    {
+        Console.ForegroundColor = ConsoleColor.Red;
+        foreach (var error in errors)
+        {
+            Console.WriteLine(error.Message);
         }
 
         Console.WriteLine();
@@ -36,27 +50,15 @@ internal static class Program
         }
     }
 
-    static void Run(string source)
+    private static void Run(string source)
     {
-        var lexer = Lexer.FromSource(source);
-        var (tokens, errors) = lexer.Tokenize();
+        var tokens = RunLexer(source);
 
-        if (errors.Count > 0)
-        {
-            CaptureErrors(errors);
-            return;
-        }
+        if (tokens.Count == 0) return;
+        var statements = RunParser(tokens);
 
-        var parser = new Parser(tokens);
-        var expressions = parser.Parse();
-
-        if (ShowAbstractSyntaxTree)
-        {
-            Console.WriteLine(_sintaxTree.Print(expressions));
-            return;
-        }
-
-        _interpreter.Execute(expressions);
+        if (statements.Count == 0) return;
+        RunInterpreter(statements);
     }
 
     static void RunInteractive()
@@ -90,5 +92,43 @@ internal static class Program
 
             Run(source);
         }
+    }
+
+    private static void RunInterpreter(List<IStatement> statements)
+    {
+        if (ShowAbstractSyntaxTree)
+        {
+            Console.WriteLine(_sintaxTree.Print(statements));
+        }
+
+        _interpreter.Execute(statements);
+    }
+
+    private static List<Token> RunLexer(string source)
+    {
+        var lexer = Lexer.FromSource(source);
+        var (tokens, errors) = lexer.Tokenize();
+
+        if (errors.Count > 0)
+        {
+            CaptureErrors(errors);
+            return [];
+        }
+
+        return tokens;
+    }
+
+    private static List<IStatement> RunParser(List<Token> tokens)
+    {
+        var parser = new Parser(tokens);
+        var (statements, errors) = parser.Parse();
+
+        if (errors.Count > 0)
+        {
+            CaptureErrors(errors);
+            return [];
+        }
+
+        return statements;
     }
 }
