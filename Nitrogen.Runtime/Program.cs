@@ -44,7 +44,7 @@ internal static class Program
     {
         const string Prompt = "> ";
         const string ExitCommand = "exit";
-        const string ClearCommand = "exit";
+        const string ClearCommand = "clear";
         const string ShowAbstractSyntaxTreeCommand = "show-ast";
 
         while (true)
