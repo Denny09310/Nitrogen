@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using Nitrogen.Exceptions;
+using System.Globalization;
 
 namespace Nitrogen.Interpreting;
 
@@ -18,14 +19,14 @@ internal readonly struct EvaluationResult(object? value)
     public static object? operator -(EvaluationResult left, EvaluationResult right) => (left.Value, right.Value) switch
     {
         (double double1, double double2) => double1 - double2,
-        _ => throw new InvalidOperationException($"Unsupported operation between types {left.Value?.GetType()} and {right.Value?.GetType()}."),
+        _ => throw new RuntimeException($"Unsupported operation between types {left.Value?.GetType()} and {right.Value?.GetType()}."),
     };
 
     public static object? operator +(EvaluationResult left, EvaluationResult right) => (left.Value, right.Value) switch
     {
         (string string1, string string2) => string1 + string2,
         (double double1, double double2) => double1 + double2,
-        _ => throw new InvalidOperationException($"Unsupported operation between types {left.Value?.GetType()} and {right.Value?.GetType()}."),
+        _ => throw new RuntimeException($"Unsupported operation between types {left.Value?.GetType()} and {right.Value?.GetType()}."),
     };
 
     #endregion Additive
@@ -35,13 +36,13 @@ internal readonly struct EvaluationResult(object? value)
     public static object? operator *(EvaluationResult left, EvaluationResult right) => (left.Value, right.Value) switch
     {
         (double double1, double double2) => double1 * double2,
-        _ => throw new InvalidOperationException($"Unsupported operation between types {left.Value?.GetType()} and {right.Value?.GetType()}."),
+        _ => throw new RuntimeException($"Unsupported operation between types {left.Value?.GetType()} and {right.Value?.GetType()}."),
     };
 
     public static object? operator /(EvaluationResult left, EvaluationResult right) => (left.Value, right.Value) switch
     {
         (double double1, double double2) => double1 / double2,
-        _ => throw new InvalidOperationException($"Unsupported operation between types {left.Value?.GetType()} and {right.Value?.GetType()}."),
+        _ => throw new RuntimeException($"Unsupported operation between types {left.Value?.GetType()} and {right.Value?.GetType()}."),
     };
 
     #endregion Multiplicative
@@ -101,7 +102,7 @@ internal readonly struct EvaluationResult(object? value)
     public static object? operator -(EvaluationResult left) => left.Value switch
     {
         (double double1) => -double1,
-        _ => throw new InvalidOperationException($"Unsupported operation for type {left.Value?.GetType()}."),
+        _ => throw new RuntimeException($"Unsupported operation for type {left.Value?.GetType()}."),
     };
 
     #endregion Unary

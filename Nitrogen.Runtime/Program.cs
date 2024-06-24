@@ -12,6 +12,7 @@ internal static class Program
     private static readonly Interpreter _interpreter = new();
     private static readonly AbstractSyntaxTree _sintaxTree = new();
 
+    public static bool HasRuntimeErrors { get; set; }
     public static bool ShowAbstractSyntaxTree { get; set; }
 
     private static void CaptureErrors(List<SyntaxException> errors)
@@ -36,6 +37,16 @@ internal static class Program
 
         Console.WriteLine();
         Console.ResetColor();
+    }
+
+    private static void CaptureErrors(RuntimeException ex)
+    {
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine(ex.Message);
+        Console.WriteLine();
+        Console.ResetColor();
+
+        HasRuntimeErrors = true;
     }
 
     private static void Main(string[] args)
@@ -101,7 +112,14 @@ internal static class Program
             Console.WriteLine(_sintaxTree.Print(statements));
         }
 
-        _interpreter.Execute(statements);
+        try
+        {
+            _interpreter.Execute(statements);
+        }
+        catch (RuntimeException ex)
+        {
+            CaptureErrors(ex);
+        }
     }
 
     private static List<Token> RunLexer(string source)

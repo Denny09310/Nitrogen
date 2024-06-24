@@ -1,4 +1,5 @@
-﻿using Nitrogen.Syntax;
+﻿using Nitrogen.Exceptions;
+using Nitrogen.Syntax;
 using Nitrogen.Syntax.Abstractions;
 using Nitrogen.Syntax.Expressions;
 
@@ -58,7 +59,7 @@ internal partial class Interpreter
             TokenKind.Greater => left > right,
             TokenKind.GreaterEqual => left >= right,
 
-            _ => throw new UnreachableException($"{@operator.Lexeme} not supported.")
+            _ => throw new RuntimeException(@operator, $"{@operator.Lexeme} not supported.")
         };
     }
 
@@ -89,7 +90,7 @@ internal partial class Interpreter
             TokenKind.Minus => -value,
             TokenKind.Bang => !value,
 
-            _ => throw new UnreachableException($"{@operator.Lexeme} not supported.")
+            _ => throw new RuntimeException(@operator, $"{@operator.Lexeme} not supported.")
         };
     }
 }
