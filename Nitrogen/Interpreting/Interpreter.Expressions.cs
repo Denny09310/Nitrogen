@@ -50,7 +50,7 @@ internal partial class Interpreter
     {
         bool left = new EvaluationResult(expression.Left);
 
-        if (expression.Operator.Kind is TokenKind.Or)
+        if (expression.Operator is { Kind: TokenKind.Or or TokenKind.PipePipe })
         {
             if (left) return left;
         }

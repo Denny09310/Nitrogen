@@ -101,6 +101,9 @@ internal partial class Parser(List<Token> tokens)
     {
         Token current = Consume();
 
+        if (current.Kind is TokenKind.True) return new LiteralExpression(true);
+        if (current.Kind is TokenKind.False) return new LiteralExpression(false);
+
         if (current is { Kind: TokenKind.Number or TokenKind.String })
         {
             return new LiteralExpression(current.Value);

@@ -44,6 +44,7 @@ internal static class Program
     {
         const string Prompt = "> ";
         const string ExitCommand = "exit";
+        const string ClearCommand = "exit";
         const string ShowAbstractSyntaxTreeCommand = "show-ast";
 
         while (true)
@@ -51,8 +52,17 @@ internal static class Program
             Console.Write(Prompt);
 
             if (Console.ReadLine() is not string source) continue;
-            if (source == ExitCommand) break;
-            if (source == ShowAbstractSyntaxTreeCommand)
+
+            if (source == ExitCommand)
+            {
+                break;
+            }
+            else if (source == ClearCommand)
+            {
+                Console.Clear();
+                continue;
+            }
+            else if (source == ShowAbstractSyntaxTreeCommand)
             {
                 ShowAbstractSyntaxTree = !ShowAbstractSyntaxTree;
                 Console.WriteLine($"{(ShowAbstractSyntaxTree ? "Showing" : "Hiding")} Abstract Syntax Tree");
