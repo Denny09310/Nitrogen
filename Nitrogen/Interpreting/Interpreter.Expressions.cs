@@ -1,6 +1,7 @@
 ﻿using Nitrogen.Syntax;
 using Nitrogen.Syntax.Abstractions;
 using Nitrogen.Syntax.Expressions;
+
 using System.Diagnostics;
 
 namespace Nitrogen.Interpreting;
@@ -9,12 +10,20 @@ internal partial class Interpreter
 {
     private object? Evaluate(IExpression expr) => expr switch
     {
+        AssignmentExpression expression => Evaluate(expression),
         BinaryExpression expression => Evaluate(expression),
         LogicalExpression expression => Evaluate(expression),
-        AssignmentExpression expression => Evaluate(expression),
+        UnaryExpression expression => Evaluate(expression),
         LiteralExpression expression => expression.Literal,
         _ => throw new UnreachableException($"Expression {expr.GetType()} not recognized.")
     };
+
+    private object? Evaluate(AssignmentExpression expression)
+    {
+        // TODO: Retrieve from the container the value assigned to the name
+        ArgumentNullException.ThrowIfNull(expression);
+        return null;
+    }
 
     private object? Evaluate(BinaryExpression expression)
     {
@@ -42,6 +51,7 @@ internal partial class Interpreter
             TokenKind.LessEqual => left <= right,
             TokenKind.Greater => left > right,
             TokenKind.GreaterEqual => left >= right,
+
             _ => throw new UnreachableException($"{@operator.Lexeme} not supported.")
         };
     }
@@ -63,10 +73,17 @@ internal partial class Interpreter
         return right;
     }
 
-    private object? Evaluate(AssignmentExpression expression)
+    private object? Evaluate(UnaryExpression expression)
     {
-        // TODO: Retrieve from the container the value assigned to the name
-        ArgumentNullException.ThrowIfNull(expression);
-        return null;
+        var value = new EvaluationResult(Evaluate(expression.Expression));
+        var @operator = expression.Operator;
+
+        return @operator.Kind switch
+        {
+            TokenKind.Minus => -value,
+            TokenKind.Bang => !value,
+
+            _ => throw new UnreachableException($"{@operator.Lexeme} not supported.")
+        };
     }
 }

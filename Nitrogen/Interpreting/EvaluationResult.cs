@@ -96,6 +96,16 @@ internal readonly struct EvaluationResult(object? value)
 
     #endregion Comparison
 
+    #region Unary
+
+    public static object? operator -(EvaluationResult left) => left.Value switch
+    {
+        (double double1) => -double1,
+        _ => throw new InvalidOperationException($"Unsupported operation for type {left.Value?.GetType()}."),
+    };
+
+    #endregion Unary
+
     public override bool Equals(object? obj)
     {
         if (obj is not EvaluationResult result) return false;

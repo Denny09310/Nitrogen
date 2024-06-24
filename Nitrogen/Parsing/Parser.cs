@@ -92,7 +92,7 @@ internal partial class Parser(List<Token> tokens)
     }
 
     private IExpression ParseMoltiplicativeExpression()
-        => ParseBinaryExpression(ParsePrimaryExpression, TokenKind.Star, TokenKind.Slash);
+        => ParseBinaryExpression(ParseUnaryExpression, TokenKind.Star, TokenKind.Slash);
 
     private IExpression ParseOrExpression()
         => ParseLogicalExpression(ParseAndExpression, TokenKind.PipePipe, TokenKind.Or);
@@ -128,5 +128,17 @@ internal partial class Parser(List<Token> tokens)
     {
         if (Match(TokenKind.Print)) return ParsePrintStatement();
         return ParseExpressionStatement();
+    }
+
+    private IExpression ParseUnaryExpression()
+    {
+        IExpression? expression = null;
+        if (Match(TokenKind.Minus, TokenKind.Bang))
+        {
+            var @operator = Peek(-1);
+            expression = new UnaryExpression(@operator, ParseExpression());
+        }
+
+        return expression ?? ParsePrimaryExpression();
     }
 }
