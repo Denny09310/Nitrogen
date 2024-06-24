@@ -1,13 +1,37 @@
-﻿using Nitrogen.Parser;
+﻿using Nitrogen;
 
-if (args is [var path])
+if (args is [var _])
 {
-    var content = await File.ReadAllTextAsync(path);
-    var source = SourceText.FromSource(content);
-
-    // TODO: Send the source to the lexer
+    // TODO: Read the file and send the content to the lexer
 }
 else
 {
-    // TODO: Start an interactive session in which the user can write
+    RunInteractive();
+}
+
+void RunInteractive()
+{
+    const string Prompt = "> ";
+    const string ExitCommand = "exit";
+
+    while (true)
+    {
+        Console.Write(Prompt);
+
+        if (Console.ReadLine() is not string source) continue;
+        if (source == ExitCommand) break;
+
+        Run(source);
+    }
+}
+
+void Run(string source)
+{
+    var lexer = Lexer.FromSource(source);
+    var tokens = lexer.Tokenize();
+
+    foreach (var token in tokens)
+    {
+        Console.WriteLine(token);
+    }
 }
