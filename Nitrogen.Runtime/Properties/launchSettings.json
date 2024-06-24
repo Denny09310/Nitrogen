@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Nitrogen.Runtime": {
+      "commandName": "Project",
+      "commandLineArgs": "../../../../scripts/test_script.mds"
+    }
+  }
+}
