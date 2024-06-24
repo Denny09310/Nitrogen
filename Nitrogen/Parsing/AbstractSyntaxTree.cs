@@ -38,11 +38,17 @@ internal class AbstractSyntaxTree
     private string? Print(IExpression expr) => expr switch
     {
         BinaryExpression expression => Print(expression),
+        LogicalExpression expression => Print(expression),
         LiteralExpression expression => Print(expression),
         _ => throw new UnreachableException($"Unrecognized expression of type {expr.GetType()}")
     };
 
     private string? Print(BinaryExpression expression)
+    {
+        return $"({Print(expression.Left)} {expression.Operator.Lexeme} {Print(expression.Right)})";
+    }
+
+    private string? Print(LogicalExpression expression)
     {
         return $"({Print(expression.Left)} {expression.Operator.Lexeme} {Print(expression.Right)})";
     }

@@ -6,6 +6,13 @@ internal readonly struct EvaluationResult(object? value)
 {
     public object? Value { get; } = value;
 
+    public static implicit operator bool(EvaluationResult evaluation)
+    {
+        if (evaluation.Value is null) return false;
+        if (evaluation.Value is bool bool1) return bool1;
+        return true;
+    }
+
     public static object? operator -(EvaluationResult left, EvaluationResult right) => (left.Value, right.Value) switch
     {
         (double string1, double string2) => string1 - string2,

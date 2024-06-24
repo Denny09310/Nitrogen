@@ -34,6 +34,7 @@ internal static class Program
         if (ShowAbstractSyntaxTree)
         {
             Console.WriteLine(_sintaxTree.Print(expressions));
+            return;
         }
 
         _interpreter.Execute(expressions);

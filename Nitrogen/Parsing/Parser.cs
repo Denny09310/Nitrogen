@@ -26,6 +26,27 @@ internal partial class Parser(List<Token> tokens)
     private IExpression ParseAdditiveExpression()
         => ParseBinaryExpression(ParseMoltiplicativeExpression, TokenKind.Plus, TokenKind.Minus);
 
+    private IExpression ParseAndExpression()
+        => ParseLogicalExpression(ParseAdditiveExpression, TokenKind.AmpersandAmpersand, TokenKind.And);
+
+    private IExpression ParseAssignmentExpression()
+    {
+        var expression = ParseOrExpression();
+        if (Match(TokenKind.Equal))
+        {
+            var value = ParseOrExpression();
+
+            if (expression is IdentifierExpression identifier)
+            {
+                return new AssignmentExpression(identifier.Name, value);
+            }
+
+            throw new InvalidOperationException("Invalid assingment target.");
+        }
+
+        return expression;
+    }
+
     private IExpression ParseBinaryExpression(Func<IExpression> descendant, params TokenKind[] kinds)
     {
         var left = descendant();
@@ -40,7 +61,7 @@ internal partial class Parser(List<Token> tokens)
 
     private IExpression ParseExpression()
     {
-        var expression = ParseAdditiveExpression();
+        var expression = ParseAssignmentExpression();
         return expression;
     }
 
@@ -51,8 +72,23 @@ internal partial class Parser(List<Token> tokens)
         return statement;
     }
 
+    private IExpression ParseLogicalExpression(Func<IExpression> descendant, params TokenKind[] kinds)
+    {
+        var left = descendant();
+        while (Match(kinds))
+        {
+            var @operator = Peek(-1);
+            var right = descendant();
+            left = new LogicalExpression(left, @operator, right);
+        }
+        return left;
+    }
+
     private IExpression ParseMoltiplicativeExpression()
         => ParseBinaryExpression(ParsePrimaryExpression, TokenKind.Star, TokenKind.Slash);
+
+    private IExpression ParseOrExpression()
+        => ParseLogicalExpression(ParseAndExpression, TokenKind.PipePipe, TokenKind.Or);
 
     private IExpression ParsePrimaryExpression()
     {
@@ -61,6 +97,11 @@ internal partial class Parser(List<Token> tokens)
         if (current is { Kind: TokenKind.Number })
         {
             return new LiteralExpression(current.Value);
+        }
+
+        if (current is { Kind: TokenKind.Identifier })
+        {
+            return new IdentifierExpression(current);
         }
 
         throw new UnreachableException($"Token '{current.Lexeme}' not recognized.");
@@ -78,41 +119,4 @@ internal partial class Parser(List<Token> tokens)
         if (Match(TokenKind.Print)) return ParsePrintStatement();
         return ParseExpressionStatement();
     }
-}
-
-internal partial class Parser
-{
-    private bool Check(TokenKind kind) => Peek().Kind == kind;
-
-    private Token Consume()
-    {
-        _index++;
-        return Peek(-1);
-    }
-
-    private void Consume(TokenKind kind, string message)
-    {
-        if (Peek().Kind == kind)
-        {
-            Consume();
-            return;
-        }
-
-        throw new InvalidOperationException(message);
-    }
-
-    private bool IsLastToken() => tokens[_index] is { Kind: TokenKind.EOF };
-
-    private bool Match(params TokenKind[] kinds)
-    {
-        if (Array.Exists(kinds, Check))
-        {
-            Consume();
-            return true;
-        }
-
-        return false;
-    }
-
-    private Token Peek(int count = 0) => tokens[_index + count];
 }

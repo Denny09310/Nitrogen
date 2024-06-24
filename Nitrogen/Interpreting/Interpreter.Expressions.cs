@@ -1,7 +1,6 @@
 ﻿using Nitrogen.Syntax;
 using Nitrogen.Syntax.Abstractions;
 using Nitrogen.Syntax.Expressions;
-
 using System.Diagnostics;
 
 namespace Nitrogen.Interpreting;
@@ -11,6 +10,8 @@ internal partial class Interpreter
     private object? Evaluate(IExpression expr) => expr switch
     {
         BinaryExpression expression => Evaluate(expression),
+        LogicalExpression expression => Evaluate(expression),
+        AssignmentExpression expression => Evaluate(expression),
         LiteralExpression expression => expression.Literal,
         _ => throw new UnreachableException($"Expression {expr.GetType()} not recognized.")
     };
@@ -30,5 +31,29 @@ internal partial class Interpreter
             TokenKind.Slash => left / right,
             _ => throw new UnreachableException($"{@operator.Lexeme} not supported.")
         };
+    }
+
+    private object? Evaluate(LogicalExpression expression)
+    {
+        bool left = new EvaluationResult(expression.Left);
+
+        if (expression.Operator.Kind is TokenKind.Or)
+        {
+            if (left) return left;
+        }
+        else
+        {
+            if (!left) return left;
+        }
+
+        bool right = new EvaluationResult(Evaluate(expression.Right));
+        return right;
+    }
+
+    private object? Evaluate(AssignmentExpression expression)
+    {
+        // TODO: Retrieve from the container the value assigned to the name
+        ArgumentNullException.ThrowIfNull(expression);
+        return null;
     }
 }

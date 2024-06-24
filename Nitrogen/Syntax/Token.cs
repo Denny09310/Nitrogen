@@ -41,6 +41,10 @@ internal enum TokenKind
     Percentage,
     Ampersand,
     BackSlash,
-    VerticalBar,
+    Pipe,
     Print,
+    PipePipe,
+    AmpersandAmpersand,
+    And,
+    Or,
 }

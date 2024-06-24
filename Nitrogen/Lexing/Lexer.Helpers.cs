@@ -9,6 +9,8 @@ internal partial class Lexer
         ["true"] = TokenKind.True,
         ["false"] = TokenKind.False,
         ["print"] = TokenKind.Print,
+        ["and"] = TokenKind.And,
+        ["or"] = TokenKind.Or,
     };
 
     private char Advance()
@@ -45,6 +47,17 @@ internal partial class Lexer
     }
 
     private bool IsLastCharacter() => source.CharAt(_index) == '\0';
+
+    private bool Match(char expected)
+    {
+        if (Peek() == expected)
+        {
+            Consume();
+            return true;
+        }
+
+        return false;
+    }
 
     private char Peek(int count = 0) => source.CharAt(_index + count);
 }
