@@ -1,1 +1,3 @@
-﻿[global: System.Runtime.CompilerServices.InternalsVisibleTo("Nitrogen.Runtime")]
+﻿using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("Nitrogen.Runtime")]
