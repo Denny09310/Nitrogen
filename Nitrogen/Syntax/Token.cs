@@ -52,4 +52,6 @@ internal enum TokenKind
     LessEqual,
     GreaterEqual,
     String,
+    PlusPlus,
+    MinusMinus,
 }

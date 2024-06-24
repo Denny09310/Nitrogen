@@ -102,8 +102,6 @@ internal partial class Lexer(SourceText source)
         var current = Consume();
         switch (current)
         {
-            case '+': return CreateToken(TokenKind.Plus);
-            case '-': return CreateToken(TokenKind.Minus);
             case '*': return CreateToken(TokenKind.Star);
             case '/': return CreateToken(TokenKind.Slash);
             case '\\': return CreateToken(TokenKind.BackSlash);
@@ -121,6 +119,14 @@ internal partial class Lexer(SourceText source)
             case '{': return CreateToken(TokenKind.CurlyLeft);
             case '}': return CreateToken(TokenKind.CurlyRight);
             case '%': return CreateToken(TokenKind.Percentage);
+
+            case '-':
+                if (Match('-')) return CreateToken(TokenKind.MinusMinus);
+                return CreateToken(TokenKind.Minus);
+
+            case '+':
+                if (Match('+')) return CreateToken(TokenKind.PlusPlus);
+                return CreateToken(TokenKind.Plus);
 
             case '<':
                 if (Match('=')) return CreateToken(TokenKind.LessEqual);
