@@ -72,13 +72,6 @@ internal partial class Parser(List<Token> tokens)
         return expression;
     }
 
-    private ExpressionStatement ParseExpressionStatement()
-    {
-        var statement = new ExpressionStatement(ParseExpression());
-        Consume(TokenKind.Semicolon, "Expect ';' after statement.");
-        return statement;
-    }
-
     private IExpression ParseLogicalExpression(Func<IExpression> descendant, params TokenKind[] kinds)
     {
         var left = descendant();
@@ -104,6 +97,13 @@ internal partial class Parser(List<Token> tokens)
         if (current.Kind is TokenKind.True) return new LiteralExpression(true);
         if (current.Kind is TokenKind.False) return new LiteralExpression(false);
 
+        if (current.Kind is TokenKind.LeftParenthesis)
+        {
+            var expression = ParseExpression();
+            var paren = Consume(TokenKind.RightParenthesis, "Expect ')' after grouping expression.");
+            return new GroupingExpression(paren, expression);
+        }
+
         if (current is { Kind: TokenKind.Number or TokenKind.String })
         {
             return new LiteralExpression(current.Value);
@@ -127,7 +127,7 @@ internal partial class Parser(List<Token> tokens)
     private IStatement ParseStatement()
     {
         if (Match(TokenKind.Print)) return ParsePrintStatement();
-        return ParseExpressionStatement();
+        return new ExpressionStatement(ParseExpression());
     }
 
     private IExpression ParseUnaryExpression()

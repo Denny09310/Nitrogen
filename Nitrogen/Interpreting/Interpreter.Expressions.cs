@@ -14,9 +14,15 @@ internal partial class Interpreter
         BinaryExpression expression => Evaluate(expression),
         LogicalExpression expression => Evaluate(expression),
         UnaryExpression expression => Evaluate(expression),
+        GroupingExpression expression => Evaluate(expression),
         LiteralExpression expression => expression.Literal,
         _ => throw new UnreachableException($"Expression {expr.GetType()} not recognized.")
     };
+
+    private object? Evaluate(GroupingExpression expression)
+    {
+        return Evaluate(expression.Expression);
+    }
 
     private object? Evaluate(AssignmentExpression expression)
     {

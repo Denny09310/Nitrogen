@@ -12,12 +12,11 @@ internal partial class Parser
         return Peek(-1);
     }
 
-    private void Consume(TokenKind kind, string message)
+    private Token Consume(TokenKind kind, string message)
     {
         if (Peek().Kind == kind)
         {
-            Consume();
-            return;
+            return Consume();
         }
 
         throw new InvalidOperationException(message);
