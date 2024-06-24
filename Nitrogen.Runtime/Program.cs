@@ -1,4 +1,4 @@
-﻿using Nitrogen;
+﻿using Nitrogen.Lexing;
 
 if (args is [var _])
 {

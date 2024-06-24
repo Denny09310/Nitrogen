@@ -1,6 +1,6 @@
 ﻿using Nitrogen.Syntax;
 
-namespace Nitrogen;
+namespace Nitrogen.Lexing;
 
 internal partial class Lexer
 {

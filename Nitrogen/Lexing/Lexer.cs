@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Text;
 
-namespace Nitrogen;
+namespace Nitrogen.Lexing;
 
 internal partial class Lexer(SourceText source)
 {
