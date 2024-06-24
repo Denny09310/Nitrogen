@@ -25,10 +25,23 @@ internal partial class Interpreter
 
         return @operator.Kind switch
         {
+            // Additive
             TokenKind.Plus => left + right,
             TokenKind.Minus => left - right,
+
+            // Multiplicative
             TokenKind.Star => left * right,
             TokenKind.Slash => left / right,
+
+            // Equality
+            TokenKind.EqualEqual => left == right,
+            TokenKind.BangEqual => left != right,
+
+            // Comparison
+            TokenKind.Less => left < right,
+            TokenKind.LessEqual => left <= right,
+            TokenKind.Greater => left > right,
+            TokenKind.GreaterEqual => left >= right,
             _ => throw new UnreachableException($"{@operator.Lexeme} not supported.")
         };
     }

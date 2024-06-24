@@ -23,7 +23,7 @@ internal enum TokenKind
     Slash,
     LeftParenthesis,
     RightParenthesis,
-    Exclamation,
+    Bang,
     Equal,
     Less,
     Greater,
@@ -47,4 +47,8 @@ internal enum TokenKind
     AmpersandAmpersand,
     And,
     Or,
+    EqualEqual,
+    BangEqual,
+    LessEqual,
+    GreaterEqual,
 }

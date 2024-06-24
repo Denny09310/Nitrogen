@@ -104,11 +104,7 @@ internal partial class Lexer(SourceText source)
             case '\\': return CreateToken(TokenKind.BackSlash);
             case '(': return CreateToken(TokenKind.LeftParenthesis);
             case ')': return CreateToken(TokenKind.RightParenthesis);
-            case '!': return CreateToken(TokenKind.Exclamation);
             case '?': return CreateToken(TokenKind.Question);
-            case '=': return CreateToken(TokenKind.Equal);
-            case '<': return CreateToken(TokenKind.Less);
-            case '>': return CreateToken(TokenKind.Greater);
             case '.': return CreateToken(TokenKind.Dot);
             case ',': return CreateToken(TokenKind.Comma);
             case ';': return CreateToken(TokenKind.Semicolon);
@@ -120,6 +116,22 @@ internal partial class Lexer(SourceText source)
             case '{': return CreateToken(TokenKind.CurlyLeft);
             case '}': return CreateToken(TokenKind.CurlyRight);
             case '%': return CreateToken(TokenKind.Percentage);
+
+            case '<':
+                if (Match('=')) return CreateToken(TokenKind.LessEqual);
+                return CreateToken(TokenKind.Less);
+
+            case '>':
+                if (Match('=')) return CreateToken(TokenKind.GreaterEqual);
+                return CreateToken(TokenKind.Greater);
+
+            case '!':
+                if (Match('=')) return CreateToken(TokenKind.BangEqual);
+                return CreateToken(TokenKind.Bang);
+
+            case '=':
+                if (Match('=')) return CreateToken(TokenKind.EqualEqual);
+                return CreateToken(TokenKind.Equal);
 
             case '&':
                 if (Match('&')) return CreateToken(TokenKind.PipePipe);

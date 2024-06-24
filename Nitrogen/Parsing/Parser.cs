@@ -2,6 +2,7 @@
 using Nitrogen.Syntax.Abstractions;
 using Nitrogen.Syntax.Expressions;
 using Nitrogen.Syntax.Statements;
+
 using System.Diagnostics;
 
 namespace Nitrogen.Parsing;
@@ -27,7 +28,7 @@ internal partial class Parser(List<Token> tokens)
         => ParseBinaryExpression(ParseMoltiplicativeExpression, TokenKind.Plus, TokenKind.Minus);
 
     private IExpression ParseAndExpression()
-        => ParseLogicalExpression(ParseAdditiveExpression, TokenKind.AmpersandAmpersand, TokenKind.And);
+        => ParseLogicalExpression(ParseEqualityExpression, TokenKind.AmpersandAmpersand, TokenKind.And);
 
     private IExpression ParseAssignmentExpression()
     {
@@ -58,6 +59,12 @@ internal partial class Parser(List<Token> tokens)
         }
         return left;
     }
+
+    private IExpression ParseComparisonExpression()
+                    => ParseBinaryExpression(ParseAdditiveExpression, TokenKind.Less, TokenKind.LessEqual, TokenKind.Greater, TokenKind.GreaterEqual);
+
+    private IExpression ParseEqualityExpression()
+        => ParseBinaryExpression(ParseComparisonExpression, TokenKind.EqualEqual, TokenKind.BangEqual);
 
     private IExpression ParseExpression()
     {
