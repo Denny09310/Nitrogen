@@ -1,5 +1,6 @@
-﻿using Nitrogen.Syntax;
-using System.Diagnostics;
+﻿using Nitrogen.Exceptions;
+using Nitrogen.Syntax;
+
 using System.Text;
 
 namespace Nitrogen.Lexing;
@@ -7,25 +8,36 @@ namespace Nitrogen.Lexing;
 internal partial class Lexer(SourceText source)
 {
     private readonly StringBuilder _buffer = new();
+
+    private readonly List<SyntaxException> _errors = [];
     private readonly List<Token> _tokens = [];
 
-    private int _line, _index, _column = 1;
+    private int _index, _line, _column;
     private SourceLocation _location;
 
     public static Lexer FromSource(string source) => new(new SourceText(source));
 
-    public List<Token> Tokenize()
+    public (List<Token>, List<SyntaxException>) Tokenize()
     {
+        _line = 1;
+
         CreateToken(TokenKind.EOF);
 
         while (!IsLastCharacter())
         {
-            if (Lex() is not Token token) continue;
-            _tokens.Add(token);
+            try
+            {
+                if (Lex() is not Token token) continue;
+                _tokens.Add(token);
+            }
+            catch (SyntaxException ex)
+            {
+                _errors.Add(ex);
+            }
         }
 
         _tokens.Add(CreateToken(TokenKind.EOF));
-        return _tokens;
+        return (_tokens, _errors);
     }
 
     private Token? Lex()
@@ -82,7 +94,7 @@ internal partial class Lexer(SourceText source)
         Consume();
 
         _line++;
-        _column = 1;
+        _column = 0;
 
         CreateToken(TokenKind.NewLine);
     }
@@ -153,7 +165,8 @@ internal partial class Lexer(SourceText source)
                 return CreateToken(TokenKind.Pipe);
 
             default:
-                throw new UnreachableException($"The character '{current}' can't be tokenized");
+                CreateToken(TokenKind.Error);
+                throw new SyntaxException(_location, $"The character '{current}' can't be tokenized");
         }
     }
 

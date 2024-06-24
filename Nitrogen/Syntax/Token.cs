@@ -54,4 +54,5 @@ internal enum TokenKind
     String,
     PlusPlus,
     MinusMinus,
+    Error,
 }

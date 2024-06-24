@@ -1,4 +1,5 @@
-﻿using Nitrogen.Interpreting;
+﻿using Nitrogen.Exceptions;
+using Nitrogen.Interpreting;
 using Nitrogen.Lexing;
 using Nitrogen.Parsing;
 
@@ -10,6 +11,18 @@ internal static class Program
     private static readonly AbstractSyntaxTree _sintaxTree = new();
 
     public static bool ShowAbstractSyntaxTree { get; set; }
+
+    private static void CaptureErrors(List<SyntaxException> errors)
+    {
+        Console.ForegroundColor = ConsoleColor.Red;
+        foreach (SyntaxException error in errors)
+        {
+            Console.WriteLine($"{error.Message}, Line {error.Location.Line} Col {error.Location.Column}");
+        }
+
+        Console.WriteLine();
+        Console.ResetColor();
+    }
 
     private static void Main(string[] args)
     {
@@ -26,7 +39,13 @@ internal static class Program
     static void Run(string source)
     {
         var lexer = Lexer.FromSource(source);
-        var tokens = lexer.Tokenize();
+        var (tokens, errors) = lexer.Tokenize();
+
+        if (errors.Count > 0)
+        {
+            CaptureErrors(errors);
+            return;
+        }
 
         var parser = new Parser(tokens);
         var expressions = parser.Parse();
