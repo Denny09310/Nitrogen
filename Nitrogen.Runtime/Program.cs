@@ -14,6 +14,7 @@ internal static class Program
     private static readonly AbstractSyntaxTree _sintaxTree = new();
 
     public static bool HasRuntimeErrors { get; set; }
+    public static bool IsInteractive { get; set; }
     public static bool ShowAbstractSyntaxTree { get; set; }
 
     private static void CaptureErrors(List<SyntaxException> errors)
@@ -90,6 +91,7 @@ internal static class Program
         var statements = RunParser(tokens);
 
         if (statements.Count == 0) return;
+
         RunResolver(statements);
     }
 
@@ -99,6 +101,8 @@ internal static class Program
         const string ExitCommand = "exit";
         const string ClearCommand = "clear";
         const string ShowAbstractSyntaxTreeCommand = "show-ast";
+
+        IsInteractive = true;
 
         while (true)
         {
@@ -124,6 +128,8 @@ internal static class Program
 
             Run(source);
         }
+
+        IsInteractive = false;
     }
 
     private static void RunInterpreter(List<IStatement> statements)
@@ -176,7 +182,11 @@ internal static class Program
         var resolver = new Resolver(_interpreter);
         var errors = resolver.Resolve(statements);
 
-        if (errors.Count > 0)
+        bool showErrors = IsInteractive
+            ? errors.Exists(error => error.Level is ExceptionLevel.Error)
+            : errors.Count > 0;
+
+        if (showErrors)
         {
             CaptureErrors(errors);
             return;

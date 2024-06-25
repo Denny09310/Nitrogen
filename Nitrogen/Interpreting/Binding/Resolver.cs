@@ -1,6 +1,7 @@
 ﻿using Nitrogen.Exceptions;
 using Nitrogen.Syntax;
 using Nitrogen.Syntax.Abstractions;
+using Nitrogen.Syntax.Statements;
 
 namespace Nitrogen.Interpreting.Binding;
 
@@ -8,6 +9,8 @@ internal partial class Resolver(Interpreter interpreter)
 {
     private readonly List<BindingException> _errors = [];
     private readonly Stack<Dictionary<string, Variable>> _scopes = [];
+
+    private FunctionType _currentFunction;
 
     public List<BindingException> Resolve(List<IStatement> statements)
     {
@@ -73,7 +76,7 @@ internal partial class Resolver(Interpreter interpreter)
         }
     }
 
-    private void ResolveLocal(Token name)
+    private void ResolveLocal(IExpression statement, Token name)
     {
         for (int i = 0; i < _scopes.Count; i++)
         {
@@ -81,7 +84,7 @@ internal partial class Resolver(Interpreter interpreter)
             if (scope.TryGetValue(name.Lexeme, out var variable))
             {
                 variable.Used = true;
-                interpreter.Resolve(name, i);
+                interpreter.Resolve(statement, i);
             }
         }
     }

@@ -8,14 +8,6 @@ namespace Nitrogen.Interpreting;
 
 internal partial class Interpreter
 {
-    public void Execute(List<IStatement> expressions)
-    {
-        foreach (var expression in expressions)
-        {
-            Execute(expression);
-        }
-    }
-
     public object? Execute(IStatement stmt) => stmt switch
     {
         ExpressionStatement statement => Execute(statement),
@@ -25,7 +17,7 @@ internal partial class Interpreter
         BlockStatement statement => Execute(statement),
         IfStatement statement => Execute(statement),
         FunctionStatement statement => Execute(statement),
-        VariableDeclarationStatement statement => Execute(statement),
+        VarStatement statement => Execute(statement),
         _ => throw new UnreachableException($"Statement {stmt.GetType()} not recognized.")
     };
 
@@ -90,15 +82,15 @@ internal partial class Interpreter
     private FunctionDeclaration Execute(FunctionStatement statement)
     {
         var function = new FunctionDeclaration(statement, _environment);
-        _environment.DefineVariable(statement.Name, function);
+        _environment.Define(statement.Name, function);
         return function;
     }
 
-    private object? Execute(VariableDeclarationStatement statement)
+    private object? Execute(VarStatement statement)
     {
         object? value = null;
         if (statement.Initializer is not null) value = Evaluate(statement.Initializer);
-        _environment.DefineVariable(statement.Name, value);
+        _environment.Define(statement.Name, value);
 
         return null;
     }

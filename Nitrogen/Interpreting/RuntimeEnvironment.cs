@@ -18,7 +18,7 @@ internal class RuntimeEnvironment
 
     public RuntimeEnvironment? Enclosing { get; private set; }
 
-    public void AssignVariable(Token name, object? value)
+    public void Assign(Token name, object? value)
     {
         if (_variables.ContainsKey(name.Lexeme))
         {
@@ -26,7 +26,7 @@ internal class RuntimeEnvironment
         }
         else if (Enclosing != null)
         {
-            Enclosing.AssignVariable(name, value);
+            Enclosing.Assign(name, value);
         }
         else
         {
@@ -34,7 +34,7 @@ internal class RuntimeEnvironment
         }
     }
 
-    public void DefineVariable(Token name, object? value)
+    public void Define(Token name, object? value)
     {
         if (!_variables.TryAdd(name.Lexeme, value))
         {
@@ -42,16 +42,21 @@ internal class RuntimeEnvironment
         }
     }
 
-    public object? GetVariable(Token name)
+    public object? Get(Token name)
     {
         if (_variables.TryGetValue(name.Lexeme, out var value)) return value;
-        if (Enclosing is not null) return Enclosing.GetVariable(name);
+        if (Enclosing is not null) return Enclosing.Get(name);
         throw new RuntimeException(name, $"Variable with name '{name.Lexeme}' not defined in this scope.");
     }
 
-    public object? GetVariableAt(Token name, int distance)
+    public object? GetAt(Token name, int distance)
     {
-        return Ancestor(distance).GetVariable(name);
+        return Ancestor(distance).Get(name);
+    }
+
+    internal void AssignAt(int distance, Token name, object? value)
+    {
+        Ancestor(distance).Assign(name, value);
     }
 
     private RuntimeEnvironment Ancestor(int distance)

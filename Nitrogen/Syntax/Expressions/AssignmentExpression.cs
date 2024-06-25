@@ -2,8 +2,8 @@
 
 namespace Nitrogen.Syntax.Expressions;
 
-internal class AssignmentExpression(Token target, IExpression value) : IExpression
+internal class AssignmentExpression(Token name, IExpression value) : IExpression
 {
-    public Token Target { get; } = target;
+    public Token Name { get; } = name;
     public IExpression Value { get; } = value;
 }

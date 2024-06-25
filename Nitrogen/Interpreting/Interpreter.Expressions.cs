@@ -28,7 +28,14 @@ internal partial class Interpreter
     private object? Evaluate(AssignmentExpression expression)
     {
         var value = Evaluate(expression.Value);
-        _environment.AssignVariable(expression.Target, value);
+
+        if (!_locals.TryGetValue(expression, out var distance))
+        {
+            throw new RuntimeException(expression.Name, "Can't define global variable.");
+        }
+
+        _environment.AssignAt(distance, expression.Name, value);
+
         return value;
     }
 
@@ -101,11 +108,11 @@ internal partial class Interpreter
 
     private object? Evaluate(CallExpression expression)
     {
-        var function = LookupVariable(expression.Name);
+        var function = Evaluate(expression.Target);
 
         if (function is not ICallable callable)
         {
-            throw new RuntimeException(expression.Name, $"Variable '{expression.Name.Lexeme}' is not a function");
+            throw new RuntimeException(expression.Paren, $"Call target is not callable.");
         }
 
         var parameters = expression.Parameters.Select(Evaluate).ToArray();
@@ -116,7 +123,7 @@ internal partial class Interpreter
 
     private object? Evaluate(IdentifierExpression expression)
     {
-        return LookupVariable(expression.Name);
+        return LookupVariable(expression, expression.Name);
     }
 
     private object? Evaluate(ReturnExpression expression)

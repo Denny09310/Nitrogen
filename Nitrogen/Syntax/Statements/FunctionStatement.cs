@@ -8,3 +8,10 @@ internal class FunctionStatement(Token name, List<IExpression> arguments, IState
     public IStatement Body { get; } = body;
     public Token Name { get; } = name;
 }
+
+internal enum FunctionType
+{
+    None,
+    Function,
+    Method,
+}
