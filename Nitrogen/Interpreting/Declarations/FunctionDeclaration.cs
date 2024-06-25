@@ -10,7 +10,7 @@ internal class FunctionDeclaration(FunctionStatement statement, RuntimeEnvironme
 
     public string Name { get; } = statement.Name.Lexeme;
 
-    public void Arity(object[] @params)
+    public void Arity(object?[] @params)
     {
         var mandatory = statement.Arguments.Where(argument => argument is IdentifierExpression).ToArray();
         var optionals = statement.Arguments.Where(argument => argument is AssignmentExpression).ToArray();
@@ -21,17 +21,17 @@ internal class FunctionDeclaration(FunctionStatement statement, RuntimeEnvironme
         }
     }
 
-    public object? Call(Interpreter interpreter, object[] @params)
+    public object? Call(Interpreter interpreter, object?[] @params)
     {
         var environment = new RuntimeEnvironment(Closure);
         DefineArguments(interpreter, @params, environment);
 
-        interpreter.Execute(statement.Body);
+        interpreter.ExecuteScoped(statement.Body is BlockStatement block ? block.Statements : [statement.Body], environment);
 
         return null;
     }
 
-    private void DefineArguments(Interpreter interpreter, object[] @params, RuntimeEnvironment environment)
+    private void DefineArguments(Interpreter interpreter, object?[] @params, RuntimeEnvironment environment)
     {
         foreach (var (index, argument) in statement.Arguments.Select((a, i) => (i, a)))
         {
@@ -41,7 +41,7 @@ internal class FunctionDeclaration(FunctionStatement statement, RuntimeEnvironme
             }
             else if (argument is AssignmentExpression assignment)
             {
-                if (index < @params.Length - 1)
+                if (index < @params.Length)
                 {
                     environment.DefineVariable(assignment.Target, @params[index]);
                 }

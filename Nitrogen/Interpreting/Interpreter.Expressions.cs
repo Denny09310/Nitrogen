@@ -1,4 +1,5 @@
 ﻿using Nitrogen.Exceptions;
+using Nitrogen.Interpreting.Declarations;
 using Nitrogen.Syntax;
 using Nitrogen.Syntax.Abstractions;
 using Nitrogen.Syntax.Expressions;
@@ -17,6 +18,7 @@ internal partial class Interpreter
         UnaryExpression expression => Evaluate(expression),
         GroupingExpression expression => Evaluate(expression),
         IdentifierExpression expression => Evaluate(expression),
+        CallExpression expression => Evaluate(expression),
         LiteralExpression expression => expression.Literal,
         BreakExpression => throw new BreakException(),
         ContinueExpression => throw new ContinueException(),
@@ -95,6 +97,21 @@ internal partial class Interpreter
     private object? Evaluate(GroupingExpression expression)
     {
         return Evaluate(expression.Expression);
+    }
+
+    private object? Evaluate(CallExpression expression)
+    {
+        var function = _environment.GetVariable(expression.Name);
+
+        if (function is not ICallable callable)
+        {
+            throw new RuntimeException(expression.Name, $"Variable '{expression.Name.Lexeme}' is not a function");
+        }
+
+        var parameters = expression.Parameters.Select(Evaluate).ToArray();
+        callable.Arity(parameters);
+
+        return callable.Call(this, parameters);
     }
 
     private object? Evaluate(IdentifierExpression expression)

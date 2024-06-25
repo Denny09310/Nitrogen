@@ -31,6 +31,23 @@ internal partial class Interpreter
         _ => throw new UnreachableException($"Statement {stmt.GetType()} not recognized.")
     };
 
+    public void ExecuteScoped(List<IStatement> statements, RuntimeEnvironment environment)
+    {
+        (var enclosing, _environment) = (_environment, environment);
+
+        try
+        {
+            foreach (var statement in statements)
+            {
+                Execute(statement);
+            }
+        }
+        finally
+        {
+            _environment = enclosing;
+        }
+    }
+
     private object? Execute(ExpressionStatement statement)
     {
         return Evaluate(statement.Expression);
@@ -111,23 +128,6 @@ internal partial class Interpreter
                     Evaluate(increment);
                 }
             }
-        }
-    }
-
-    private void ExecuteScoped(List<IStatement> statements, RuntimeEnvironment environment)
-    {
-        (var enclosing, _environment) = (_environment, environment);
-
-        try
-        {
-            foreach (var statement in statements)
-            {
-                Execute(statement);
-            }
-        }
-        finally
-        {
-            _environment = enclosing;
         }
     }
 }
