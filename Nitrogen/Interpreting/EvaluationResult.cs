@@ -122,6 +122,6 @@ internal readonly struct EvaluationResult(object? value)
     {
         if (Value == null) return "nil";
         if (Value is double double1) return double1.ToString(CultureInfo.InvariantCulture);
-        return base.ToString();
+        return Value.ToString();
     }
 }
