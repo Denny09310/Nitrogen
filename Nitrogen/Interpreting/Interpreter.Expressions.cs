@@ -16,22 +16,18 @@ internal partial class Interpreter
         LogicalExpression expression => Evaluate(expression),
         UnaryExpression expression => Evaluate(expression),
         GroupingExpression expression => Evaluate(expression),
+        IdentifierExpression expression => Evaluate(expression),
         LiteralExpression expression => expression.Literal,
         BreakExpression => throw new BreakException(),
         ContinueExpression => throw new ContinueException(),
         _ => throw new UnreachableException($"Expression {expr.GetType()} not recognized.")
     };
 
-    private object? Evaluate(GroupingExpression expression)
-    {
-        return Evaluate(expression.Expression);
-    }
-
     private object? Evaluate(AssignmentExpression expression)
     {
-        // TODO: Retrieve from the container the value assigned to the name
-        ArgumentNullException.ThrowIfNull(expression);
-        return null;
+        var value = Evaluate(expression.Value);
+        _environment.AssignVariable(expression.Target, value);
+        return value;
     }
 
     private object? Evaluate(BinaryExpression expression)
@@ -94,5 +90,15 @@ internal partial class Interpreter
 
             _ => throw new RuntimeException(@operator, $"{@operator.Lexeme} not supported.")
         };
+    }
+
+    private object? Evaluate(GroupingExpression expression)
+    {
+        return Evaluate(expression.Expression);
+    }
+
+    private object? Evaluate(IdentifierExpression expression)
+    {
+        return _environment.GetVariable(expression.Name);
     }
 }

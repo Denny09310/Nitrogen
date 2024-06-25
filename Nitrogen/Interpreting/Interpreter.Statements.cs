@@ -7,6 +7,8 @@ namespace Nitrogen.Interpreting;
 
 internal partial class Interpreter
 {
+    private RuntimeEnvironment _environment = new();
+
     public void Execute(List<IStatement> expressions)
     {
         foreach (var expression in expressions)
@@ -23,6 +25,8 @@ internal partial class Interpreter
         PrintStatement statement => Execute(statement),
         WhileStatement statement => Execute(statement),
         ForStatement statement => Execute(statement),
+        VariableDeclarationStatement statement => Execute(statement),
+        BlockStatement statement => Execute(statement),
         _ => throw new UnreachableException($"Statement {stmt.GetType()} not recognized.")
     };
 
@@ -54,6 +58,21 @@ internal partial class Interpreter
         return null;
     }
 
+    private object? Execute(VariableDeclarationStatement statement)
+    {
+        object? value = null;
+        if (statement.Initializer is not null) value = Evaluate(statement.Initializer);
+        _environment.DefineVariable(statement.Name, value);
+
+        return null;
+    }
+
+    private object? Execute(BlockStatement statement)
+    {
+        ExecuteScoped(statement.Statements, new RuntimeEnvironment(_environment));
+        return null;
+    }
+
     private void ExecuteLoop(Func<bool> condition, IStatement body, IExpression? increment = null)
     {
         while (condition())
@@ -77,6 +96,23 @@ internal partial class Interpreter
                     Evaluate(increment);
                 }
             }
+        }
+    }
+
+    private void ExecuteScoped(List<IStatement> statements, RuntimeEnvironment environment)
+    {
+        (var enclosing, _environment) = (_environment, environment);
+
+        try
+        {
+            foreach (var statement in statements)
+            {
+                Execute(statement);
+            }
+        }
+        finally
+        {
+            _environment = enclosing;
         }
     }
 }
