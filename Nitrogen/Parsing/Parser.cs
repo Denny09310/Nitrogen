@@ -39,13 +39,11 @@ internal partial class Parser(List<Token> tokens)
 
     private IExpression ParseAssignmentExpression()
     {
-        var expression = ParseOrExpression();
+        var expression = ParseCallExpression();
         if (Match(TokenKind.Equal))
         {
             var equal = Peek(-1);
             var value = ParseOrExpression();
-
-            Consume(TokenKind.Semicolon, "Expect ';' after assignment.");
 
             if (expression is IdentifierExpression identifier)
             {
@@ -81,8 +79,49 @@ internal partial class Parser(List<Token> tokens)
         return new BlockStatement(statements);
     }
 
+    private List<IExpression> ParseCallArguments(Token paren)
+    {
+        List<IExpression> parameters = [];
+        if (!Check(TokenKind.RightParenthesis))
+        {
+            do
+            {
+                if (parameters.Count >= 255)
+                {
+                    throw new ParseException(paren, "Can't have more that 254 arguments per function.");
+                }
+
+                parameters.Add(ParseExpression());
+            }
+            while (Match(TokenKind.Comma));
+        }
+
+        Consume(TokenKind.RightParenthesis, "Expect ')' after call arguments.");
+
+        return parameters;
+    }
+
+    private IExpression ParseCallExpression()
+    {
+        IExpression expression = ParseOrExpression();
+        if (Match(TokenKind.LeftParenthesis))
+        {
+            var paren = Peek(-1);
+            var parameters = ParseCallArguments(paren);
+
+            if (expression is IdentifierExpression identifier)
+            {
+                return new CallExpression(identifier.Name, parameters);
+            }
+
+            throw new ParseException(paren, "Invalid target for function call.");
+        }
+
+        return expression;
+    }
+
     private IExpression ParseComparisonExpression()
-            => ParseBinaryExpression(ParseAdditiveExpression, TokenKind.Less, TokenKind.LessEqual, TokenKind.Greater, TokenKind.GreaterEqual);
+                    => ParseBinaryExpression(ParseAdditiveExpression, TokenKind.Less, TokenKind.LessEqual, TokenKind.Greater, TokenKind.GreaterEqual);
 
     private IExpression ParseEqualityExpression()
         => ParseBinaryExpression(ParseComparisonExpression, TokenKind.EqualEqual, TokenKind.BangEqual);
@@ -101,14 +140,13 @@ internal partial class Parser(List<Token> tokens)
         IStatement? initialization = null;
         if (Match(TokenKind.Var))
         {
-            // TODO: Add variable parsing
+            initialization = ParseVariableDeclarationStatement();
         }
         else if (!Check(TokenKind.Semicolon))
         {
             initialization = new ExpressionStatement(ParseExpression());
+            Consume(TokenKind.Semicolon, "Expect ';' after for initialization.");
         }
-
-        Consume(TokenKind.Semicolon, "Expect ';' after for initialization.");
 
         IExpression condition = new LiteralExpression(true);
         if (!Check(TokenKind.Semicolon))
@@ -129,6 +167,40 @@ internal partial class Parser(List<Token> tokens)
         var body = ParseStatement();
 
         return new ForStatement(keyword, initialization, condition, body, increment);
+    }
+
+    private FunctionStatement ParseFunctionStatement()
+    {
+        var name = Consume(TokenKind.Identifier, "Expect name after function declaration.");
+        Consume(TokenKind.LeftParenthesis, "Expect '(' after function name.");
+
+        List<IExpression> arguments = [];
+        if (!Check(TokenKind.RightParenthesis))
+        {
+            do
+            {
+                if (arguments.Count >= 255)
+                {
+                    throw new ParseException(name, "Can't have more that 254 arguments per function.");
+                }
+
+                var expression = ParseExpression();
+                if (expression is not (AssignmentExpression or IdentifierExpression))
+                {
+                    throw new ParseException(name, "Arguments must be only identifiers or assignments.");
+                }
+
+                arguments.Add(expression);
+            }
+            while (Match(TokenKind.Comma));
+        }
+
+        Consume(TokenKind.RightParenthesis, "Expect '(' after function arguments.");
+        Consume(TokenKind.LeftBrace, "Expect '{' after function declaration.");
+
+        var body = ParseBlockStatement();
+
+        return new FunctionStatement(name, arguments, body);
     }
 
     private IfStatement ParseIfStatement()
@@ -178,6 +250,17 @@ internal partial class Parser(List<Token> tokens)
         if (current.Kind is TokenKind.Break) return new BreakExpression();
         if (current.Kind is TokenKind.Continue) return new ContinueExpression();
 
+        if (current.Kind is TokenKind.Return)
+        {
+            IExpression? value = null;
+            if (!Check(TokenKind.Semicolon))
+            {
+                value = ParseExpression();
+            }
+
+            return new ReturnExpression(value);
+        }
+
         if (current.Kind is TokenKind.LeftParenthesis)
         {
             var expression = ParseExpression();
@@ -207,16 +290,19 @@ internal partial class Parser(List<Token> tokens)
 
     private IStatement ParseStatement()
     {
+        if (Match(TokenKind.Function)) return ParseFunctionStatement();
+        if (Match(TokenKind.Var)) return ParseVariableDeclarationStatement();
+
         if (Match(TokenKind.Print)) return ParsePrintStatement();
         if (Match(TokenKind.While)) return ParseWhileStatement();
         if (Match(TokenKind.For)) return ParseForStatement();
-        if (Match(TokenKind.Var)) return ParseVariableDeclarationStatement();
         if (Match(TokenKind.If)) return ParseIfStatement();
 
         if (Match(TokenKind.LeftBrace)) return ParseBlockStatement();
 
         var expression = new ExpressionStatement(ParseExpression());
         Consume(TokenKind.Semicolon, "Expect ';' after statement.");
+
         return expression;
     }
 

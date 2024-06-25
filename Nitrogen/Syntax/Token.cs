@@ -70,8 +70,10 @@ internal enum TokenKind
     Var,
     Break,
     Continue,
+    Return,
     If,
     Else,
+    Function,
 
     #endregion Keywords
 
