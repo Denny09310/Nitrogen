@@ -18,12 +18,18 @@ internal partial class Interpreter
 
     private object? Execute(IStatement stmt) => stmt switch
     {
-        PrintStatement statement => Execute(statement),
         ExpressionStatement statement => Execute(statement),
+        PrintStatement statement => Execute(statement),
+        WhileStatement statement => Execute(statement),
         _ => throw new UnreachableException($"Statement {stmt.GetType()} not recognized.")
     };
 
 #pragma warning restore S3241 // Methods should not return values that are never used
+
+    private object? Execute(ExpressionStatement statement)
+    {
+        return Evaluate(statement.Expression);
+    }
 
     private object? Execute(PrintStatement statement)
     {
@@ -33,8 +39,27 @@ internal partial class Interpreter
         return null;
     }
 
-    private object? Execute(ExpressionStatement statement)
+    private object? Execute(WhileStatement statement)
     {
-        return Evaluate(statement.Expression);
+        ExecuteLoop(() => new EvaluationResult(Evaluate(statement.Condition)), statement.Body);
+        return null;
+    }
+
+    private void ExecuteLoop(Func<bool> condition, IStatement body, IExpression? increment = null)
+    {
+        while (condition())
+        {
+            try
+            {
+                Execute(body);
+            }
+            finally
+            {
+                if (increment != null)
+                {
+                    Evaluate(increment);
+                }
+            }
+        }
     }
 }
