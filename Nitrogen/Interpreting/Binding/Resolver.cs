@@ -85,6 +85,7 @@ internal partial class Resolver(Interpreter interpreter)
             {
                 variable.Used = true;
                 interpreter.Resolve(statement, i);
+                break;
             }
         }
     }

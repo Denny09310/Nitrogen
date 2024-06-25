@@ -1,4 +1,5 @@
 ﻿using Nitrogen.Syntax.Abstractions;
+using Nitrogen.Syntax.Expressions;
 using Nitrogen.Syntax.Statements;
 
 namespace Nitrogen.Interpreting.Binding;
@@ -77,8 +78,8 @@ internal partial class Resolver
 
     private void Resolve(FunctionStatement statement)
     {
-        Declare(statement.Name);
         Define(statement.Name);
+        Declare(statement.Name);
 
         ResolveFunction(statement, FunctionType.Function);
     }
@@ -91,7 +92,16 @@ internal partial class Resolver
 
         foreach (var argument in statement.Arguments)
         {
-            Resolve(argument);
+            if (argument is AssignmentExpression assignment)
+            {
+                Define(assignment.Name);
+                Declare(assignment.Name);
+            }
+            else if (argument is IdentifierExpression identifier)
+            {
+                Define(identifier.Name);
+                Declare(identifier.Name);
+            }
         }
 
         Resolve(statement.Body);

@@ -1,6 +1,7 @@
 ﻿using Nitrogen.Exceptions;
 using Nitrogen.Syntax.Abstractions;
 using Nitrogen.Syntax.Expressions;
+using Nitrogen.Syntax.Statements;
 
 namespace Nitrogen.Interpreting.Binding;
 
@@ -73,6 +74,11 @@ internal partial class Resolver
 
     private void Resolve(ReturnExpression expression)
     {
+        if (_currentFunction is FunctionType.None)
+        {
+            _errors.Add(new(ExceptionLevel.Error, expression.Keyword, "Can't return from top-level statemet."));
+        }
+
         if (expression.Value is not null) Resolve(expression.Value);
     }
 }

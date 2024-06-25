@@ -258,7 +258,7 @@ internal partial class Parser(List<Token> tokens)
                 value = ParseExpression();
             }
 
-            return new ReturnExpression(value);
+            return new ReturnExpression(current, value);
         }
 
         if (current.Kind is TokenKind.LeftParenthesis)
