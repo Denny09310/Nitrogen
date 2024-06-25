@@ -10,23 +10,44 @@ internal readonly record struct Token
 
 internal enum TokenKind
 {
-    Number,
+    #region Operators
+
     Plus,
-    EOF,
-    WhiteSpace,
-    NewLine,
-    Identifier,
-    True,
-    False,
     Minus,
     Star,
     Slash,
-    LeftParenthesis,
-    RightParenthesis,
-    Bang,
+    Percentage,
+    Ampersand,
+    Pipe,
+    BackSlash,
     Equal,
+    Bang,
     Less,
     Greater,
+
+    #endregion Operators
+
+    #region Compound operators
+
+    PlusPlus,
+    MinusMinus,
+    PipePipe,
+    AmpersandAmpersand,
+    EqualEqual,
+    BangEqual,
+    LessEqual,
+    GreaterEqual,
+
+    #endregion Compound operators
+
+    #region Delimiters
+
+    LeftParenthesis,
+    RightParenthesis,
+    LeftBracket,
+    RightBracket,
+    LeftBrace,
+    RightBrace,
     Dot,
     Comma,
     Semicolon,
@@ -34,25 +55,39 @@ internal enum TokenKind
     Question,
     DoubleQuote,
     SingleQuote,
-    LeftBracket,
-    RightBracket,
-    LeftBrace,
-    RightBrace,
-    Percentage,
-    Ampersand,
-    BackSlash,
-    Pipe,
+
+    #endregion Delimiters
+
+    #region Keywords
+
+    True,
+    False,
+    While,
     Print,
-    PipePipe,
-    AmpersandAmpersand,
     And,
     Or,
-    EqualEqual,
-    BangEqual,
-    LessEqual,
-    GreaterEqual,
+
+    #endregion Keywords
+
+    #region Identifiers and Literals
+
+    Identifier,
     String,
-    PlusPlus,
-    MinusMinus,
-    Error,
+    Number,
+
+    #endregion Identifiers and Literals
+
+    #region Whitespace and control characters
+
+    WhiteSpace,
+    NewLine,
+
+    #endregion Whitespace and control characters
+
+    #region Miscellaneous
+
+    EOF,
+    Error
+
+    #endregion Miscellaneous
 }
