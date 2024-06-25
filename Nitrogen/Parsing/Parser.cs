@@ -131,6 +131,25 @@ internal partial class Parser(List<Token> tokens)
         return new ForStatement(keyword, initialization, condition, body, increment);
     }
 
+    private IfStatement ParseIfStatement()
+    {
+        var keyword = Peek(-1);
+        Consume(TokenKind.LeftParenthesis, "Expect '(' after if statement.");
+
+        var condition = ParseExpression();
+        Consume(TokenKind.RightParenthesis, "Expect ')' after if condition.");
+
+        var then = ParseStatement();
+
+        IStatement? @else = null;
+        if (Match(TokenKind.Else))
+        {
+            @else = ParseStatement();
+        }
+
+        return new IfStatement(keyword, condition, then, @else);
+    }
+
     private IExpression ParseLogicalExpression(Func<IExpression> descendant, params TokenKind[] kinds)
     {
         var left = descendant();
@@ -192,6 +211,7 @@ internal partial class Parser(List<Token> tokens)
         if (Match(TokenKind.While)) return ParseWhileStatement();
         if (Match(TokenKind.For)) return ParseForStatement();
         if (Match(TokenKind.Var)) return ParseVariableDeclarationStatement();
+        if (Match(TokenKind.If)) return ParseIfStatement();
 
         if (Match(TokenKind.LeftBrace)) return ParseBlockStatement();
 

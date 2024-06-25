@@ -25,8 +25,9 @@ internal partial class Interpreter
         PrintStatement statement => Execute(statement),
         WhileStatement statement => Execute(statement),
         ForStatement statement => Execute(statement),
-        VariableDeclarationStatement statement => Execute(statement),
         BlockStatement statement => Execute(statement),
+        IfStatement statement => Execute(statement),
+        VariableDeclarationStatement statement => Execute(statement),
         _ => throw new UnreachableException($"Statement {stmt.GetType()} not recognized.")
     };
 
@@ -58,18 +59,27 @@ internal partial class Interpreter
         return null;
     }
 
+    private object? Execute(BlockStatement statement)
+    {
+        ExecuteScoped(statement.Statements, new RuntimeEnvironment(_environment));
+        return null;
+    }
+
+    private object? Execute(IfStatement statement)
+    {
+        var condition = new EvaluationResult(Evaluate(statement.Condition));
+        if (condition) Execute(statement.Then);
+        else if (statement.Else is not null) Execute(statement.Else);
+
+        return null;
+    }
+
     private object? Execute(VariableDeclarationStatement statement)
     {
         object? value = null;
         if (statement.Initializer is not null) value = Evaluate(statement.Initializer);
         _environment.DefineVariable(statement.Name, value);
 
-        return null;
-    }
-
-    private object? Execute(BlockStatement statement)
-    {
-        ExecuteScoped(statement.Statements, new RuntimeEnvironment(_environment));
         return null;
     }
 
