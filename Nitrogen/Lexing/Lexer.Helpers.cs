@@ -11,6 +11,11 @@ internal partial class Lexer
         ["print"] = TokenKind.Print,
         ["and"] = TokenKind.And,
         ["or"] = TokenKind.Or,
+        ["while"] = TokenKind.While,
+        ["for"] = TokenKind.For,
+        ["var"] = TokenKind.Var,
+        ["break"] = TokenKind.Break,
+        ["continue"] = TokenKind.Continue,
     };
 
     private char Advance()

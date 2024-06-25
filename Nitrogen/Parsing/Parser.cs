@@ -71,7 +71,7 @@ internal partial class Parser(List<Token> tokens)
     }
 
     private IExpression ParseComparisonExpression()
-                    => ParseBinaryExpression(ParseAdditiveExpression, TokenKind.Less, TokenKind.LessEqual, TokenKind.Greater, TokenKind.GreaterEqual);
+        => ParseBinaryExpression(ParseAdditiveExpression, TokenKind.Less, TokenKind.LessEqual, TokenKind.Greater, TokenKind.GreaterEqual);
 
     private IExpression ParseEqualityExpression()
         => ParseBinaryExpression(ParseComparisonExpression, TokenKind.EqualEqual, TokenKind.BangEqual);
@@ -80,6 +80,44 @@ internal partial class Parser(List<Token> tokens)
     {
         var expression = ParseAssignmentExpression();
         return expression;
+    }
+
+    private ForStatement ParseForStatement()
+    {
+        var keyword = Peek(-1);
+        Consume(TokenKind.LeftParenthesis, "Expect '(' after for statement.");
+
+        IStatement? initialization = null;
+        if (Match(TokenKind.Var))
+        {
+            // TODO: Add variable parsing
+        }
+        else if (!Check(TokenKind.Semicolon))
+        {
+            initialization = new ExpressionStatement(ParseExpression());
+        }
+
+        Consume(TokenKind.Semicolon, "Expect ';' after for initialization.");
+
+        IExpression condition = new LiteralExpression(true);
+        if (!Check(TokenKind.Semicolon))
+        {
+            condition = ParseExpression();
+        }
+
+        Consume(TokenKind.Semicolon, "Expect ';' after for condition.");
+
+        IExpression? increment = null;
+        if (!Check(TokenKind.Semicolon))
+        {
+            increment = ParseExpression();
+        }
+
+        Consume(TokenKind.RightParenthesis, "Expect ')' after for increment.");
+
+        var body = ParseStatement();
+
+        return new ForStatement(keyword, initialization, condition, body, increment);
     }
 
     private IExpression ParseLogicalExpression(Func<IExpression> descendant, params TokenKind[] kinds)
@@ -106,6 +144,9 @@ internal partial class Parser(List<Token> tokens)
 
         if (current.Kind is TokenKind.True) return new LiteralExpression(true);
         if (current.Kind is TokenKind.False) return new LiteralExpression(false);
+
+        if (current.Kind is TokenKind.Break) return new BreakExpression();
+        if (current.Kind is TokenKind.Continue) return new ContinueExpression();
 
         if (current.Kind is TokenKind.LeftParenthesis)
         {
@@ -137,6 +178,8 @@ internal partial class Parser(List<Token> tokens)
     private IStatement ParseStatement()
     {
         if (Match(TokenKind.Print)) return ParsePrintStatement();
+        if (Match(TokenKind.While)) return ParseWhileStatement();
+        if (Match(TokenKind.For)) return ParseForStatement();
         return new ExpressionStatement(ParseExpression());
     }
 
@@ -150,5 +193,20 @@ internal partial class Parser(List<Token> tokens)
         }
 
         return expression ?? ParsePrimaryExpression();
+    }
+
+    private WhileStatement ParseWhileStatement()
+    {
+        var keyword = Peek(-1);
+        Consume(TokenKind.LeftParenthesis, "Expect '(' after while statement.");
+
+        var condition = ParseExpression();
+        Consume(TokenKind.RightParenthesis, "Expect ')' after while condition.");
+
+        Consume(TokenKind.LeftBrace, "Expect '{' after while condition.");
+        var body = ParseStatement();
+
+        Consume(TokenKind.RightBrace, "Expect '}' after while body");
+        return new WhileStatement(keyword, condition, body);
     }
 }
