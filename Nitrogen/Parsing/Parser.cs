@@ -195,7 +195,9 @@ internal partial class Parser(List<Token> tokens)
 
         if (Match(TokenKind.LeftBrace)) return ParseBlockStatement();
 
-        return new ExpressionStatement(ParseExpression());
+        var expression = new ExpressionStatement(ParseExpression());
+        Consume(TokenKind.Semicolon, "Expect ';' after statement.");
+        return expression;
     }
 
     private IExpression ParseUnaryExpression()
