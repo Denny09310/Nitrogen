@@ -137,6 +137,7 @@ internal partial class Parser(List<Token> tokens)
     private IStatement ParseStatement()
     {
         if (Match(TokenKind.Print)) return ParsePrintStatement();
+        if (Match(TokenKind.While)) return ParseWhileStatement();
         return new ExpressionStatement(ParseExpression());
     }
 
@@ -150,5 +151,20 @@ internal partial class Parser(List<Token> tokens)
         }
 
         return expression ?? ParsePrimaryExpression();
+    }
+
+    private WhileStatement ParseWhileStatement()
+    {
+        var keyword = Peek(-1);
+        Consume(TokenKind.LeftParenthesis, "Expect '(' after while statement.");
+
+        var condition = ParseExpression();
+        Consume(TokenKind.RightParenthesis, "Expect ')' after while condition.");
+
+        Consume(TokenKind.LeftBrace, "Expect '{' after while condition.");
+        var body = ParseStatement();
+
+        Consume(TokenKind.RightBrace, "Expect '}' after while body");
+        return new WhileStatement(keyword, condition, body);
     }
 }
