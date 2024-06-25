@@ -180,6 +180,7 @@ internal partial class Parser(List<Token> tokens)
         if (Match(TokenKind.Print)) return ParsePrintStatement();
         if (Match(TokenKind.While)) return ParseWhileStatement();
         if (Match(TokenKind.For)) return ParseForStatement();
+        if (Match(TokenKind.Var)) return ParseVariableDeclarationStatement();
         return new ExpressionStatement(ParseExpression());
     }
 
@@ -193,6 +194,21 @@ internal partial class Parser(List<Token> tokens)
         }
 
         return expression ?? ParsePrimaryExpression();
+    }
+
+    private VariableDeclarationStatement ParseVariableDeclarationStatement()
+    {
+        var name = Consume(TokenKind.Identifier, "Expect name after variable declaration.");
+
+        IExpression? initializer = null;
+        if (Match(TokenKind.Equal))
+        {
+            initializer = ParseExpression();
+        }
+
+        Consume(TokenKind.Semicolon, "Expect ';' after variable declaration statement.");
+
+        return new VariableDeclarationStatement(name, initializer);
     }
 
     private WhileStatement ParseWhileStatement()

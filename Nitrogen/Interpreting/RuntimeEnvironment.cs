@@ -28,7 +28,7 @@ internal class RuntimeEnvironment
         _variables[name.Lexeme] = value;
     }
 
-    public void DefineVariable(Token name, object value)
+    public void DefineVariable(Token name, object? value)
     {
         if (!_variables.TryAdd(name.Lexeme, value))
         {
