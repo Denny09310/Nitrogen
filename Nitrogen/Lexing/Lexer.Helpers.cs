@@ -12,6 +12,7 @@ internal partial class Lexer
         ["and"] = TokenKind.And,
         ["or"] = TokenKind.Or,
         ["while"] = TokenKind.While,
+        ["for"] = TokenKind.For,
     };
 
     private char Advance()

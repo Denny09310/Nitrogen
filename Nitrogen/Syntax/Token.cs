@@ -66,6 +66,8 @@ internal enum TokenKind
     Print,
     And,
     Or,
+    For,
+    Var,
 
     #endregion Keywords
 
@@ -87,7 +89,7 @@ internal enum TokenKind
     #region Miscellaneous
 
     EOF,
-    Error
+    Error,
 
     #endregion Miscellaneous
 }
