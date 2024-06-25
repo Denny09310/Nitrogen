@@ -68,6 +68,8 @@ internal enum TokenKind
     Or,
     For,
     Var,
+    Break,
+    Continue,
 
     #endregion Keywords
 
