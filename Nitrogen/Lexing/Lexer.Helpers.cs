@@ -16,6 +16,7 @@ internal partial class Lexer
         ["var"] = TokenKind.Var,
         ["break"] = TokenKind.Break,
         ["continue"] = TokenKind.Continue,
+        ["return"] = TokenKind.Return,
         ["if"] = TokenKind.If,
         ["else"] = TokenKind.Else,
         ["function"] = TokenKind.Function,

@@ -26,7 +26,17 @@ internal class FunctionDeclaration(FunctionStatement statement, RuntimeEnvironme
         var environment = new RuntimeEnvironment(Closure);
         DefineArguments(interpreter, @params, environment);
 
-        interpreter.ExecuteScoped(statement.Body is BlockStatement block ? block.Statements : [statement.Body], environment);
+        try
+        {
+            interpreter.ExecuteScoped(statement.Body is BlockStatement block ? block.Statements : [statement.Body], environment);
+        }
+        catch (ReturnException ex)
+        {
+            if (ex.Value is not null)
+            {
+                return ex.Value;
+            }
+        }
 
         return null;
     }

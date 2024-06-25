@@ -20,6 +20,7 @@ internal partial class Interpreter
         IdentifierExpression expression => Evaluate(expression),
         CallExpression expression => Evaluate(expression),
         LiteralExpression expression => expression.Literal,
+        ReturnExpression expression => Evaluate(expression),
         BreakExpression => throw new BreakException(),
         ContinueExpression => throw new ContinueException(),
         _ => throw new UnreachableException($"Expression {expr.GetType()} not recognized.")
@@ -117,5 +118,16 @@ internal partial class Interpreter
     private object? Evaluate(IdentifierExpression expression)
     {
         return _environment.GetVariable(expression.Name);
+    }
+
+    private object? Evaluate(ReturnExpression expression)
+    {
+        object? value = null;
+        if (expression.Value is not null)
+        {
+            value = Evaluate(expression.Value);
+        }
+
+        throw new ReturnException(value);
     }
 }

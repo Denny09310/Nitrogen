@@ -26,6 +26,10 @@ internal readonly struct EvaluationResult(object? value)
     {
         (string string1, string string2) => string1 + string2,
         (double double1, double double2) => double1 + double2,
+
+        (string string1, _) => string1 + right.Value?.ToString(),
+        (_, string string2) => left.Value?.ToString() + string2,
+        
         _ => throw new RuntimeException($"Unsupported operation between types {left.Value?.GetType()} and {right.Value?.GetType()}."),
     };
 

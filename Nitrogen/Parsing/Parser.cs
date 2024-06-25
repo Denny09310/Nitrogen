@@ -250,6 +250,17 @@ internal partial class Parser(List<Token> tokens)
         if (current.Kind is TokenKind.Break) return new BreakExpression();
         if (current.Kind is TokenKind.Continue) return new ContinueExpression();
 
+        if (current.Kind is TokenKind.Return)
+        {
+            IExpression? value = null;
+            if (!Check(TokenKind.Semicolon))
+            {
+                value = ParseExpression();
+            }
+
+            return new ReturnExpression(value);
+        }
+
         if (current.Kind is TokenKind.LeftParenthesis)
         {
             var expression = ParseExpression();
