@@ -72,6 +72,7 @@ internal enum TokenKind
     Continue,
     If,
     Else,
+    Function,
 
     #endregion Keywords
 

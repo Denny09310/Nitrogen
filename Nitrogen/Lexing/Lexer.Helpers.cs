@@ -18,6 +18,7 @@ internal partial class Lexer
         ["continue"] = TokenKind.Continue,
         ["if"] = TokenKind.If,
         ["else"] = TokenKind.Else,
+        ["function"] = TokenKind.Function,
     };
 
     private char Advance()
