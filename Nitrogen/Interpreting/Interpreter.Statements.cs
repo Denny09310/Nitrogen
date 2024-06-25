@@ -8,8 +8,6 @@ namespace Nitrogen.Interpreting;
 
 internal partial class Interpreter
 {
-    private RuntimeEnvironment _environment = new();
-
     public void Execute(List<IStatement> expressions)
     {
         foreach (var expression in expressions)

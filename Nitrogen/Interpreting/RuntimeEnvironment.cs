@@ -48,4 +48,21 @@ internal class RuntimeEnvironment
         if (Enclosing is not null) return Enclosing.GetVariable(name);
         throw new RuntimeException(name, $"Variable with name '{name.Lexeme}' not defined in this scope.");
     }
+
+    public object? GetVariableAt(Token name, int distance)
+    {
+        return Ancestor(distance).GetVariable(name);
+    }
+
+    private RuntimeEnvironment Ancestor(int distance)
+    {
+        var environment = this;
+        for (int i = 0; i < distance; i++)
+        {
+            environment = environment?.Enclosing;
+        }
+
+        if (environment is null) throw new RuntimeException("Can't lookup variable.");
+        return environment;
+    }
 }

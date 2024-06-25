@@ -1,5 +1,6 @@
 ﻿using Nitrogen.Exceptions;
 using Nitrogen.Interpreting;
+using Nitrogen.Interpreting.Binding;
 using Nitrogen.Lexing;
 using Nitrogen.Parsing;
 using Nitrogen.Syntax;
@@ -20,7 +21,7 @@ internal static class Program
         Console.ForegroundColor = ConsoleColor.Red;
         foreach (var error in errors)
         {
-            Console.WriteLine($"{error.Message}, Line {error.Location.Line} Col {error.Location.Column}");
+            Console.WriteLine($"{error.Message} Line {error.Location.Line} Col {error.Location.Column}");
         }
 
         Console.WriteLine();
@@ -49,6 +50,26 @@ internal static class Program
         HasRuntimeErrors = true;
     }
 
+    private static void CaptureErrors(List<BindingException> errors)
+    {
+        foreach (var error in errors)
+        {
+            Console.ForegroundColor = error.Level switch
+            {
+                ExceptionLevel.Info => ConsoleColor.Cyan,
+                ExceptionLevel.Warning => ConsoleColor.Yellow,
+                ExceptionLevel.Error => ConsoleColor.Red,
+                _ => ConsoleColor.White,
+            };
+
+            var location = error.Token.Span.Start;
+            Console.WriteLine($"{error.Message} Line {location.Line} Col {location.Column}");
+        }
+
+        Console.WriteLine();
+        Console.ResetColor();
+    }
+
     private static void Main(string[] args)
     {
         if (args is [var _])
@@ -69,7 +90,7 @@ internal static class Program
         var statements = RunParser(tokens);
 
         if (statements.Count == 0) return;
-        RunInterpreter(statements);
+        RunResolver(statements);
     }
 
     static void RunInteractive()
@@ -148,5 +169,19 @@ internal static class Program
         }
 
         return statements;
+    }
+
+    private static void RunResolver(List<IStatement> statements)
+    {
+        var resolver = new Resolver(_interpreter);
+        var errors = resolver.Resolve(statements);
+
+        if (errors.Count > 0)
+        {
+            CaptureErrors(errors);
+            return;
+        }
+
+        RunInterpreter(statements);
     }
 }

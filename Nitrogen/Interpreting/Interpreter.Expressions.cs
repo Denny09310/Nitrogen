@@ -3,7 +3,6 @@ using Nitrogen.Interpreting.Declarations;
 using Nitrogen.Syntax;
 using Nitrogen.Syntax.Abstractions;
 using Nitrogen.Syntax.Expressions;
-
 using System.Diagnostics;
 
 namespace Nitrogen.Interpreting;
@@ -102,7 +101,7 @@ internal partial class Interpreter
 
     private object? Evaluate(CallExpression expression)
     {
-        var function = _environment.GetVariable(expression.Name);
+        var function = LookupVariable(expression.Name);
 
         if (function is not ICallable callable)
         {
@@ -117,7 +116,7 @@ internal partial class Interpreter
 
     private object? Evaluate(IdentifierExpression expression)
     {
-        return _environment.GetVariable(expression.Name);
+        return LookupVariable(expression.Name);
     }
 
     private object? Evaluate(ReturnExpression expression)
