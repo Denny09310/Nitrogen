@@ -109,9 +109,9 @@ internal partial class Parser(List<Token> tokens)
             var paren = Peek(-1);
             var parameters = ParseCallArguments(paren);
 
-            if (expression is IdentifierExpression identifier)
+            if (expression is IdentifierExpression)
             {
-                return new CallExpression(identifier.Name, parameters);
+                return new CallExpression(paren, expression, parameters);
             }
 
             throw new ParseException(paren, "Invalid target for function call.");
@@ -318,7 +318,7 @@ internal partial class Parser(List<Token> tokens)
         return expression ?? ParsePrimaryExpression();
     }
 
-    private VariableDeclarationStatement ParseVariableDeclarationStatement()
+    private VarStatement ParseVariableDeclarationStatement()
     {
         var name = Consume(TokenKind.Identifier, "Expect name after variable declaration.");
 
@@ -330,7 +330,7 @@ internal partial class Parser(List<Token> tokens)
 
         Consume(TokenKind.Semicolon, "Expect ';' after variable declaration statement.");
 
-        return new VariableDeclarationStatement(name, initializer);
+        return new VarStatement(name, initializer);
     }
 
     private WhileStatement ParseWhileStatement()

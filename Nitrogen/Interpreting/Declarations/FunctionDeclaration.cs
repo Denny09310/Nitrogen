@@ -47,17 +47,17 @@ internal class FunctionDeclaration(FunctionStatement statement, RuntimeEnvironme
         {
             if (argument is IdentifierExpression identifier)
             {
-                environment.DefineVariable(identifier.Name, @params[index]);
+                environment.Define(identifier.Name, @params[index]);
             }
             else if (argument is AssignmentExpression assignment)
             {
                 if (index < @params.Length)
                 {
-                    environment.DefineVariable(assignment.Target, @params[index]);
+                    environment.Define(assignment.Name, @params[index]);
                 }
                 else
                 {
-                    environment.DefineVariable(assignment.Target, interpreter.Evaluate(assignment.Value));
+                    environment.Define(assignment.Name, interpreter.Evaluate(assignment.Value));
                 }
             }
         }
