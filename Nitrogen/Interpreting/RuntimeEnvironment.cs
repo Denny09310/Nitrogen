@@ -20,12 +20,18 @@ internal class RuntimeEnvironment
 
     public void AssignVariable(Token name, object? value)
     {
-        if (!_variables.ContainsKey(name.Lexeme))
+        if (_variables.ContainsKey(name.Lexeme))
+        {
+            _variables[name.Lexeme] = value;
+        }
+        else if (Enclosing != null)
+        {
+            Enclosing.AssignVariable(name, value);
+        }
+        else
         {
             throw new RuntimeException(name, $"Variable with name '{name.Lexeme}' not defined in this scope.");
         }
-
-        _variables[name.Lexeme] = value;
     }
 
     public void DefineVariable(Token name, object? value)

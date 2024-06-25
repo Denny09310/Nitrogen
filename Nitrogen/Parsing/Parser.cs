@@ -70,8 +70,19 @@ internal partial class Parser(List<Token> tokens)
         return left;
     }
 
+    private BlockStatement ParseBlockStatement()
+    {
+        List<IStatement> statements = [];
+        while (!Match(TokenKind.RightBrace))
+        {
+            statements.Add(ParseStatement());
+        }
+
+        return new BlockStatement(statements);
+    }
+
     private IExpression ParseComparisonExpression()
-        => ParseBinaryExpression(ParseAdditiveExpression, TokenKind.Less, TokenKind.LessEqual, TokenKind.Greater, TokenKind.GreaterEqual);
+            => ParseBinaryExpression(ParseAdditiveExpression, TokenKind.Less, TokenKind.LessEqual, TokenKind.Greater, TokenKind.GreaterEqual);
 
     private IExpression ParseEqualityExpression()
         => ParseBinaryExpression(ParseComparisonExpression, TokenKind.EqualEqual, TokenKind.BangEqual);
@@ -181,6 +192,9 @@ internal partial class Parser(List<Token> tokens)
         if (Match(TokenKind.While)) return ParseWhileStatement();
         if (Match(TokenKind.For)) return ParseForStatement();
         if (Match(TokenKind.Var)) return ParseVariableDeclarationStatement();
+
+        if (Match(TokenKind.LeftBrace)) return ParseBlockStatement();
+
         return new ExpressionStatement(ParseExpression());
     }
 
@@ -219,10 +233,8 @@ internal partial class Parser(List<Token> tokens)
         var condition = ParseExpression();
         Consume(TokenKind.RightParenthesis, "Expect ')' after while condition.");
 
-        Consume(TokenKind.LeftBrace, "Expect '{' after while condition.");
         var body = ParseStatement();
 
-        Consume(TokenKind.RightBrace, "Expect '}' after while body");
         return new WhileStatement(keyword, condition, body);
     }
 }
