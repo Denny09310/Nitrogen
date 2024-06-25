@@ -82,6 +82,44 @@ internal partial class Parser(List<Token> tokens)
         return expression;
     }
 
+    private ForStatement ParseForStatement()
+    {
+        var keyword = Peek(-1);
+        Consume(TokenKind.LeftParenthesis, "Expect '(' after for statement.");
+
+        IStatement? initialization = null;
+        if (Match(TokenKind.Var))
+        {
+            // TODO: Add variable parsing
+        }
+        else if (!Check(TokenKind.Semicolon))
+        {
+            initialization = new ExpressionStatement(ParseExpression());
+        }
+
+        Consume(TokenKind.Semicolon, "Expect ';' after for initialization.");
+
+        IExpression condition = new LiteralExpression(true);
+        if (!Check(TokenKind.Semicolon))
+        {
+            condition = ParseExpression();
+        }
+
+        Consume(TokenKind.Semicolon, "Expect ';' after for condition.");
+
+        IExpression? increment = null;
+        if (!Check(TokenKind.Semicolon))
+        {
+            increment = ParseExpression();
+        }
+
+        Consume(TokenKind.RightParenthesis, "Expect ')' after for increment.");
+
+        var body = ParseStatement();
+
+        return new ForStatement(keyword, initialization, condition, body, increment);
+    }
+
     private IExpression ParseLogicalExpression(Func<IExpression> descendant, params TokenKind[] kinds)
     {
         var left = descendant();
@@ -138,6 +176,7 @@ internal partial class Parser(List<Token> tokens)
     {
         if (Match(TokenKind.Print)) return ParsePrintStatement();
         if (Match(TokenKind.While)) return ParseWhileStatement();
+        if (Match(TokenKind.For)) return ParseForStatement();
         return new ExpressionStatement(ParseExpression());
     }
 

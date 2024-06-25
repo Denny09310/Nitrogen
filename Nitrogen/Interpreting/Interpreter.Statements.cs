@@ -21,6 +21,7 @@ internal partial class Interpreter
         ExpressionStatement statement => Execute(statement),
         PrintStatement statement => Execute(statement),
         WhileStatement statement => Execute(statement),
+        ForStatement statement => Execute(statement),
         _ => throw new UnreachableException($"Statement {stmt.GetType()} not recognized.")
     };
 
@@ -42,6 +43,13 @@ internal partial class Interpreter
     private object? Execute(WhileStatement statement)
     {
         ExecuteLoop(() => new EvaluationResult(Evaluate(statement.Condition)), statement.Body);
+        return null;
+    }
+
+    private object? Execute(ForStatement statement)
+    {
+        if (statement.Initialization is not null) Execute(statement.Initialization);
+        ExecuteLoop(() => new EvaluationResult(Evaluate(statement.Condition)), statement.Body, statement.Increment);
         return null;
     }
 
