@@ -1,4 +1,5 @@
-﻿using Nitrogen.Syntax.Abstractions;
+﻿using Nitrogen.Exceptions;
+using Nitrogen.Syntax.Abstractions;
 using Nitrogen.Syntax.Statements;
 using System.Diagnostics;
 
@@ -60,6 +61,14 @@ internal partial class Interpreter
             try
             {
                 Execute(body);
+            }
+            catch (BreakException)
+            {
+                break;
+            }
+            catch (ContinueException)
+            {
+                continue;
             }
             finally
             {

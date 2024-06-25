@@ -17,6 +17,8 @@ internal partial class Interpreter
         UnaryExpression expression => Evaluate(expression),
         GroupingExpression expression => Evaluate(expression),
         LiteralExpression expression => expression.Literal,
+        BreakExpression => throw new BreakException(),
+        ContinueExpression => throw new ContinueException(),
         _ => throw new UnreachableException($"Expression {expr.GetType()} not recognized.")
     };
 

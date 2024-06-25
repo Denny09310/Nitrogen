@@ -71,7 +71,7 @@ internal partial class Parser(List<Token> tokens)
     }
 
     private IExpression ParseComparisonExpression()
-                    => ParseBinaryExpression(ParseAdditiveExpression, TokenKind.Less, TokenKind.LessEqual, TokenKind.Greater, TokenKind.GreaterEqual);
+        => ParseBinaryExpression(ParseAdditiveExpression, TokenKind.Less, TokenKind.LessEqual, TokenKind.Greater, TokenKind.GreaterEqual);
 
     private IExpression ParseEqualityExpression()
         => ParseBinaryExpression(ParseComparisonExpression, TokenKind.EqualEqual, TokenKind.BangEqual);
@@ -144,6 +144,9 @@ internal partial class Parser(List<Token> tokens)
 
         if (current.Kind is TokenKind.True) return new LiteralExpression(true);
         if (current.Kind is TokenKind.False) return new LiteralExpression(false);
+
+        if (current.Kind is TokenKind.Break) return new BreakExpression();
+        if (current.Kind is TokenKind.Continue) return new ContinueExpression();
 
         if (current.Kind is TokenKind.LeftParenthesis)
         {
