@@ -31,7 +31,7 @@ internal partial class Interpreter
 
         if (!_locals.TryGetValue(expression, out var distance))
         {
-            throw new RuntimeException(expression.Name, "Can't define global variable.");
+            throw new RuntimeException(expression.Name, "Can't variable in global scope.");
         }
 
         _environment.AssignAt(distance, expression.Name, value);

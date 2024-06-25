@@ -1,6 +1,7 @@
 ﻿using Nitrogen.Exceptions;
 using Nitrogen.Syntax;
 using Nitrogen.Syntax.Abstractions;
+using Nitrogen.Syntax.Expressions;
 using Nitrogen.Syntax.Statements;
 
 namespace Nitrogen.Interpreting.Binding;
@@ -14,14 +15,10 @@ internal partial class Resolver(Interpreter interpreter)
 
     public List<BindingException> Resolve(List<IStatement> statements)
     {
-        BeginScope();
-
         foreach (var statement in statements)
         {
             Resolve(statement);
         }
-
-        EndScope();
 
         return _errors;
     }
@@ -30,37 +27,27 @@ internal partial class Resolver(Interpreter interpreter)
 
     private void Declare(Token name)
     {
-        if (_scopes.Count == 0)
-        {
-            _errors.Add(new(ExceptionLevel.Error, name, "No scopes available."));
-            return;
-        }
+        if (_scopes.Count == 0) return;
 
-        Variable? variable = null;
-        foreach (var scope in _scopes)
+        var scope = _scopes.Peek();
+        if (!scope.TryAdd(name.Lexeme, new Variable { Name = name, Defined = true }))
         {
-            if (scope.TryGetValue(name.Lexeme, out variable)) break;
+            _errors.Add(new(ExceptionLevel.Error, name, "Variable with this name already declared in this scope."));
         }
+    }
 
-        if (variable == null)
+    private void Define(Token name)
+    {
+        if (_scopes.Count == 0) return;
+
+        var scope = _scopes.Peek();
+        if (!scope.TryGetValue(name.Lexeme, out var variable))
         {
             _errors.Add(new(ExceptionLevel.Error, name, $"Variable '{name.Lexeme}' not declared."));
             return;
         }
 
         variable.Declared = true;
-    }
-
-    private void Define(Token name)
-    {
-        if (_scopes.Count == 0)
-        {
-            _errors.Add(new(ExceptionLevel.Error, name, "No scopes available."));
-            return;
-        }
-
-        var scope = _scopes.Peek();
-        scope.Add(name.Lexeme, new Variable { Name = name, Defined = true });
     }
 
     private void EndScope()
@@ -74,6 +61,33 @@ internal partial class Resolver(Interpreter interpreter)
                 _errors.Add(new(ExceptionLevel.Warning, variable.Name, $"Unusued variable '{name}'."));
             }
         }
+    }
+
+    private void ResolveFunction(FunctionStatement statement, FunctionType type)
+    {
+        (var enclosingFunction, _currentFunction) = (_currentFunction, type);
+
+        BeginScope();
+
+        foreach (var argument in statement.Arguments)
+        {
+            if (argument is AssignmentExpression assignment)
+            {
+                Declare(assignment.Name);
+                Define(assignment.Name);
+            }
+            else if (argument is IdentifierExpression identifier)
+            {
+                Declare(identifier.Name);
+                Define(identifier.Name);
+            }
+        }
+
+        Resolve(statement.Body);
+
+        EndScope();
+
+        _currentFunction = enclosingFunction;
     }
 
     private void ResolveLocal(IExpression statement, Token name)

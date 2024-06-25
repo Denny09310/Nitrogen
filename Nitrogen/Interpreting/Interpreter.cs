@@ -13,14 +13,14 @@ internal partial class Interpreter
     public Interpreter()
     {
         _globals = DefineGlobals();
-        _environment = new RuntimeEnvironment(_globals);
+        _environment = _globals;
     }
 
-    public void Execute(List<IStatement> expressions)
+    public void Execute(List<IStatement> statements)
     {
-        foreach (var expression in expressions)
+        foreach (var statement in statements)
         {
-            Execute(expression);
+            Execute(statement);
         }
     }
 

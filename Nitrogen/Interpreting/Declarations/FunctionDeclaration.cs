@@ -28,7 +28,7 @@ internal class FunctionDeclaration(FunctionStatement statement, RuntimeEnvironme
 
         try
         {
-            interpreter.ExecuteScoped(statement.Body is BlockStatement block ? block.Statements : [statement.Body], environment);
+            interpreter.ExecuteScoped(statement.Body is BlockStatement block ? block.Statements : [statement.Body], new RuntimeEnvironment(environment));
         }
         catch (ReturnException ex)
         {

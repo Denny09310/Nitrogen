@@ -1,5 +1,4 @@
 ﻿using Nitrogen.Syntax.Abstractions;
-using Nitrogen.Syntax.Expressions;
 using Nitrogen.Syntax.Statements;
 
 namespace Nitrogen.Interpreting.Binding;
@@ -30,12 +29,12 @@ internal partial class Resolver
 
     private void Resolve(VarStatement statement)
     {
-        Define(statement.Name);
+        Declare(statement.Name);
         if (statement.Initializer is not null)
         {
             Resolve(statement.Initializer);
         }
-        Declare(statement.Name);
+        Define(statement.Name);
     }
 
     private void Resolve(ExpressionStatement statement)
@@ -60,12 +59,10 @@ internal partial class Resolver
     private void Resolve(BlockStatement statement)
     {
         BeginScope();
-
         foreach (var stmt in statement.Statements)
         {
             Resolve(stmt);
         }
-
         EndScope();
     }
 
@@ -78,36 +75,9 @@ internal partial class Resolver
 
     private void Resolve(FunctionStatement statement)
     {
-        Define(statement.Name);
         Declare(statement.Name);
+        Define(statement.Name);
 
         ResolveFunction(statement, FunctionType.Function);
-    }
-
-    private void ResolveFunction(FunctionStatement statement, FunctionType type)
-    {
-        (var enclosingFunction, _currentFunction) = (_currentFunction, type);
-
-        BeginScope();
-
-        foreach (var argument in statement.Arguments)
-        {
-            if (argument is AssignmentExpression assignment)
-            {
-                Define(assignment.Name);
-                Declare(assignment.Name);
-            }
-            else if (argument is IdentifierExpression identifier)
-            {
-                Define(identifier.Name);
-                Declare(identifier.Name);
-            }
-        }
-
-        Resolve(statement.Body);
-
-        EndScope();
-
-        _currentFunction = enclosingFunction;
     }
 }
