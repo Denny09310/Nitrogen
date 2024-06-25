@@ -131,6 +131,38 @@ internal partial class Parser(List<Token> tokens)
         return new ForStatement(keyword, initialization, condition, body, increment);
     }
 
+    private FunctionStatement ParseFunctionStatement()
+    {
+        var name = Consume(TokenKind.Identifier, "Expect name after function declaration.");
+        Consume(TokenKind.LeftParenthesis, "Expect '(' after function name.");
+
+        List<IExpression> arguments = [];
+        if (!Check(TokenKind.RightParenthesis))
+        {
+            do
+            {
+                if (arguments.Count >= 255)
+                {
+                    throw new ParseException(name, "Can't have more that 254 arguments per function.");
+                }
+
+                var expression = ParseExpression();
+                if (expression is not AssignmentExpression or IdentifierExpression)
+                {
+                    throw new ParseException(name, "Arguments must be only identifiers or assignments.");
+                }
+
+                arguments.Add(expression);
+            }
+            while (Match(TokenKind.Comma));
+        }
+
+        Consume(TokenKind.RightParenthesis, "Expect '(' after function arguments.");
+        var body = ParseBlockStatement();
+
+        return new FunctionStatement(name, arguments, body);
+    }
+
     private IfStatement ParseIfStatement()
     {
         var keyword = Peek(-1);
@@ -207,10 +239,12 @@ internal partial class Parser(List<Token> tokens)
 
     private IStatement ParseStatement()
     {
+        if (Match(TokenKind.Function)) return ParseFunctionStatement();
+        if (Match(TokenKind.Var)) return ParseVariableDeclarationStatement();
+
         if (Match(TokenKind.Print)) return ParsePrintStatement();
         if (Match(TokenKind.While)) return ParseWhileStatement();
         if (Match(TokenKind.For)) return ParseForStatement();
-        if (Match(TokenKind.Var)) return ParseVariableDeclarationStatement();
         if (Match(TokenKind.If)) return ParseIfStatement();
 
         if (Match(TokenKind.LeftBrace)) return ParseBlockStatement();

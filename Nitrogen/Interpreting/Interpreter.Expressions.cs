@@ -9,7 +9,7 @@ namespace Nitrogen.Interpreting;
 
 internal partial class Interpreter
 {
-    private object? Evaluate(IExpression expr) => expr switch
+    public object? Evaluate(IExpression expr) => expr switch
     {
         AssignmentExpression expression => Evaluate(expression),
         BinaryExpression expression => Evaluate(expression),

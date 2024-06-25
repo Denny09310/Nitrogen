@@ -1,4 +1,5 @@
 ﻿using Nitrogen.Exceptions;
+using Nitrogen.Interpreting.Declarations;
 using Nitrogen.Syntax.Abstractions;
 using Nitrogen.Syntax.Statements;
 using System.Diagnostics;
@@ -17,9 +18,7 @@ internal partial class Interpreter
         }
     }
 
-#pragma warning disable S3241 // Methods should not return values that are never used
-
-    private object? Execute(IStatement stmt) => stmt switch
+    public object? Execute(IStatement stmt) => stmt switch
     {
         ExpressionStatement statement => Execute(statement),
         PrintStatement statement => Execute(statement),
@@ -27,11 +26,10 @@ internal partial class Interpreter
         ForStatement statement => Execute(statement),
         BlockStatement statement => Execute(statement),
         IfStatement statement => Execute(statement),
+        FunctionStatement statement => Execute(statement),
         VariableDeclarationStatement statement => Execute(statement),
         _ => throw new UnreachableException($"Statement {stmt.GetType()} not recognized.")
     };
-
-#pragma warning restore S3241 // Methods should not return values that are never used
 
     private object? Execute(ExpressionStatement statement)
     {
@@ -72,6 +70,13 @@ internal partial class Interpreter
         else if (statement.Else is not null) Execute(statement.Else);
 
         return null;
+    }
+
+    private FunctionDeclaration Execute(FunctionStatement statement)
+    {
+        var function = new FunctionDeclaration(statement, _environment);
+        _environment.DefineVariable(statement.Name, function);
+        return function;
     }
 
     private object? Execute(VariableDeclarationStatement statement)
