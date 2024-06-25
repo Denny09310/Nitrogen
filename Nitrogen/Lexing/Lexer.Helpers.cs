@@ -16,6 +16,8 @@ internal partial class Lexer
         ["var"] = TokenKind.Var,
         ["break"] = TokenKind.Break,
         ["continue"] = TokenKind.Continue,
+        ["if"] = TokenKind.If,
+        ["else"] = TokenKind.Else,
     };
 
     private char Advance()
