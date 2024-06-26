@@ -33,10 +33,19 @@ internal partial class Resolver
 
     private void Resolve(IdentifierExpression expression)
     {
-        if (_currentDepth != 0 && _variables.TryGetValue(expression.Name.Lexeme.GetHashCode(), out var variable) && !variable.Declared)
+        int identifier = expression.Name.Lexeme.GetHashCode();
+        if (!_variables.TryGetValue(identifier, out var variable))
+        {
+            _errors.Add(new(ExceptionLevel.Error, expression.Name, $"Undefined variable '{expression.Name.Lexeme}'."));
+            return;
+        }
+
+        if (!variable.Declared)
         {
             _errors.Add(new(ExceptionLevel.Error, expression.Name, "Cannot read local variable in its own initializer."));
+            return;
         }
+
         ResolveLocal(expression, expression.Name);
     }
 

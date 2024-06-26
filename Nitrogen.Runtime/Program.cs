@@ -34,7 +34,8 @@ internal static class Program
         Console.ForegroundColor = ConsoleColor.Red;
         foreach (var error in errors)
         {
-            Console.WriteLine(error.Message);
+            var location = error.Token.Span.Start;
+            Console.WriteLine($"{error.Message} Line {location.Line} Col {location.Column}");
         }
 
         Console.WriteLine();
@@ -73,9 +74,9 @@ internal static class Program
 
     private static void Main(string[] args)
     {
-        if (args is [var _])
+        if (args is [var path])
         {
-            // TODO: Read the file and send the content to the lexer
+            RunFile(path);
         }
         else
         {
@@ -93,6 +94,12 @@ internal static class Program
         if (statements.Count == 0) return;
 
         RunResolver(statements);
+    }
+
+    private static void RunFile(string path)
+    {
+        var source = File.ReadAllText(path);
+        Run(source);
     }
 
     static void RunInteractive()
@@ -182,11 +189,11 @@ internal static class Program
         var resolver = new Resolver(_interpreter);
         var errors = resolver.Resolve(statements);
 
-        bool showErrors = IsInteractive
+        bool hasErrors = IsInteractive
             ? errors.Exists(error => error.Level is ExceptionLevel.Error)
             : errors.Count > 0;
 
-        if (showErrors)
+        if (hasErrors)
         {
             CaptureErrors(errors);
             return;

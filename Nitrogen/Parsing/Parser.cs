@@ -109,12 +109,7 @@ internal partial class Parser(List<Token> tokens)
             var paren = Peek(-1);
             var parameters = ParseCallArguments(paren);
 
-            if (expression is IdentifierExpression)
-            {
-                return new CallExpression(paren, expression, parameters);
-            }
-
-            throw new ParseException(paren, "Invalid target for function call.");
+            return new CallExpression(paren, expression, parameters);
         }
 
         return expression;

@@ -11,15 +11,19 @@ internal partial class Resolver(Interpreter interpreter)
     private readonly List<BindingException> _errors = [];
     private readonly Dictionary<int, Variable> _variables = [];
 
-    private int _currentDepth = 1;
+    private int _currentDepth;
     private FunctionType _currentFunction;
 
     public List<BindingException> Resolve(List<IStatement> statements)
     {
+        BeginScope();
+
         foreach (var statement in statements)
         {
             Resolve(statement);
         }
+
+        EndScope();
 
         return _errors;
     }
@@ -59,8 +63,6 @@ internal partial class Resolver(Interpreter interpreter)
 
     private void EndScope()
     {
-        _currentDepth--;
-
         foreach (var variable in _variables.Values.Where(variable => variable.Depth == _currentDepth))
         {
             if (!variable.Used)
@@ -68,6 +70,8 @@ internal partial class Resolver(Interpreter interpreter)
                 _errors.Add(new(ExceptionLevel.Warning, variable.Name, $"Unusued variable '{variable.Name.Lexeme}'."));
             }
         }
+
+        _currentDepth--;
     }
 
     private void ResolveFunction(FunctionStatement statement, FunctionType type)
