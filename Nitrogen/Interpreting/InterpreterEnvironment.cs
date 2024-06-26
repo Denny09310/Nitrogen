@@ -3,20 +3,20 @@ using Nitrogen.Syntax;
 
 namespace Nitrogen.Interpreting;
 
-internal class RuntimeEnvironment
+public class InterpreterEnvironment
 {
     private readonly Dictionary<string, object?> _variables = [];
 
-    public RuntimeEnvironment()
+    public InterpreterEnvironment()
     {
     }
 
-    public RuntimeEnvironment(RuntimeEnvironment enclosing)
+    public InterpreterEnvironment(InterpreterEnvironment enclosing)
     {
         Enclosing = enclosing;
     }
 
-    public RuntimeEnvironment? Enclosing { get; private set; }
+    public InterpreterEnvironment? Enclosing { get; private set; }
 
     public void Assign(Token name, object? value)
     {
@@ -59,7 +59,7 @@ internal class RuntimeEnvironment
         Ancestor(distance).Assign(name, value);
     }
 
-    private RuntimeEnvironment Ancestor(int distance)
+    private InterpreterEnvironment Ancestor(int distance)
     {
         var environment = this;
         for (int i = 0; i < distance; i++)

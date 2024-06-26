@@ -4,9 +4,9 @@ using Nitrogen.Syntax.Statements;
 
 namespace Nitrogen.Interpreting.Declarations;
 
-internal class FunctionDeclaration(FunctionStatement statement, RuntimeEnvironment closure) : ICallable
+internal class FunctionDeclaration(FunctionStatement statement, InterpreterEnvironment closure) : ICallable
 {
-    public RuntimeEnvironment Closure { get; } = closure;
+    public InterpreterEnvironment Closure { get; } = closure;
 
     public string Name { get; } = statement.Name.Lexeme;
 
@@ -23,12 +23,12 @@ internal class FunctionDeclaration(FunctionStatement statement, RuntimeEnvironme
 
     public object? Call(Interpreter interpreter, object?[] @params)
     {
-        var environment = new RuntimeEnvironment(Closure);
+        var environment = new InterpreterEnvironment(Closure);
         DefineArguments(interpreter, @params, environment);
 
         try
         {
-            interpreter.ExecuteScoped(statement.Body is BlockStatement block ? block.Statements : [statement.Body], new RuntimeEnvironment(environment));
+            interpreter.ExecuteScoped(statement.Body is BlockStatement block ? block.Statements : [statement.Body], new InterpreterEnvironment(environment));
         }
         catch (ReturnException ex)
         {
@@ -41,7 +41,7 @@ internal class FunctionDeclaration(FunctionStatement statement, RuntimeEnvironme
         return null;
     }
 
-    private void DefineArguments(Interpreter interpreter, object?[] @params, RuntimeEnvironment environment)
+    private void DefineArguments(Interpreter interpreter, object?[] @params, InterpreterEnvironment environment)
     {
         foreach (var (index, argument) in statement.Arguments.Select((a, i) => (i, a)))
         {
