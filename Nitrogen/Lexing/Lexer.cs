@@ -1,6 +1,5 @@
 ﻿using Nitrogen.Exceptions;
 using Nitrogen.Syntax;
-
 using System.Text;
 
 namespace Nitrogen.Lexing;
@@ -44,7 +43,7 @@ internal partial class Lexer(SourceText source)
     {
         char current = Peek();
 
-        if (current is '\n')
+        if (current == '\r' || current == '\n')
         {
             LexNewLine();
             return null;
@@ -89,13 +88,27 @@ internal partial class Lexer(SourceText source)
         return CreateToken(TokenKind.Identifier);
     }
 
+    private void LexLineComment()
+    {
+        while (Peek() != '\n' && !IsLastCharacter())
+        {
+            Consume();
+        }
+
+        CreateToken(TokenKind.LineComment);
+    }
+
     private void LexNewLine()
     {
-        Consume();
+        if (Peek() == '\n')
+        {
+            _line++;
+        }
 
-        _line++;
         _column = 0;
+        _location = new SourceLocation(_line, _column);
 
+        Consume();
         CreateToken(TokenKind.NewLine);
     }
 
@@ -109,13 +122,12 @@ internal partial class Lexer(SourceText source)
         return CreateToken(TokenKind.Number);
     }
 
-    private Token LexPunctuation()
+    private Token? LexPunctuation()
     {
         var current = Consume();
         switch (current)
         {
             case '*': return CreateToken(TokenKind.Star);
-            case '/': return CreateToken(TokenKind.Slash);
             case '\\': return CreateToken(TokenKind.BackSlash);
             case '(': return CreateToken(TokenKind.LeftParenthesis);
             case ')': return CreateToken(TokenKind.RightParenthesis);
@@ -131,6 +143,14 @@ internal partial class Lexer(SourceText source)
             case '{': return CreateToken(TokenKind.LeftBrace);
             case '}': return CreateToken(TokenKind.RightBrace);
             case '%': return CreateToken(TokenKind.Percentage);
+
+            case '/':
+                if (Match('/'))
+                {
+                    LexLineComment();
+                    return null;
+                }
+                return CreateToken(TokenKind.Slash);
 
             case '-':
                 if (Match('-')) return CreateToken(TokenKind.MinusMinus);
@@ -187,7 +207,7 @@ internal partial class Lexer(SourceText source)
 
     private void LexWhiteSpace()
     {
-        while (char.IsWhiteSpace(Peek()) && !IsLastCharacter())
+        while (char.IsWhiteSpace(Peek()) && (Peek() is not '\r' or '\n') && !IsLastCharacter())
         {
             Consume();
         }

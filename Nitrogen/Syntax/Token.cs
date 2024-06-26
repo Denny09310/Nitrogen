@@ -96,6 +96,8 @@ internal enum TokenKind
 
     EOF,
     Error,
+    LineComment,
+    BlockComment,
 
     #endregion Miscellaneous
 }
