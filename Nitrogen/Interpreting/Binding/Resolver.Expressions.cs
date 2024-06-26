@@ -20,7 +20,11 @@ internal partial class Resolver
             case CallExpression call: Resolve(call); break;
             case ReturnExpression @return: Resolve(@return); break;
 
-            case LiteralExpression or BreakExpression or ContinueExpression:
+            case BreakExpression:
+                if (_currentLoop is not null) _currentLoop.CanExit = true;
+                break;
+
+            case LiteralExpression or ContinueExpression:
             default: break;
         }
     }
@@ -86,6 +90,11 @@ internal partial class Resolver
         if (_currentFunction is FunctionType.None)
         {
             _errors.Add(new(ExceptionLevel.Error, expression.Keyword, "Can't return from top-level statemet."));
+        }
+
+        if (_currentLoop is not null)
+        {
+            _currentLoop.CanExit = true;
         }
 
         if (expression.Value is not null) Resolve(expression.Value);

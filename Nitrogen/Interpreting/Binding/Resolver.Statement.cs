@@ -1,4 +1,6 @@
-﻿using Nitrogen.Syntax.Abstractions;
+﻿using Nitrogen.Exceptions;
+using Nitrogen.Syntax.Abstractions;
+using Nitrogen.Syntax.Expressions;
 using Nitrogen.Syntax.Statements;
 
 namespace Nitrogen.Interpreting.Binding;
@@ -44,16 +46,37 @@ internal partial class Resolver
 
     private void Resolve(WhileStatement statement)
     {
+        (var enclosing, _currentLoop) = (_currentLoop, new Loop { Type = LoopType.While });
+
         Resolve(statement.Condition);
         Resolve(statement.Body);
+
+        if (!_currentLoop.CanExit)
+        {
+            _errors.Add(new BindingException(ExceptionLevel.Warning, statement.Keyword, "Possible infinite loop detected."));
+        }
+
+        _currentLoop = enclosing;
     }
 
     private void Resolve(ForStatement statement)
     {
+        (var enclosing, _currentLoop) = (_currentLoop, new Loop { Type = LoopType.For });
+
         if (statement.Initialization is not null) Resolve(statement.Initialization);
         Resolve(statement.Condition);
         Resolve(statement.Body);
-        if (statement.Increment is not null) Resolve(statement.Increment);
+
+        if (statement.Increment is not null)
+        {
+            Resolve(statement.Increment);
+        }
+        else if (!_currentLoop.CanExit)
+        {
+            _errors.Add(new BindingException(ExceptionLevel.Warning, statement.Keyword, "Possible infinite loop detected."));
+        }
+
+        _currentLoop = enclosing;
     }
 
     private void Resolve(BlockStatement statement)

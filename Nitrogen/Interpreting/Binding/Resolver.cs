@@ -12,7 +12,9 @@ internal partial class Resolver(Interpreter interpreter)
     private readonly Dictionary<int, Variable> _variables = [];
 
     private int _currentDepth;
+
     private FunctionType _currentFunction;
+    private Loop? _currentLoop;
 
     public List<BindingException> Resolve(List<IStatement> statements)
     {
@@ -121,5 +123,11 @@ internal partial class Resolver(Interpreter interpreter)
         public int Depth { get; set; }
         public Token Name { get; init; }
         public bool Used { get; set; }
+    }
+
+    private sealed class Loop
+    {
+        public LoopType Type { get; set; }
+        public bool CanExit { get; set; }
     }
 }
