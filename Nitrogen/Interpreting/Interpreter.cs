@@ -13,7 +13,7 @@ internal partial class Interpreter
     public Interpreter()
     {
         _globals = DefineGlobals();
-        _environment = _globals;
+        _environment = new RuntimeEnvironment(_globals);
     }
 
     public void Execute(List<IStatement> statements)
@@ -24,7 +24,10 @@ internal partial class Interpreter
         }
     }
 
-    public void Resolve(IExpression expression, int depth) => _locals.Add(expression, depth);
+    public void Resolve(IExpression expression, int depth)
+    {
+        _locals.TryAdd(expression, depth);
+    }
 
     private static RuntimeEnvironment DefineGlobals()
     {

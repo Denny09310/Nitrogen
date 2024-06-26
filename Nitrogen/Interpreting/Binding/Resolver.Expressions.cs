@@ -33,7 +33,7 @@ internal partial class Resolver
 
     private void Resolve(IdentifierExpression expression)
     {
-        if (_scopes.Count != 0 && _scopes.Peek().TryGetValue(expression.Name.Lexeme, out var variable) && !variable.Declared)
+        if (_currentDepth != 0 && _variables.TryGetValue(expression.Name.Lexeme.GetHashCode(), out var variable) && !variable.Declared)
         {
             _errors.Add(new(ExceptionLevel.Error, expression.Name, "Cannot read local variable in its own initializer."));
         }

@@ -64,10 +64,8 @@ internal class RuntimeEnvironment
         var environment = this;
         for (int i = 0; i < distance; i++)
         {
-            environment = environment?.Enclosing;
+            environment = environment.Enclosing ?? throw new RuntimeException("Can't lookup variable.");
         }
-
-        if (environment is null) throw new RuntimeException("Can't lookup variable.");
         return environment;
     }
 }

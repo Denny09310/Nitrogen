@@ -9,8 +9,9 @@ namespace Nitrogen.Interpreting.Binding;
 internal partial class Resolver(Interpreter interpreter)
 {
     private readonly List<BindingException> _errors = [];
-    private readonly Stack<Dictionary<string, Variable>> _scopes = [];
+    private readonly Dictionary<int, Variable> _variables = [];
 
+    private int _currentDepth = 1;
     private FunctionType _currentFunction;
 
     public List<BindingException> Resolve(List<IStatement> statements)
@@ -23,14 +24,17 @@ internal partial class Resolver(Interpreter interpreter)
         return _errors;
     }
 
-    private void BeginScope() => _scopes.Push([]);
+    private void BeginScope() => _currentDepth++;
 
     private void Declare(Token name)
     {
-        if (_scopes.Count == 0) return;
+        if (_currentDepth == 0)
+        {
+            _errors.Add(new(ExceptionLevel.Error, name, "No scopes available."));
+            return;
+        }
 
-        var scope = _scopes.Peek();
-        if (!scope.TryAdd(name.Lexeme, new Variable { Name = name, Defined = true }))
+        if (!_variables.TryAdd(name.Lexeme.GetHashCode(), new Variable { Name = name, Defined = true, Depth = _currentDepth }))
         {
             _errors.Add(new(ExceptionLevel.Error, name, "Variable with this name already declared in this scope."));
         }
@@ -38,10 +42,13 @@ internal partial class Resolver(Interpreter interpreter)
 
     private void Define(Token name)
     {
-        if (_scopes.Count == 0) return;
+        if (_currentDepth == 0)
+        {
+            _errors.Add(new(ExceptionLevel.Error, name, "No scopes available."));
+            return;
+        }
 
-        var scope = _scopes.Peek();
-        if (!scope.TryGetValue(name.Lexeme, out var variable))
+        if (!_variables.TryGetValue(name.Lexeme.GetHashCode(), out var variable))
         {
             _errors.Add(new(ExceptionLevel.Error, name, $"Variable '{name.Lexeme}' not declared."));
             return;
@@ -52,13 +59,13 @@ internal partial class Resolver(Interpreter interpreter)
 
     private void EndScope()
     {
-        var scope = _scopes.Pop();
+        _currentDepth--;
 
-        foreach (var (name, variable) in scope)
+        foreach (var variable in _variables.Values.Where(variable => variable.Depth == _currentDepth))
         {
             if (!variable.Used)
             {
-                _errors.Add(new(ExceptionLevel.Warning, variable.Name, $"Unusued variable '{name}'."));
+                _errors.Add(new(ExceptionLevel.Warning, variable.Name, $"Unusued variable '{variable.Name.Lexeme}'."));
             }
         }
     }
@@ -92,15 +99,14 @@ internal partial class Resolver(Interpreter interpreter)
 
     private void ResolveLocal(IExpression statement, Token name)
     {
-        for (int i = 0; i < _scopes.Count; i++)
+        if (_variables.TryGetValue(name.Lexeme.GetHashCode(), out var variable))
         {
-            var scope = _scopes.ElementAt(i);
-            if (scope.TryGetValue(name.Lexeme, out var variable))
-            {
-                variable.Used = true;
-                interpreter.Resolve(statement, i);
-                break;
-            }
+            variable.Used = true;
+            interpreter.Resolve(statement, _currentDepth - variable.Depth);
+        }
+        else
+        {
+            interpreter.Resolve(statement, _currentDepth - 1);
         }
     }
 
@@ -108,6 +114,7 @@ internal partial class Resolver(Interpreter interpreter)
     {
         public bool Declared { get; set; }
         public bool Defined { get; set; }
+        public int Depth { get; set; }
         public Token Name { get; init; }
         public bool Used { get; set; }
     }
