@@ -46,7 +46,7 @@ public partial class Interpreter
     private object? Execute(PrintStatement statement)
     {
         var value = new EvaluationResult(Evaluate(statement.Expression));
-        Console.WriteLine(value.ToString());
+        Output.WriteLine(value.ToString());
 
         return null;
     }

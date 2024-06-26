@@ -7,6 +7,7 @@ public partial class Interpreter
 {
     private readonly InterpreterEnvironment _globals;
     private readonly Dictionary<IExpression, int> _locals = [];
+    private readonly InterpreterOptions _options = InterpreterOptions.Default;
 
     private InterpreterEnvironment _environment;
 
@@ -15,6 +16,13 @@ public partial class Interpreter
         _globals = DefineGlobals();
         _environment = new InterpreterEnvironment(_globals);
     }
+
+    public Interpreter(InterpreterOptions options) : this()
+    {
+        _options = options;
+    }
+
+    public IOutputSink Output => _options.OutputSink;
 
     public void Execute(List<IStatement> statements)
     {
