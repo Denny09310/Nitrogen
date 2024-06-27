@@ -1,4 +1,6 @@
-﻿using Nitrogen.Syntax.Abstractions;
+﻿using Nitrogen.Exceptions;
+using Nitrogen.Syntax.Abstractions;
+using Nitrogen.Syntax.Expressions;
 using Nitrogen.Syntax.Statements;
 
 namespace Nitrogen.Interpreting.Binding;
@@ -46,6 +48,9 @@ internal partial class Resolver
     private void Resolve(WhileStatement statement)
     {
         ResolveLoop(statement, LoopType.While);
+    }
+
+        _currentLoop = enclosing;
     }
 
     private void Resolve(ForStatement statement)

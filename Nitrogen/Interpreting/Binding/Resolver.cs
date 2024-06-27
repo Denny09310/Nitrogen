@@ -14,6 +14,7 @@ internal partial class Resolver(Interpreter interpreter)
 
     private ClassType _currentClass;
     private int _currentDepth;
+
     private FunctionType _currentFunction;
     private Loop? _currentLoop;
 
@@ -198,5 +199,11 @@ internal partial class Resolver(Interpreter interpreter)
         public int Depth { get; set; }
         public Token Name { get; set; }
         public bool Used { get; set; }
+    }
+
+    private sealed class Loop
+    {
+        public LoopType Type { get; set; }
+        public bool CanExit { get; set; }
     }
 }
