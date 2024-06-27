@@ -1,4 +1,6 @@
-﻿namespace Nitrogen.Interpreting;
+﻿using System.Text;
+
+namespace Nitrogen.Interpreting;
 
 public interface IOutputSink
 {
@@ -37,9 +39,11 @@ public sealed class NullOutputSink : IOutputSink
 
 public sealed class TestOutputSink : IOutputSink
 {
-    public string? Result { get; set; }
+    private readonly StringBuilder _result = new();
 
-    public void Write(object? obj) => Result += obj?.ToString();
+    public string Result => _result.ToString();
 
-    public void WriteLine(object? obj) => Result += obj?.ToString() + Environment.NewLine;
+    public void Write(object? obj) => _result.Append(obj);
+
+    public void WriteLine(object? obj) => _result.AppendLine(obj?.ToString());
 }

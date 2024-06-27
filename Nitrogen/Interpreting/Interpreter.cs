@@ -11,15 +11,15 @@ public partial class Interpreter
 
     private InterpreterEnvironment _environment;
 
-    public Interpreter()
+    public Interpreter() : this(InterpreterOptions.Default)
+    {
+    }
+
+    public Interpreter(InterpreterOptions options)
     {
         _globals = DefineGlobals();
         _environment = new InterpreterEnvironment(_globals);
-    }
-
-    public Interpreter(InterpreterOptions options) : this()
-    {
-        _options = options;
+        _options = options ?? throw new ArgumentNullException(nameof(options));
     }
 
     public IOutputSink Output => _options.OutputSink;
