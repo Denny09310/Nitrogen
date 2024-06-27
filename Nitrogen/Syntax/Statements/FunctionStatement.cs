@@ -14,4 +14,5 @@ internal enum FunctionType
     None,
     Function,
     Method,
+    Constructor,
 }

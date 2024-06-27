@@ -1,5 +1,4 @@
-﻿using Nitrogen.Exceptions;
-using Nitrogen.Interpreting.Declarations;
+﻿using Nitrogen.Interpreting.Declarations;
 using Nitrogen.Syntax.Abstractions;
 using Nitrogen.Syntax.Statements;
 using System.Diagnostics;
@@ -18,6 +17,7 @@ public partial class Interpreter
         IfStatement statement => Execute(statement),
         FunctionStatement statement => Execute(statement),
         VarStatement statement => Execute(statement),
+        ClassStatement statement => Execute(statement),
         _ => throw new UnreachableException($"Statement {stmt.GetType()} not recognized.")
     };
 
@@ -53,14 +53,14 @@ public partial class Interpreter
 
     private object? Execute(WhileStatement statement)
     {
-        ExecuteLoop(() => new EvaluationResult(Evaluate(statement.Condition)), statement.Body);
+        Loop(() => new EvaluationResult(Evaluate(statement.Condition)), statement.Body);
         return null;
     }
 
     private object? Execute(ForStatement statement)
     {
         if (statement.Initialization is not null) Execute(statement.Initialization);
-        ExecuteLoop(() => new EvaluationResult(Evaluate(statement.Condition)), statement.Body, statement.Increment);
+        Loop(() => new EvaluationResult(Evaluate(statement.Condition)), statement.Body, statement.Increment);
         return null;
     }
 
@@ -95,29 +95,15 @@ public partial class Interpreter
         return null;
     }
 
-    private void ExecuteLoop(Func<bool> condition, IStatement body, IExpression? increment = null)
+    private object? Execute(ClassStatement statement)
     {
-        while (condition())
-        {
-            try
-            {
-                Execute(body);
-            }
-            catch (BreakException)
-            {
-                break;
-            }
-            catch (ContinueException)
-            {
-                continue;
-            }
-            finally
-            {
-                if (increment != null)
-                {
-                    Evaluate(increment);
-                }
-            }
-        }
+        var methods = statement.Methods.ToDictionary(
+            method => method.Name.Lexeme,
+            method => new FunctionDeclaration(method, _environment, method.Name.Lexeme is "constructor"));
+
+        var @class = new ClassDeclaration(statement, methods);
+        _environment.Define(statement.Name, @class);
+
+        return null;
     }
 }

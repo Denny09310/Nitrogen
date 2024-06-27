@@ -1,6 +1,7 @@
 ﻿using Nitrogen.Exceptions;
 using Nitrogen.Syntax.Abstractions;
 using Nitrogen.Syntax.Expressions;
+using Nitrogen.Syntax.Statements;
 
 namespace Nitrogen.Interpreting.Binding;
 
@@ -18,7 +19,14 @@ internal partial class Resolver
             case GroupingExpression grouping: Resolve(grouping); break;
             case CallExpression call: Resolve(call); break;
             case ReturnExpression @return: Resolve(@return); break;
-            case BreakExpression @break: Resolve(@break); break;
+            case GetterExpression getter: Resolve(getter); break;
+            case SetterExpression setter: Resolve(setter); break;
+            case ThisExpression setter: Resolve(setter); break;
+
+            case BreakExpression:
+                if (_currentLoop != null) _currentLoop.Infinite = false;
+                break;
+
             case LiteralExpression or ContinueExpression:
             default: break;
         }
@@ -35,13 +43,13 @@ internal partial class Resolver
         int identifier = expression.Name.Lexeme.GetHashCode();
         if (!_variables.TryGetValue(identifier, out var variable))
         {
-            _errors.Add(new(ExceptionLevel.Error, expression.Name, $"Undefined variable '{expression.Name.Lexeme}'."));
+            Report(ExceptionLevel.Error, expression.Name, $"Undefined variable '{expression.Name.Lexeme}'.");
             return;
         }
 
         if (!variable.Declared)
         {
-            _errors.Add(new(ExceptionLevel.Error, expression.Name, "Cannot read local variable in its own initializer."));
+            Report(ExceptionLevel.Error, expression.Name, "Cannot read local variable in its own initializer.");
             return;
         }
 
@@ -82,11 +90,41 @@ internal partial class Resolver
 
     private void Resolve(ReturnExpression expression)
     {
-        _functions.Resolve(expression);
+        if (_currentFunction is FunctionType.None)
+        {
+            Report(ExceptionLevel.Error, expression.Keyword, "Can't return from top-level statemet.");
+        }
+
+        if (expression.Value is not null)
+        {
+            if (_currentFunction is FunctionType.Constructor)
+            {
+                Report(ExceptionLevel.Error, expression.Keyword, "Can't return a value from constructor.");
+            }
+
+            Resolve(expression.Value);
+        }
     }
 
-    private void Resolve(BreakExpression expression)
+    private void Resolve(GetterExpression expression)
     {
-        _loops.Resolve(expression);
+        Resolve(expression.Expression);
+    }
+
+    private void Resolve(SetterExpression expression)
+    {
+        Resolve(expression.Object);
+        Resolve(expression.Value);
+    }
+
+    private void Resolve(ThisExpression expression)
+    {
+        if (_currentClass is ClassType.None)
+        {
+            Report(ExceptionLevel.Error, expression.Keyword, "Can't use 'this' outside of a class.");
+            return;
+        }
+
+        ResolveLocal(expression, expression.Keyword);
     }
 }

@@ -49,6 +49,10 @@ internal partial class Parser(List<Token> tokens)
             {
                 return new AssignmentExpression(identifier.Name, value);
             }
+            else if (expression is GetterExpression getter)
+            {
+                return new SetterExpression(getter.Name, getter.Expression, value);
+            }
 
             throw new ParseException(equal, "Invalid assingment target.");
         }
@@ -104,19 +108,49 @@ internal partial class Parser(List<Token> tokens)
     private IExpression ParseCallExpression()
     {
         IExpression expression = ParseOrExpression();
-        if (Match(TokenKind.LeftParenthesis))
-        {
-            var paren = Peek(-1);
-            var parameters = ParseCallArguments(paren);
 
-            return new CallExpression(paren, expression, parameters);
+        while (true)
+        {
+            if (Match(TokenKind.LeftParenthesis))
+            {
+                var paren = Peek(-1);
+                var parameters = ParseCallArguments(paren);
+
+                expression = new CallExpression(paren, expression, parameters);
+            }
+            else if (Match(TokenKind.Dot))
+            {
+                var name = Consume(TokenKind.Identifier, "Expect property name after '.'.");
+                expression = new GetterExpression(name, expression);
+            }
+            else
+            {
+                break;
+            }
         }
 
         return expression;
     }
 
+    private ClassStatement ParseClassStatement()
+    {
+        var name = Consume(TokenKind.Identifier, "Expect name after class statement.");
+
+        Consume(TokenKind.LeftBrace, "Expect '{' after class name.");
+
+        List<FunctionStatement> methods = [];
+        while (!Check(TokenKind.RightBrace))
+        {
+            methods.Add(ParseFunctionStatement());
+        }
+
+        Consume(TokenKind.RightBrace, "Expect '}' after class declaration.");
+
+        return new ClassStatement(name, methods);
+    }
+
     private IExpression ParseComparisonExpression()
-                    => ParseBinaryExpression(ParseAdditiveExpression, TokenKind.Less, TokenKind.LessEqual, TokenKind.Greater, TokenKind.GreaterEqual);
+                        => ParseBinaryExpression(ParseAdditiveExpression, TokenKind.Less, TokenKind.LessEqual, TokenKind.Greater, TokenKind.GreaterEqual);
 
     private IExpression ParseEqualityExpression()
         => ParseBinaryExpression(ParseComparisonExpression, TokenKind.EqualEqual, TokenKind.BangEqual);
@@ -135,7 +169,7 @@ internal partial class Parser(List<Token> tokens)
         IStatement? initialization = null;
         if (Match(TokenKind.Var))
         {
-            initialization = ParseVariableDeclarationStatement();
+            initialization = ParseVariableStatement();
         }
         else if (!Check(TokenKind.Semicolon))
         {
@@ -244,6 +278,7 @@ internal partial class Parser(List<Token> tokens)
 
         if (current.Kind is TokenKind.Break) return new BreakExpression();
         if (current.Kind is TokenKind.Continue) return new ContinueExpression();
+        if (current.Kind is TokenKind.This) return new ThisExpression(current);
 
         if (current.Kind is TokenKind.Return)
         {
@@ -286,7 +321,8 @@ internal partial class Parser(List<Token> tokens)
     private IStatement ParseStatement()
     {
         if (Match(TokenKind.Function)) return ParseFunctionStatement();
-        if (Match(TokenKind.Var)) return ParseVariableDeclarationStatement();
+        if (Match(TokenKind.Var)) return ParseVariableStatement();
+        if (Match(TokenKind.Class)) return ParseClassStatement();
 
         if (Match(TokenKind.Print)) return ParsePrintStatement();
         if (Match(TokenKind.While)) return ParseWhileStatement();
@@ -313,7 +349,7 @@ internal partial class Parser(List<Token> tokens)
         return expression ?? ParsePrimaryExpression();
     }
 
-    private VarStatement ParseVariableDeclarationStatement()
+    private VarStatement ParseVariableStatement()
     {
         var name = Consume(TokenKind.Identifier, "Expect name after variable declaration.");
 

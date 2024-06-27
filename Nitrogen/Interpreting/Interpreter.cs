@@ -1,4 +1,5 @@
-﻿using Nitrogen.Syntax;
+﻿using Nitrogen.Exceptions;
+using Nitrogen.Syntax;
 using Nitrogen.Syntax.Abstractions;
 
 namespace Nitrogen.Interpreting;
@@ -51,5 +52,31 @@ public partial class Interpreter
         }
 
         return _globals.Get(name);
+    }
+
+    private void Loop(Func<bool> condition, IStatement body, IExpression? increment = null)
+    {
+        while (condition())
+        {
+            try
+            {
+                Execute(body);
+            }
+            catch (BreakException)
+            {
+                break;
+            }
+            catch (ContinueException)
+            {
+                continue;
+            }
+            finally
+            {
+                if (increment != null)
+                {
+                    Evaluate(increment);
+                }
+            }
+        }
     }
 }

@@ -17,6 +17,7 @@ internal partial class Resolver
             case BlockStatement block: Resolve(block); break;
             case IfStatement @if: Resolve(@if); break;
             case FunctionStatement function: Resolve(function); break;
+            case ClassStatement function: Resolve(function); break;
 
             default: break;
         }
@@ -29,12 +30,12 @@ internal partial class Resolver
 
     private void Resolve(VarStatement statement)
     {
-        Declare(statement.Name);
+        Define(statement.Name);
         if (statement.Initializer is not null)
         {
             Resolve(statement.Initializer);
         }
-        Define(statement.Name);
+        Declare(statement.Name);
     }
 
     private void Resolve(ExpressionStatement statement)
@@ -44,12 +45,12 @@ internal partial class Resolver
 
     private void Resolve(WhileStatement statement)
     {
-        _loops.ResolveLoop(statement, LoopType.While);
+        ResolveLoop(statement, LoopType.While);
     }
 
     private void Resolve(ForStatement statement)
     {
-        _loops.ResolveLoop(statement, LoopType.For);
+        ResolveLoop(statement, LoopType.For);
     }
 
     private void Resolve(BlockStatement statement)
@@ -71,9 +72,31 @@ internal partial class Resolver
 
     private void Resolve(FunctionStatement statement)
     {
-        Declare(statement.Name);
         Define(statement.Name);
+        Declare(statement.Name);
 
-        _functions.ResolveFunction(statement, FunctionType.Function);
+        ResolveFunction(statement, FunctionType.Function);
+    }
+
+    private void Resolve(ClassStatement statement)
+    {
+        var enclosing = _currentClass;
+        _currentClass = ClassType.Class;
+
+        Define(statement.Name);
+        Declare(statement.Name);
+
+        BeginScope();
+
+        AddVariable("this");
+
+        foreach (var method in statement.Methods)
+        {
+            ResolveFunction(method, FunctionType.Method);
+        }
+
+        EndScope();
+
+        _currentClass = enclosing;
     }
 }

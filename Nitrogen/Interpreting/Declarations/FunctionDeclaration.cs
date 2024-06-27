@@ -1,10 +1,11 @@
 ﻿using Nitrogen.Exceptions;
+using Nitrogen.Syntax;
 using Nitrogen.Syntax.Expressions;
 using Nitrogen.Syntax.Statements;
 
 namespace Nitrogen.Interpreting.Declarations;
 
-internal class FunctionDeclaration(FunctionStatement statement, InterpreterEnvironment closure) : ICallable
+internal class FunctionDeclaration(FunctionStatement statement, InterpreterEnvironment closure, bool isConstructor = false) : ICallable
 {
     public InterpreterEnvironment Closure { get; } = closure;
 
@@ -19,6 +20,13 @@ internal class FunctionDeclaration(FunctionStatement statement, InterpreterEnvir
         {
             throw new RuntimeException(statement.Name, $"Parameters mismatch, required at least {mandatory.Length} and at most {mandatory.Length + optionals.Length}");
         }
+    }
+
+    public FunctionDeclaration Bind(ClassInstance instance)
+    {
+        var environment = new InterpreterEnvironment(Closure);
+        environment.Define("this", instance);
+        return new FunctionDeclaration(statement, environment);
     }
 
     public object? Call(Interpreter interpreter, object?[] @params)
@@ -38,8 +46,10 @@ internal class FunctionDeclaration(FunctionStatement statement, InterpreterEnvir
             }
         }
 
-        return null;
+        return isConstructor ? Closure.Get("this") : null;
     }
+
+    public override string ToString() => $"function {Name}() {{...}}";
 
     private void DefineArguments(Interpreter interpreter, object?[] @params, InterpreterEnvironment environment)
     {

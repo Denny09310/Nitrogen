@@ -74,6 +74,9 @@ public enum TokenKind
     If,
     Else,
     Function,
+    Class,
+    This,
+    Super,
 
     #endregion Keywords
 

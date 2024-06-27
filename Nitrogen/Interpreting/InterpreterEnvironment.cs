@@ -42,12 +42,16 @@ public class InterpreterEnvironment
         }
     }
 
+    public void Define(string name, object? value) => Define(new Token { Lexeme = name }, value);
+
     public object? Get(Token name)
     {
         if (_variables.TryGetValue(name.Lexeme, out var value)) return value;
         if (Enclosing is not null) return Enclosing.Get(name);
         throw new RuntimeException(name, $"Variable with name '{name.Lexeme}' not defined in this scope.");
     }
+
+    public object? Get(string name) => Get(new Token { Lexeme = name });
 
     public object? GetAt(Token name, int distance)
     {

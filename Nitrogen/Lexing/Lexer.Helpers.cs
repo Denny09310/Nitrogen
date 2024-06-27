@@ -20,6 +20,9 @@ internal partial class Lexer
         ["if"] = TokenKind.If,
         ["else"] = TokenKind.Else,
         ["function"] = TokenKind.Function,
+        ["class"] = TokenKind.Class,
+        ["this"] = TokenKind.This,
+        ["super"] = TokenKind.Super,
     };
 
     private char Advance()

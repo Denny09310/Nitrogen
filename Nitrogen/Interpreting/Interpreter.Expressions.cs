@@ -21,6 +21,9 @@ public partial class Interpreter
         CallExpression expression => Evaluate(expression),
         LiteralExpression expression => expression.Literal,
         ReturnExpression expression => Evaluate(expression),
+        GetterExpression expression => Evaluate(expression),
+        SetterExpression expression => Evaluate(expression),
+        ThisExpression expression => Evaluate(expression),
         BreakExpression => throw new BreakException(),
         ContinueExpression => throw new ContinueException(),
         _ => throw new UnreachableException($"Expression {expr.GetType()} not recognized.")
@@ -136,5 +139,36 @@ public partial class Interpreter
         }
 
         throw new ReturnException(value);
+    }
+
+    private object? Evaluate(GetterExpression expression)
+    {
+        var target = Evaluate(expression.Expression);
+        if (target is ClassInstance instance)
+        {
+            return instance.Get(expression.Name);
+        }
+
+        throw new RuntimeException(expression.Name, "Only instances have properties.");
+    }
+
+    private object? Evaluate(SetterExpression expression)
+    {
+        var target = Evaluate(expression.Object);
+
+        if (target is not ClassInstance instance)
+        {
+            throw new RuntimeException(expression.Name, "Only instances have properties.");
+        }
+
+        var value = Evaluate(expression.Value);
+        instance.Set(expression.Name, value);
+
+        return value;
+    }
+
+    private object? Evaluate(ThisExpression expression)
+    {
+        return LookupVariable(expression, expression.Keyword);
     }
 }
