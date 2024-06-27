@@ -80,6 +80,11 @@ internal partial class Resolver
 
     private void Resolve(CallExpression expression)
     {
+        if (expression.Target is GetterExpression getter && getter.Name.Lexeme is "constructor")
+        {
+            Report(ExceptionLevel.Error, getter.Name, "Cannot call class contructor explicitly.");
+        }
+
         Resolve(expression.Target);
 
         foreach (var parameter in expression.Parameters)
