@@ -200,10 +200,4 @@ internal partial class Resolver(Interpreter interpreter)
         public Token Name { get; set; }
         public bool Used { get; set; }
     }
-
-    private sealed class Loop
-    {
-        public LoopType Type { get; set; }
-        public bool CanExit { get; set; }
-    }
 }

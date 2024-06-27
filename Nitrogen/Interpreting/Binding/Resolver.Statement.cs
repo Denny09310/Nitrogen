@@ -50,9 +50,6 @@ internal partial class Resolver
         ResolveLoop(statement, LoopType.While);
     }
 
-        _currentLoop = enclosing;
-    }
-
     private void Resolve(ForStatement statement)
     {
         ResolveLoop(statement, LoopType.For);
