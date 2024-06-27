@@ -32,6 +32,11 @@ internal class LoopResolver(Resolver resolver)
 
             resolver.Resolve(@while.Condition);
             resolver.Resolve(@while.Body);
+
+            if (@while.Condition is not LiteralExpression expression || expression.Literal is not bool bool1 || !bool1)
+            {
+                _current.Infinite = false;
+            }
         }
         else if (statement is ForStatement @for)
         {
