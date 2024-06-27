@@ -1,36 +1,34 @@
 ﻿using Nitrogen.Exceptions;
 using Nitrogen.Syntax;
 using Nitrogen.Syntax.Abstractions;
-using Nitrogen.Syntax.Expressions;
-using Nitrogen.Syntax.Statements;
 
 namespace Nitrogen.Interpreting.Binding;
 
-internal partial class Resolver(Interpreter interpreter)
+internal partial class Resolver
 {
+    #region Modules
+
+    private readonly FunctionResolver _functions;
+    private readonly Interpreter _interpreter;
+    private readonly LoopResolver _loops;
+
+    #endregion Modules
+
     private readonly List<BindingException> _errors = [];
     private readonly Dictionary<int, Variable> _variables = [];
 
     private int _currentDepth;
-    private FunctionType _currentFunction;
 
-    public List<BindingException> Resolve(List<IStatement> statements)
+    public Resolver(Interpreter interpreter)
     {
-        BeginScope();
-
-        foreach (var statement in statements)
-        {
-            Resolve(statement);
-        }
-
-        EndScope();
-
-        return _errors;
+        _interpreter = interpreter;
+        _functions = new(this);
+        _loops = new(this);
     }
 
-    private void BeginScope() => _currentDepth++;
+    public void BeginScope() => _currentDepth++;
 
-    private void Declare(Token name)
+    public void Declare(Token name)
     {
         if (_currentDepth == 0)
         {
@@ -44,7 +42,7 @@ internal partial class Resolver(Interpreter interpreter)
         }
     }
 
-    private void Define(Token name)
+    public void Define(Token name)
     {
         if (_currentDepth == 0)
         {
@@ -61,7 +59,7 @@ internal partial class Resolver(Interpreter interpreter)
         variable.Declared = true;
     }
 
-    private void EndScope()
+    public void EndScope()
     {
         foreach (var variable in _variables.Values.Where(variable => variable.Depth == _currentDepth))
         {
@@ -74,31 +72,20 @@ internal partial class Resolver(Interpreter interpreter)
         _currentDepth--;
     }
 
-    private void ResolveFunction(FunctionStatement statement, FunctionType type)
-    {
-        (var enclosingFunction, _currentFunction) = (_currentFunction, type);
+    public void Error(ExceptionLevel level, Token token, string message) => _errors.Add(new(level, token, message));
 
+    public List<BindingException> Resolve(List<IStatement> statements)
+    {
         BeginScope();
 
-        foreach (var argument in statement.Arguments)
+        foreach (var statement in statements)
         {
-            if (argument is AssignmentExpression assignment)
-            {
-                Declare(assignment.Name);
-                Define(assignment.Name);
-            }
-            else if (argument is IdentifierExpression identifier)
-            {
-                Declare(identifier.Name);
-                Define(identifier.Name);
-            }
+            Resolve(statement);
         }
-
-        Resolve(statement.Body);
 
         EndScope();
 
-        _currentFunction = enclosingFunction;
+        return _errors;
     }
 
     private void ResolveLocal(IExpression statement, Token name)
@@ -106,11 +93,11 @@ internal partial class Resolver(Interpreter interpreter)
         if (_variables.TryGetValue(name.Lexeme.GetHashCode(), out var variable))
         {
             variable.Used = true;
-            interpreter.Resolve(statement, _currentDepth - variable.Depth);
+            _interpreter.Resolve(statement, _currentDepth - variable.Depth);
         }
         else
         {
-            interpreter.Resolve(statement, _currentDepth - 1);
+            _interpreter.Resolve(statement, _currentDepth - 1);
         }
     }
 

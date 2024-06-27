@@ -3,18 +3,26 @@ using Nitrogen.Syntax.Abstractions;
 
 namespace Nitrogen.Interpreting;
 
-internal partial class Interpreter
+public partial class Interpreter
 {
-    private readonly RuntimeEnvironment _globals;
+    private readonly InterpreterEnvironment _globals;
     private readonly Dictionary<IExpression, int> _locals = [];
+    private readonly InterpreterOptions _options = InterpreterOptions.Default;
 
-    private RuntimeEnvironment _environment;
+    private InterpreterEnvironment _environment;
 
-    public Interpreter()
+    public Interpreter() : this(InterpreterOptions.Default)
+    {
+    }
+
+    public Interpreter(InterpreterOptions options)
     {
         _globals = DefineGlobals();
-        _environment = new RuntimeEnvironment(_globals);
+        _environment = new InterpreterEnvironment(_globals);
+        _options = options ?? throw new ArgumentNullException(nameof(options));
     }
+
+    public IOutputSink Output => _options.OutputSink;
 
     public void Execute(List<IStatement> statements)
     {
@@ -29,9 +37,9 @@ internal partial class Interpreter
         _locals.TryAdd(expression, depth);
     }
 
-    private static RuntimeEnvironment DefineGlobals()
+    private static InterpreterEnvironment DefineGlobals()
     {
-        var environment = new RuntimeEnvironment();
+        var environment = new InterpreterEnvironment();
         return environment;
     }
 

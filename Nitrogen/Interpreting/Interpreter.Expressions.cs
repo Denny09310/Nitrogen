@@ -8,7 +8,7 @@ using System.Diagnostics;
 
 namespace Nitrogen.Interpreting;
 
-internal partial class Interpreter
+public partial class Interpreter
 {
     public object? Evaluate(IExpression expr) => expr switch
     {

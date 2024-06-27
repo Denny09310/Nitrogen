@@ -152,7 +152,7 @@ internal partial class Parser(List<Token> tokens)
         Consume(TokenKind.Semicolon, "Expect ';' after for condition.");
 
         IExpression? increment = null;
-        if (!Check(TokenKind.Semicolon))
+        if (!Check(TokenKind.RightParenthesis))
         {
             increment = ParseExpression();
         }

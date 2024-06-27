@@ -6,7 +6,7 @@ using System.Diagnostics;
 
 namespace Nitrogen.Interpreting;
 
-internal partial class Interpreter
+public partial class Interpreter
 {
     public object? Execute(IStatement stmt) => stmt switch
     {
@@ -21,7 +21,7 @@ internal partial class Interpreter
         _ => throw new UnreachableException($"Statement {stmt.GetType()} not recognized.")
     };
 
-    public void ExecuteScoped(List<IStatement> statements, RuntimeEnvironment environment)
+    public void ExecuteScoped(List<IStatement> statements, InterpreterEnvironment environment)
     {
         (var enclosing, _environment) = (_environment, environment);
 
@@ -46,7 +46,7 @@ internal partial class Interpreter
     private object? Execute(PrintStatement statement)
     {
         var value = new EvaluationResult(Evaluate(statement.Expression));
-        Console.WriteLine(value.ToString());
+        Output.WriteLine(value.ToString());
 
         return null;
     }
@@ -66,7 +66,7 @@ internal partial class Interpreter
 
     private object? Execute(BlockStatement statement)
     {
-        ExecuteScoped(statement.Statements, new RuntimeEnvironment(_environment));
+        ExecuteScoped(statement.Statements, new InterpreterEnvironment(_environment));
         return null;
     }
 

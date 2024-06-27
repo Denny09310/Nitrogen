@@ -1,6 +1,6 @@
 ﻿namespace Nitrogen.Syntax;
 
-internal readonly record struct Token
+public readonly record struct Token
 {
     public TokenKind Kind { get; init; }
     public SourceSpan Span { get; init; }
@@ -8,7 +8,7 @@ internal readonly record struct Token
     public object? Value { get; init; }
 }
 
-internal enum TokenKind
+public enum TokenKind
 {
     #region Operators
 

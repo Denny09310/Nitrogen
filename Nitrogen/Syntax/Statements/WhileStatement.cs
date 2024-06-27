@@ -8,3 +8,10 @@ internal class WhileStatement(Token keyword, IExpression condition, IStatement b
     public IExpression Condition { get; } = condition;
     public Token Keyword { get; } = keyword;
 }
+
+internal enum LoopType
+{
+    None,
+    While,
+    For
+}

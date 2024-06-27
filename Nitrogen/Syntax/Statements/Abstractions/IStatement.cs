@@ -1,3 +1,3 @@
 ﻿namespace Nitrogen.Syntax.Abstractions;
 
-internal interface IStatement;
+public interface IStatement;
