@@ -5,7 +5,7 @@ namespace Nitrogen.Interpreting.Binding;
 
 internal partial class Resolver
 {
-    private void Resolve(IStatement statement)
+    public void Resolve(IStatement statement)
     {
         switch (statement)
         {
@@ -44,16 +44,12 @@ internal partial class Resolver
 
     private void Resolve(WhileStatement statement)
     {
-        Resolve(statement.Condition);
-        Resolve(statement.Body);
+        _loops.ResolveLoop(statement, LoopType.While);
     }
 
     private void Resolve(ForStatement statement)
     {
-        if (statement.Initialization is not null) Resolve(statement.Initialization);
-        Resolve(statement.Condition);
-        Resolve(statement.Body);
-        if (statement.Increment is not null) Resolve(statement.Increment);
+        _loops.ResolveLoop(statement, LoopType.For);
     }
 
     private void Resolve(BlockStatement statement)
@@ -78,6 +74,6 @@ internal partial class Resolver
         Declare(statement.Name);
         Define(statement.Name);
 
-        ResolveFunction(statement, FunctionType.Function);
+        _functions.ResolveFunction(statement, FunctionType.Function);
     }
 }

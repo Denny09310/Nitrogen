@@ -1,13 +1,12 @@
 ﻿using Nitrogen.Exceptions;
 using Nitrogen.Syntax.Abstractions;
 using Nitrogen.Syntax.Expressions;
-using Nitrogen.Syntax.Statements;
 
 namespace Nitrogen.Interpreting.Binding;
 
 internal partial class Resolver
 {
-    private void Resolve(IExpression expression)
+    public void Resolve(IExpression expression)
     {
         switch (expression)
         {
@@ -19,8 +18,8 @@ internal partial class Resolver
             case GroupingExpression grouping: Resolve(grouping); break;
             case CallExpression call: Resolve(call); break;
             case ReturnExpression @return: Resolve(@return); break;
-
-            case LiteralExpression or BreakExpression or ContinueExpression:
+            case BreakExpression @break: Resolve(@break); break;
+            case LiteralExpression or ContinueExpression:
             default: break;
         }
     }
@@ -83,11 +82,11 @@ internal partial class Resolver
 
     private void Resolve(ReturnExpression expression)
     {
-        if (_currentFunction is FunctionType.None)
-        {
-            _errors.Add(new(ExceptionLevel.Error, expression.Keyword, "Can't return from top-level statemet."));
-        }
+        _functions.Resolve(expression);
+    }
 
-        if (expression.Value is not null) Resolve(expression.Value);
+    private void Resolve(BreakExpression expression)
+    {
+        _loops.Resolve(expression);
     }
 }
