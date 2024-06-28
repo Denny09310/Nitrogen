@@ -78,10 +78,6 @@ internal static class Program
         {
             RunFile(path);
         }
-        else
-        {
-            RunInteractive();
-        }
     }
 
     private static void Run(string source)
@@ -100,43 +96,6 @@ internal static class Program
     {
         var source = File.ReadAllText(path);
         Run(source);
-    }
-
-    static void RunInteractive()
-    {
-        const string Prompt = "> ";
-        const string ExitCommand = "exit";
-        const string ClearCommand = "clear";
-        const string ShowAbstractSyntaxTreeCommand = "show-ast";
-
-        IsInteractive = true;
-
-        while (true)
-        {
-            Console.Write(Prompt);
-
-            if (Console.ReadLine() is not string source) continue;
-
-            if (source == ExitCommand)
-            {
-                break;
-            }
-            else if (source == ClearCommand)
-            {
-                Console.Clear();
-                continue;
-            }
-            else if (source == ShowAbstractSyntaxTreeCommand)
-            {
-                ShowAbstractSyntaxTree = !ShowAbstractSyntaxTree;
-                Console.WriteLine($"{(ShowAbstractSyntaxTree ? "Showing" : "Hiding")} Abstract Syntax Tree");
-                continue;
-            }
-
-            Run(source);
-        }
-
-        IsInteractive = false;
     }
 
     private static void RunInterpreter(List<IStatement> statements)
