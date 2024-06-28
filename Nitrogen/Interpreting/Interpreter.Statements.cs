@@ -1,4 +1,5 @@
-﻿using Nitrogen.Interpreting.Declarations;
+﻿using Nitrogen.Exceptions;
+using Nitrogen.Interpreting.Declarations;
 using Nitrogen.Syntax.Abstractions;
 using Nitrogen.Syntax.Statements;
 using System.Diagnostics;
@@ -97,13 +98,20 @@ public partial class Interpreter
 
     private object? Execute(ClassStatement statement)
     {
+        ClassDeclaration? superclass = null;
+        if (statement.Superclass is not null)
+        {
+            superclass = Evaluate(statement.Superclass) as ClassDeclaration
+                ?? throw new RuntimeException(statement.Superclass.Name, "Superclass must be a class.");
+        }
+
         _environment.Define(statement.Name, null);
 
         var methods = statement.Methods.ToDictionary(
             method => method.Name.Lexeme,
             method => new FunctionDeclaration(method, _environment, method.Name.Lexeme is "constructor"));
 
-        var @class = new ClassDeclaration(statement, methods);
+        var @class = new ClassDeclaration(statement, superclass, methods);
 
         _environment.Assign(statement.Name, @class);
 
