@@ -24,6 +24,7 @@ public partial class Interpreter
         GetterExpression expression => Evaluate(expression),
         SetterExpression expression => Evaluate(expression),
         ThisExpression expression => Evaluate(expression),
+        SuperExpression expression => Evaluate(expression),
         BreakExpression => throw new BreakException(),
         ContinueExpression => throw new ContinueException(),
         _ => throw new UnreachableException($"Expression {expr.GetType()} not recognized.")
@@ -169,6 +170,42 @@ public partial class Interpreter
 
     private object? Evaluate(ThisExpression expression)
     {
-        return LookupVariable(expression, expression.Keyword);
+        return LookupVariable(expression, expression.Keyword, global: false);
+    }
+
+    private object? Evaluate(SuperExpression expression)
+    {
+        if (!_locals.TryGetValue(expression, out var distance))
+        {
+            throw new RuntimeException(expression.Keyword, "Super class not found in this scope.");
+        }
+
+        if (_environment.GetAt("super", distance) is not ClassDeclaration superclass)
+        {
+            throw new RuntimeException(expression.Keyword, "The class has no super class");
+        }
+
+        if (_environment.GetAt("this", distance - 1) is not ClassInstance instance)
+        {
+            throw new RuntimeException(expression.Keyword, "Invalid instance getter.");
+        }
+
+        if (expression.Type is SuperType.Accessor)
+        {
+            if (superclass.FindMethod(expression.Member.Lexeme) is not FunctionDeclaration method)
+            {
+                throw new RuntimeException(expression.Keyword, $"Undefined property '{expression.Member.Lexeme}'.");
+            }
+
+            return method.Bind(instance);
+        }
+
+        if (superclass.FindMethod("constructor") is not FunctionDeclaration constructor)
+        {
+            throw new RuntimeException(expression.Keyword, "The class has no super class");
+        }
+
+        var @params = expression.Parameters.Select(Evaluate).ToArray();
+        return constructor.Bind(instance).Call(this, @params);
     }
 }

@@ -74,7 +74,6 @@ internal static class Program
 
     private static void Main(string[] args)
     {
-        args = ["C:\\Users\\dkoja\\Downloads\\language_test_script.mds"];
         if (args is [var path])
         {
             RunFile(path);

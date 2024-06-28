@@ -1,6 +1,8 @@
-﻿using Nitrogen.Interpreting.Declarations;
+﻿using Nitrogen.Exceptions;
+using Nitrogen.Interpreting.Declarations;
 using Nitrogen.Syntax.Abstractions;
 using Nitrogen.Syntax.Statements;
+
 using System.Diagnostics;
 
 namespace Nitrogen.Interpreting;
@@ -97,13 +99,31 @@ public partial class Interpreter
 
     private object? Execute(ClassStatement statement)
     {
+        ClassDeclaration? superclass = null;
+        if (statement.Superclass is not null)
+        {
+            superclass = Evaluate(statement.Superclass) as ClassDeclaration
+                ?? throw new RuntimeException(statement.Superclass.Name, "Superclass must be a class.");
+        }
+
         _environment.Define(statement.Name, null);
+
+        if (superclass is not null)
+        {
+            _environment = new InterpreterEnvironment(_environment);
+            _environment.Define("super", superclass);
+        }
 
         var methods = statement.Methods.ToDictionary(
             method => method.Name.Lexeme,
             method => new FunctionDeclaration(method, _environment, method.Name.Lexeme is "constructor"));
 
-        var @class = new ClassDeclaration(statement, methods);
+        var @class = new ClassDeclaration(statement, superclass, methods);
+
+        if (superclass is not null)
+        {
+            _environment = _environment.Enclosing ?? throw new RuntimeException("Can't leave global scope.");
+        }
 
         _environment.Assign(statement.Name, @class);
 

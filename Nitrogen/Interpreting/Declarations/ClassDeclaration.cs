@@ -4,13 +4,11 @@ using Nitrogen.Syntax.Statements;
 
 namespace Nitrogen.Interpreting.Declarations;
 
-internal class ClassDeclaration(ClassStatement statement, Dictionary<string, FunctionDeclaration> methods) : ICallable
+internal class ClassDeclaration(ClassStatement statement, ClassDeclaration? superclass, Dictionary<string, FunctionDeclaration> methods) : ICallable
 {
     private FunctionDeclaration? _constructor;
 
-    public Dictionary<string, FunctionDeclaration> Methods { get; } = methods;
     public Token Name { get; } = statement.Name;
-
     string ICallable.Name => Name.Lexeme;
 
     public void Arity(object?[] @params)
@@ -30,12 +28,12 @@ internal class ClassDeclaration(ClassStatement statement, Dictionary<string, Fun
 
     public FunctionDeclaration? FindMethod(string name)
     {
-        if (Methods.TryGetValue(name, out var method))
+        if (methods.TryGetValue(name, out var method))
         {
             return method;
         }
 
-        return null;
+        return superclass?.FindMethod(name);
     }
 
     public override string ToString() => $"class {Name.Lexeme} {{...}}";

@@ -25,6 +25,7 @@ internal partial class Lexer
         ["class"] = TokenKind.Class,
         ["this"] = TokenKind.This,
         ["super"] = TokenKind.Super,
+        ["extends"] = TokenKind.Extends,
     };
 
     private char Advance()

@@ -58,6 +58,11 @@ public class InterpreterEnvironment
         return Ancestor(distance).Get(name);
     }
 
+    public object? GetAt(string name, int distance)
+    {
+        return Ancestor(distance).Get(name);
+    }
+
     internal void AssignAt(int distance, Token name, object? value)
     {
         Ancestor(distance).Assign(name, value);

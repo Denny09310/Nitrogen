@@ -45,16 +45,12 @@ internal partial class Parser(List<Token> tokens)
             var equal = Peek(-1);
             var value = ParseOrExpression();
 
-            if (expression is IdentifierExpression identifier)
+            return expression switch
             {
-                return new AssignmentExpression(identifier.Name, value);
-            }
-            else if (expression is GetterExpression getter)
-            {
-                return new SetterExpression(getter.Name, getter.Expression, value);
-            }
-
-            throw new ParseException(equal, "Invalid assingment target.");
+                IdentifierExpression identifier => new AssignmentExpression(identifier.Name, value),
+                GetterExpression getter => new SetterExpression(getter.Name, getter.Expression, value),
+                _ => throw new ParseException(equal, "Invalid assingment target.")
+            };
         }
 
         return expression;
@@ -75,15 +71,44 @@ internal partial class Parser(List<Token> tokens)
     private BlockStatement ParseBlockStatement()
     {
         List<IStatement> statements = [];
-        while (!Match(TokenKind.RightBrace))
+        while (!Check(TokenKind.RightBrace))
         {
             statements.Add(ParseStatement());
         }
 
+        Consume(TokenKind.RightBrace, "Expect '}' after block statement.");
+
         return new BlockStatement(statements);
     }
 
-    private List<IExpression> ParseCallArguments(Token paren)
+    private IExpression ParseCallExpression()
+    {
+        IExpression expression = ParsePrimaryExpression();
+
+        while (true)
+        {
+            if (Match(TokenKind.LeftParenthesis))
+            {
+                var paren = Peek(-1);
+                var parameters = ParseCallParameters(paren);
+
+                expression = new CallExpression(paren, expression, parameters);
+            }
+            else if (Match(TokenKind.Dot))
+            {
+                var name = Consume(TokenKind.Identifier, "Expect property name after '.'.");
+                expression = new GetterExpression(name, expression);
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        return expression;
+    }
+
+    private List<IExpression> ParseCallParameters(Token paren)
     {
         List<IExpression> parameters = [];
         if (!Check(TokenKind.RightParenthesis))
@@ -105,36 +130,16 @@ internal partial class Parser(List<Token> tokens)
         return parameters;
     }
 
-    private IExpression ParseCallExpression()
-    {
-        IExpression expression = ParsePrimaryExpression();
-
-        while (true)
-        {
-            if (Match(TokenKind.LeftParenthesis))
-            {
-                var paren = Peek(-1);
-                var parameters = ParseCallArguments(paren);
-
-                expression = new CallExpression(paren, expression, parameters);
-            }
-            else if (Match(TokenKind.Dot))
-            {
-                var name = Consume(TokenKind.Identifier, "Expect property name after '.'.");
-                expression = new GetterExpression(name, expression);
-            }
-            else
-            {
-                break;
-            }
-        }
-
-        return expression;
-    }
-
     private ClassStatement ParseClassStatement()
     {
         var name = Consume(TokenKind.Identifier, "Expect name after class statement.");
+
+        IdentifierExpression? superclass = null;
+        if (Match(TokenKind.Extends))
+        {
+            var supername = Consume(TokenKind.Identifier, "Expect superclass name after extends keyword.");
+            superclass = new IdentifierExpression(supername);
+        }
 
         Consume(TokenKind.LeftBrace, "Expect '{' after class name.");
 
@@ -146,7 +151,7 @@ internal partial class Parser(List<Token> tokens)
 
         Consume(TokenKind.RightBrace, "Expect '}' after class declaration.");
 
-        return new ClassStatement(name, methods);
+        return new ClassStatement(name, superclass, methods);
     }
 
     private IExpression ParseComparisonExpression()
@@ -224,7 +229,7 @@ internal partial class Parser(List<Token> tokens)
             while (Match(TokenKind.Comma));
         }
 
-        Consume(TokenKind.RightParenthesis, "Expect '(' after function arguments.");
+        Consume(TokenKind.RightParenthesis, "Expect ')' after function arguments.");
         Consume(TokenKind.LeftBrace, "Expect '{' after function declaration.");
 
         var body = ParseBlockStatement();
@@ -279,6 +284,11 @@ internal partial class Parser(List<Token> tokens)
         if (current.Kind is TokenKind.Break) return new BreakExpression();
         if (current.Kind is TokenKind.Continue) return new ContinueExpression();
         if (current.Kind is TokenKind.This) return new ThisExpression(current);
+
+        if (current.Kind is TokenKind.Super)
+        {
+            return ParseSuperExpression(current);
+        }
 
         if (current.Kind is TokenKind.Return)
         {
@@ -335,6 +345,20 @@ internal partial class Parser(List<Token> tokens)
         Consume(TokenKind.Semicolon, "Expect ';' after statement.");
 
         return expression;
+    }
+
+    private SuperExpression ParseSuperExpression(Token current)
+    {
+        if (Match(TokenKind.LeftParenthesis))
+        {
+            var parameters = ParseCallParameters(current);
+            return new SuperExpression(current, parameters);
+        }
+
+        Consume(TokenKind.Dot, "Expect '.' after super accessor.");
+        Token member = Consume(TokenKind.Identifier, "Expect member name after super expression.");
+
+        return new SuperExpression(current, member);
     }
 
     private IExpression ParseUnaryExpression()
