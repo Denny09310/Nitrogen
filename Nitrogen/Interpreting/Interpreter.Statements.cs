@@ -97,12 +97,15 @@ public partial class Interpreter
 
     private object? Execute(ClassStatement statement)
     {
+        _environment.Define(statement.Name, null);
+
         var methods = statement.Methods.ToDictionary(
             method => method.Name.Lexeme,
             method => new FunctionDeclaration(method, _environment, method.Name.Lexeme is "constructor"));
 
         var @class = new ClassDeclaration(statement, methods);
-        _environment.Define(statement.Name, @class);
+
+        _environment.Assign(statement.Name, @class);
 
         return null;
     }

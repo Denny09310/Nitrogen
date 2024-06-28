@@ -54,7 +54,7 @@ internal class ClassInstance(ClassDeclaration declaration)
 
         if (declaration.FindMethod(property.Lexeme) is FunctionDeclaration method)
         {
-            return method;
+            return method.Bind(this);
         }
 
         throw new RuntimeException(property, $"The class '{declaration.Name.Lexeme}' has no property named '{property.Lexeme}'.");

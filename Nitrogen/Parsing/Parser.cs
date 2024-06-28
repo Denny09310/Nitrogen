@@ -39,7 +39,7 @@ internal partial class Parser(List<Token> tokens)
 
     private IExpression ParseAssignmentExpression()
     {
-        var expression = ParseCallExpression();
+        var expression = ParseOrExpression();
         if (Match(TokenKind.Equal))
         {
             var equal = Peek(-1);
@@ -107,7 +107,7 @@ internal partial class Parser(List<Token> tokens)
 
     private IExpression ParseCallExpression()
     {
-        IExpression expression = ParseOrExpression();
+        IExpression expression = ParsePrimaryExpression();
 
         while (true)
         {
@@ -150,7 +150,7 @@ internal partial class Parser(List<Token> tokens)
     }
 
     private IExpression ParseComparisonExpression()
-                        => ParseBinaryExpression(ParseAdditiveExpression, TokenKind.Less, TokenKind.LessEqual, TokenKind.Greater, TokenKind.GreaterEqual);
+        => ParseBinaryExpression(ParseAdditiveExpression, TokenKind.Less, TokenKind.LessEqual, TokenKind.Greater, TokenKind.GreaterEqual);
 
     private IExpression ParseEqualityExpression()
         => ParseBinaryExpression(ParseComparisonExpression, TokenKind.EqualEqual, TokenKind.BangEqual);
@@ -346,7 +346,7 @@ internal partial class Parser(List<Token> tokens)
             expression = new UnaryExpression(@operator, ParseExpression());
         }
 
-        return expression ?? ParsePrimaryExpression();
+        return expression ?? ParseCallExpression();
     }
 
     private VarStatement ParseVariableStatement()

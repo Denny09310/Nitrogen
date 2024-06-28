@@ -74,6 +74,7 @@ internal static class Program
 
     private static void Main(string[] args)
     {
+        args = ["C:\\Users\\dkoja\\Downloads\\language_test_script.mds"];
         if (args is [var path])
         {
             RunFile(path);
@@ -186,17 +187,16 @@ internal static class Program
 
     private static void RunResolver(List<IStatement> statements)
     {
-        var resolver = new Resolver(_interpreter);
-        var errors = resolver.Resolve(statements);
-
-        bool hasErrors = IsInteractive
-            ? errors.Exists(error => error.Level is ExceptionLevel.Error)
-            : errors.Count > 0;
-
-        if (hasErrors)
+        if (!IsInteractive)
         {
-            CaptureErrors(errors);
-            return;
+            var resolver = new Resolver(_interpreter);
+            var errors = resolver.Resolve(statements);
+
+            if (errors.Count > 0)
+            {
+                CaptureErrors(errors);
+                return;
+            }
         }
 
         RunInterpreter(statements);

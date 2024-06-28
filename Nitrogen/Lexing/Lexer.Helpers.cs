@@ -1,5 +1,7 @@
 ﻿using Nitrogen.Syntax;
 
+using System.Globalization;
+
 namespace Nitrogen.Lexing;
 
 internal partial class Lexer
@@ -49,7 +51,7 @@ internal partial class Lexer
 
         object? value = kind switch
         {
-            TokenKind.Number => double.Parse(lexeme),
+            TokenKind.Number => double.Parse(lexeme, CultureInfo.InvariantCulture),
             TokenKind.String => lexeme.Replace("\\\"", "\""),
             _ => null,
         };
