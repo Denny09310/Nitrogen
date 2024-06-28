@@ -1,5 +1,4 @@
-﻿using Nitrogen.Exceptions;
-using Nitrogen.Syntax.Abstractions;
+﻿using Nitrogen.Syntax.Abstractions;
 using Nitrogen.Syntax.Statements;
 
 namespace Nitrogen.Interpreting.Binding;
