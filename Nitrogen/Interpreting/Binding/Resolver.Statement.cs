@@ -1,4 +1,5 @@
-﻿using Nitrogen.Syntax.Abstractions;
+﻿using Nitrogen.Exceptions;
+using Nitrogen.Syntax.Abstractions;
 using Nitrogen.Syntax.Statements;
 
 namespace Nitrogen.Interpreting.Binding;
@@ -85,6 +86,16 @@ internal partial class Resolver
 
         Define(statement.Name);
         Declare(statement.Name);
+
+        if (statement.Superclass is not null)
+        {
+            if (statement.Name.Lexeme == statement.Superclass.Name.Lexeme)
+            {
+                Report(ExceptionLevel.Error, statement.Superclass.Name, "A class can't inherit from itself.");
+            }
+
+            Resolve(statement.Superclass);
+        }
 
         BeginScope();
 
