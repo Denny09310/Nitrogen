@@ -1,5 +1,4 @@
 ﻿using Nitrogen.Exceptions;
-using Nitrogen.Syntax;
 using Nitrogen.Syntax.Expressions;
 using Nitrogen.Syntax.Statements;
 
