@@ -77,6 +77,7 @@ public enum TokenKind
     Class,
     This,
     Super,
+    Extends,
 
     #endregion Keywords
 
