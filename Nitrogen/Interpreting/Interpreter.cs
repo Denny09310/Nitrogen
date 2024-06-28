@@ -44,11 +44,16 @@ public partial class Interpreter
         return environment;
     }
 
-    private object? LookupVariable(IExpression expression, Token name)
+    private object? LookupVariable(IExpression expression, Token name, bool global = true)
     {
         if (_locals.TryGetValue(expression, out var distance))
         {
             return _environment.GetAt(name, distance);
+        }
+
+        if (!global)
+        {
+            throw new RuntimeException(name, $"Global lookup not available for '{name.Lexeme}'");
         }
 
         return _globals.Get(name);

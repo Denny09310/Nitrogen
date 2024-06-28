@@ -8,10 +8,8 @@ internal class ClassDeclaration(ClassStatement statement, ClassDeclaration? supe
 {
     private FunctionDeclaration? _constructor;
 
-    public Dictionary<string, FunctionDeclaration> Methods { get; } = methods;
     public Token Name { get; } = statement.Name;
     string ICallable.Name => Name.Lexeme;
-    public ClassDeclaration? Superclass { get; } = superclass;
 
     public void Arity(object?[] @params)
     {
@@ -30,12 +28,12 @@ internal class ClassDeclaration(ClassStatement statement, ClassDeclaration? supe
 
     public FunctionDeclaration? FindMethod(string name)
     {
-        if (Methods.TryGetValue(name, out var method))
+        if (methods.TryGetValue(name, out var method))
         {
             return method;
         }
 
-        return Superclass?.FindMethod(name);
+        return superclass?.FindMethod(name);
     }
 
     public override string ToString() => $"class {Name.Lexeme} {{...}}";

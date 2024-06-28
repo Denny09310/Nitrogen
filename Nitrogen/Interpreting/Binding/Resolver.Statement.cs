@@ -94,7 +94,11 @@ internal partial class Resolver
                 Report(ExceptionLevel.Error, statement.Superclass.Name, "A class can't inherit from itself.");
             }
 
+            _currentClass = ClassType.Subclass;
             Resolve(statement.Superclass);
+
+            BeginScope();
+            AddVariable("super");
         }
 
         BeginScope();
@@ -107,6 +111,11 @@ internal partial class Resolver
         }
 
         EndScope();
+
+        if (statement.Superclass is not null)
+        {
+            EndScope();
+        }
 
         _currentClass = enclosing;
     }

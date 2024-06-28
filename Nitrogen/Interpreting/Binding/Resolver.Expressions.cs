@@ -2,6 +2,7 @@
 using Nitrogen.Syntax.Abstractions;
 using Nitrogen.Syntax.Expressions;
 using Nitrogen.Syntax.Statements;
+using System.Xml.Linq;
 
 namespace Nitrogen.Interpreting.Binding;
 
@@ -22,6 +23,7 @@ internal partial class Resolver
             case GetterExpression getter: Resolve(getter); break;
             case SetterExpression setter: Resolve(setter); break;
             case ThisExpression setter: Resolve(setter); break;
+            case SuperExpression setter: Resolve(setter); break;
 
             case BreakExpression:
                 if (_currentLoop != null) _currentLoop.Infinite = false;
@@ -41,7 +43,15 @@ internal partial class Resolver
     private void Resolve(IdentifierExpression expression)
     {
         int identifier = expression.Name.Lexeme.GetHashCode();
-        if (!_variables.TryGetValue(identifier, out var variable))
+
+        Variable? variable = null;
+
+        foreach (var scope in _scopes)
+        {
+            if (scope.TryGetValue(identifier, out variable)) break;
+        }
+
+        if (variable is null)
         {
             Report(ExceptionLevel.Error, expression.Name, $"Undefined variable '{expression.Name.Lexeme}'.");
             return;
@@ -128,6 +138,30 @@ internal partial class Resolver
         {
             Report(ExceptionLevel.Error, expression.Keyword, "Can't use 'this' outside of a class.");
             return;
+        }
+
+        ResolveLocal(expression, expression.Keyword);
+    }
+
+    private void Resolve(SuperExpression expression)
+    {
+        if (_currentClass is ClassType.None)
+        {
+            Report(ExceptionLevel.Error, expression.Keyword, "Can't use 'super' outside of a class.");
+            return;
+        }
+        else if (_currentClass is not ClassType.Subclass)
+        {
+            Report(ExceptionLevel.Error, expression.Keyword, "Can't use 'super' in a class with no superclass.");
+            return;
+        }
+
+        if (expression.Type is SuperType.Constructor)
+        {
+            foreach (var parameter in expression.Parameters)
+            {
+                Resolve(parameter);
+            }
         }
 
         ResolveLocal(expression, expression.Keyword);
