@@ -136,6 +136,13 @@ internal partial class Parser(List<Token> tokens)
     {
         var name = Consume(TokenKind.Identifier, "Expect name after class statement.");
 
+        IdentifierExpression? superclass = null;
+        if (Match(TokenKind.Extends))
+        {
+            var supername = Consume(TokenKind.Identifier, "Expect superclass name after extends keyword.");
+            superclass = new IdentifierExpression(supername);
+        }
+
         Consume(TokenKind.LeftBrace, "Expect '{' after class name.");
 
         List<FunctionStatement> methods = [];
@@ -146,7 +153,7 @@ internal partial class Parser(List<Token> tokens)
 
         Consume(TokenKind.RightBrace, "Expect '}' after class declaration.");
 
-        return new ClassStatement(name, methods);
+        return new ClassStatement(name, superclass, methods);
     }
 
     private IExpression ParseComparisonExpression()
