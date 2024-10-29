@@ -193,15 +193,20 @@ internal partial class Lexer(SourceText source)
     private Token? LexString()
     {
         Advance();
-
         while (Peek() != '"' && !IsLastCharacter())
         {
-            if (Peek() == '\\') Consume();
-            Consume();
+            if (Peek() == '\\')
+            {
+                Consume();
+                HandleEscapeSequence();
+            }
+            else
+            {
+                Consume();
+            }
         }
 
         Advance();
-
         return CreateToken(TokenKind.String);
     }
 

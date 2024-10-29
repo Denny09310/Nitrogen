@@ -28,6 +28,16 @@ internal partial class Lexer
         ["extends"] = TokenKind.Extends,
     };
 
+    private static object? GetValue(TokenKind kind, string lexeme)
+    {
+        return kind switch
+        {
+            TokenKind.Number => double.Parse(lexeme, CultureInfo.InvariantCulture),
+            TokenKind.String => lexeme.Replace("\\\"", "\""),
+            _ => null
+        };
+    }
+
     private char Advance()
     {
         var current = Peek();
@@ -47,19 +57,32 @@ internal partial class Lexer
 
     private Token CreateToken(TokenKind kind)
     {
-        var lexeme = _buffer.ToString();
-        _buffer.Clear();
-
-        object? value = kind switch
-        {
-            TokenKind.Number => double.Parse(lexeme, CultureInfo.InvariantCulture),
-            TokenKind.String => lexeme.Replace("\\\"", "\""),
-            _ => null,
-        };
+        var lexeme = ExtractLexeme();
+        var value = GetValue(kind, lexeme);
 
         (var location, _location) = (_location, new SourceLocation(_line, _column));
 
         return new Token { Kind = kind, Lexeme = lexeme, Value = value, Span = location.AsSpan(_location) };
+    }
+
+    private string ExtractLexeme()
+    {
+        var lexeme = _buffer.ToString();
+        _buffer.Clear();
+        return lexeme;
+    }
+
+    private void HandleEscapeSequence()
+    {
+        switch (Peek())
+        {
+            case 'n': _buffer.Append('\n'); break;
+            case 't': _buffer.Append('\t'); break;
+            case '\\': _buffer.Append('\\'); break;
+            case '\"': _buffer.Append('\"'); break;
+        }
+
+        Advance();
     }
 
     private bool IsLastCharacter() => source.CharAt(_index) == '\0';

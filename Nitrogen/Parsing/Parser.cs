@@ -162,8 +162,7 @@ internal partial class Parser(List<Token> tokens)
 
     private IExpression ParseExpression()
     {
-        var expression = ParseAssignmentExpression();
-        return expression;
+        return ParseAssignmentExpression();
     }
 
     private ForStatement ParseForStatement()
@@ -363,14 +362,13 @@ internal partial class Parser(List<Token> tokens)
 
     private IExpression ParseUnaryExpression()
     {
-        IExpression? expression = null;
         if (Match(TokenKind.Minus, TokenKind.Bang))
         {
             var @operator = Peek(-1);
-            expression = new UnaryExpression(@operator, ParseExpression());
+            return new UnaryExpression(@operator, ParseExpression());
         }
 
-        return expression ?? ParseCallExpression();
+        return ParseCallExpression();
     }
 
     private VarStatement ParseVariableStatement()

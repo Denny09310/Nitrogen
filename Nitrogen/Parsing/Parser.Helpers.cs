@@ -44,11 +44,10 @@ internal partial class Parser
         Token current = Peek();
         while (!IsLastToken())
         {
-            if (current is { Kind: TokenKind.Semicolon or TokenKind.RightBrace })
+            if (current.Kind is TokenKind.Semicolon or TokenKind.RightBrace or TokenKind.Class or TokenKind.Function or TokenKind.If or TokenKind.While or TokenKind.For)
             {
                 break;
             }
-
             current = Consume();
         }
     }

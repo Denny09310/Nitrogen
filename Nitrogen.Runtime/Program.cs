@@ -11,10 +11,10 @@ namespace Nitrogen.Runtime;
 internal static class Program
 {
     private static readonly Interpreter _interpreter = new();
+    private static readonly Resolver _resolver = new(_interpreter);
     private static readonly AbstractSyntaxTree _sintaxTree = new();
 
     public static bool HasRuntimeErrors { get; set; }
-    public static bool IsInteractive { get; set; }
     public static bool ShowAbstractSyntaxTree { get; set; }
 
     private static void CaptureErrors(List<SyntaxException> errors)
@@ -35,7 +35,7 @@ internal static class Program
         foreach (var error in errors)
         {
             var location = error.Token.Span.Start;
-            Console.WriteLine($"{error.Message} Line {location.Line} Col {location.Column}");
+            Console.WriteLine($"{error.Message}");
         }
 
         Console.WriteLine();
@@ -78,6 +78,10 @@ internal static class Program
         {
             RunFile(path);
         }
+        else
+        {
+            RunInteractive();
+        }
     }
 
     private static void Run(string source)
@@ -96,6 +100,39 @@ internal static class Program
     {
         var source = File.ReadAllText(path);
         Run(source);
+    }
+
+    private static void RunInteractive()
+    {
+        const string Prompt = "> ";
+        const string ExitCommand = "exit";
+        const string ClearCommand = "clear";
+        const string ShowAbstractSyntaxTreeCommand = "show-ast";
+
+        while (true)
+        {
+            Console.Write(Prompt);
+
+            if (Console.ReadLine() is not string source) continue;
+
+            if (source == ExitCommand)
+            {
+                break;
+            }
+            else if (source == ClearCommand)
+            {
+                Console.Clear();
+                continue;
+            }
+            else if (source == ShowAbstractSyntaxTreeCommand)
+            {
+                ShowAbstractSyntaxTree = !ShowAbstractSyntaxTree;
+                Console.WriteLine($"{(ShowAbstractSyntaxTree ? "Showing" : "Hiding")} Abstract Syntax Tree");
+                continue;
+            }
+
+            Run(source);
+        }
     }
 
     private static void RunInterpreter(List<IStatement> statements)
@@ -145,16 +182,12 @@ internal static class Program
 
     private static void RunResolver(List<IStatement> statements)
     {
-        if (!IsInteractive)
-        {
-            var resolver = new Resolver(_interpreter);
-            var errors = resolver.Resolve(statements);
+        var errors = _resolver.Resolve(statements);
 
-            if (errors.Count > 0)
-            {
-                CaptureErrors(errors);
-                return;
-            }
+        if (errors.Count > 0)
+        {
+            CaptureErrors(errors);
+            return;
         }
 
         RunInterpreter(statements);

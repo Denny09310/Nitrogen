@@ -10,13 +10,13 @@ namespace Nitrogen.Interpreting.Binding;
 internal partial class Resolver(Interpreter interpreter)
 {
     private readonly List<BindingException> _errors = [];
-    private readonly Stack<Dictionary<int, Variable>> _scopes = [];
+    private readonly Stack<(Dictionary<int, Variable> variables, HashSet<int> variableHashes)> _scopes = [];
 
     private ClassType _currentClass;
     private FunctionType _currentFunction;
     private Loop? _currentLoop;
 
-    public void BeginScope() => _scopes.Push([]);
+    public void BeginScope() => _scopes.Push((new Dictionary<int, Variable>(), new HashSet<int>()));
 
     public List<BindingException> Resolve(List<IStatement> statements)
     {
@@ -32,19 +32,26 @@ internal partial class Resolver(Interpreter interpreter)
         return _errors;
     }
 
+    private static bool HasReturn(IStatement statement)
+    {
+        if (statement is ReturnExpression) return true;
+
+        if (statement is IfStatement ifStmt)
+        {
+            return HasReturn(ifStmt.Then) && ifStmt.Else != null && HasReturn(ifStmt.Else);
+        }
+        return false;
+    }
+
     private void AddVariable(string name, Variable? variable = null)
     {
-        variable ??= new()
-        {
-            Defined = true,
-            Declared = true,
-            Used = true,
-        };
+        variable ??= new Variable { Declared = true, Defined = true, Used = true, Name = new Token { Lexeme = name } };
 
-        variable.Name = new Token { Lexeme = name };
+        var (variables, variableHashes) = _scopes.Peek();
+        int hash = name.GetHashCode();
 
-        var scope = _scopes.Peek();
-        scope.Add(name.GetHashCode(), variable);
+        variables[hash] = variable;
+        variableHashes.Add(hash);
     }
 
     private void Declare(Token name)
@@ -55,14 +62,20 @@ internal partial class Resolver(Interpreter interpreter)
             return;
         }
 
-        var scope = _scopes.Peek();
-        if (!scope.TryGetValue(name.Lexeme.GetHashCode(), out var variable))
+        var (variables, variableHashes) = _scopes.Peek();
+        int hash = name.Lexeme.GetHashCode();
+
+        // Check if the variable already exists in the current scope
+        if (!variableHashes.Contains(hash))
         {
             Report(ExceptionLevel.Error, name, $"Variable '{name.Lexeme}' not defined.");
             return;
         }
 
-        variable.Declared = true;
+        if (variables.TryGetValue(hash, out var variable))
+        {
+            variable.Declared = true;
+        }
     }
 
     private void Define(Token name)
@@ -73,21 +86,27 @@ internal partial class Resolver(Interpreter interpreter)
             return;
         }
 
-        var scope = _scopes.Peek();
-        if (!scope.TryAdd(name.Lexeme.GetHashCode(), new Variable { Name = name, Defined = true }))
+        var (variables, variableHashes) = _scopes.Peek();
+        int hash = name.Lexeme.GetHashCode();
+
+        // Attempt to add the variable to the current scope
+        if (!variableHashes.Add(hash))
         {
             Report(ExceptionLevel.Error, name, $"Variable with name '{name.Lexeme}' already declared in this scope.");
+            return;
         }
+
+        variables[hash] = new Variable { Name = name, Defined = true };
     }
 
     private void EndScope()
     {
-        var scope = _scopes.Pop();
-        foreach (var variable in scope.Values)
+        var (variables, _) = _scopes.Pop();
+        foreach (var variable in variables.Values)
         {
             if (!variable.Used)
             {
-                Report(ExceptionLevel.Warning, variable.Name, $"Unusued variable '{variable.Name.Lexeme}'.");
+                Report(ExceptionLevel.Warning, variable.Name, $"Unused variable '{variable.Name.Lexeme}'.");
             }
         }
     }
@@ -121,24 +140,29 @@ internal partial class Resolver(Interpreter interpreter)
         ResolveArguments(statement.Arguments);
         Resolve(statement.Body);
 
+        if (_currentFunction != FunctionType.Constructor && !HasReturn(statement.Body))
+        {
+            Report(ExceptionLevel.Error, statement.Name, "All paths must return a value in non-void function.");
+        }
+
         EndScope();
 
         _currentFunction = enclosing;
     }
 
-    private void ResolveLocal(IExpression statement, Token name)
+    private void ResolveLocal(IExpression expression, Token name)
     {
-        foreach (var (index, scope) in _scopes.Select((s, i) => (i, s)))
+        int hash = name.Lexeme.GetHashCode();
+
+        foreach (var (variables, variableHashes) in _scopes)
         {
-            if (scope.TryGetValue(name.Lexeme.GetHashCode(), out var variable))
+            if (variableHashes.Contains(hash) && variables.TryGetValue(hash, out var variable))
             {
                 variable.Used = true;
-                interpreter.Resolve(statement, index);
+                interpreter.Resolve(expression, _scopes.Count - 1);
                 return;
             }
         }
-
-        interpreter.Resolve(statement, _scopes.Count - 1);
     }
 
     private void ResolveLoop(IStatement statement, LoopType type)
@@ -201,3 +225,4 @@ internal partial class Resolver(Interpreter interpreter)
         public bool Used { get; set; }
     }
 }
+
