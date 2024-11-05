@@ -32,17 +32,6 @@ internal partial class Resolver(Interpreter interpreter)
         return _errors;
     }
 
-    private static bool HasReturn(IStatement statement)
-    {
-        if (statement is ReturnExpression) return true;
-
-        if (statement is IfStatement ifStmt)
-        {
-            return HasReturn(ifStmt.Then) && ifStmt.Else != null && HasReturn(ifStmt.Else);
-        }
-        return false;
-    }
-
     private void AddVariable(string name, Variable? variable = null)
     {
         variable ??= new Variable { Declared = true, Defined = true, Used = true, Name = new Token { Lexeme = name } };
@@ -139,11 +128,6 @@ internal partial class Resolver(Interpreter interpreter)
 
         ResolveArguments(statement.Arguments);
         Resolve(statement.Body);
-
-        if (_currentFunction != FunctionType.Constructor && !HasReturn(statement.Body))
-        {
-            Report(ExceptionLevel.Error, statement.Name, "All paths must return a value in non-void function.");
-        }
 
         EndScope();
 
