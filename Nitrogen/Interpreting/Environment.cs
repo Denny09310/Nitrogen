@@ -3,20 +3,20 @@ using Nitrogen.Syntax;
 
 namespace Nitrogen.Interpreting;
 
-public class InterpreterEnvironment
+public class Environment
 {
     private readonly Dictionary<string, object?> _variables = [];
 
-    public InterpreterEnvironment()
+    public Environment()
     {
     }
 
-    public InterpreterEnvironment(InterpreterEnvironment enclosing)
+    public Environment(Environment enclosing)
     {
         Enclosing = enclosing;
     }
 
-    public InterpreterEnvironment? Enclosing { get; private set; }
+    public Environment? Enclosing { get; private set; }
 
     public void Assign(Token name, object? value)
     {
@@ -68,7 +68,7 @@ public class InterpreterEnvironment
         Ancestor(distance).Assign(name, value);
     }
 
-    private InterpreterEnvironment Ancestor(int distance)
+    private Environment Ancestor(int distance)
     {
         var environment = this;
         for (int i = 0; i < distance; i++)

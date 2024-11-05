@@ -23,7 +23,7 @@ public partial class Interpreter
         _ => throw new UnreachableException($"Statement {stmt.GetType()} not recognized.")
     };
 
-    public void ExecuteScoped(List<IStatement> statements, InterpreterEnvironment environment)
+    public void ExecuteScoped(List<IStatement> statements, Environment environment)
     {
         (var enclosing, _environment) = (_environment, environment);
 
@@ -68,7 +68,7 @@ public partial class Interpreter
 
     private object? Execute(BlockStatement statement)
     {
-        ExecuteScoped(statement.Statements, new InterpreterEnvironment(_environment));
+        ExecuteScoped(statement.Statements, new Environment(_environment));
         return null;
     }
 
@@ -110,7 +110,7 @@ public partial class Interpreter
 
         if (superclass is not null)
         {
-            _environment = new InterpreterEnvironment(_environment);
+            _environment = new Environment(_environment);
             _environment.Define("super", superclass);
         }
 

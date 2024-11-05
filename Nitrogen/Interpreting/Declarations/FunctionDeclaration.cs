@@ -4,9 +4,9 @@ using Nitrogen.Syntax.Statements;
 
 namespace Nitrogen.Interpreting.Declarations;
 
-internal class FunctionDeclaration(FunctionStatement statement, InterpreterEnvironment closure, bool isConstructor = false) : ICallable
+internal class FunctionDeclaration(FunctionStatement statement, Environment closure, bool isConstructor = false) : ICallable
 {
-    public InterpreterEnvironment Closure { get; } = closure;
+    public Environment Closure { get; } = closure;
 
     public string Name { get; } = statement.Name.Lexeme;
 
@@ -23,19 +23,19 @@ internal class FunctionDeclaration(FunctionStatement statement, InterpreterEnvir
 
     public FunctionDeclaration Bind(ClassInstance instance)
     {
-        var environment = new InterpreterEnvironment(Closure);
+        var environment = new Environment(Closure);
         environment.Define("this", instance);
         return new FunctionDeclaration(statement, environment);
     }
 
     public object? Call(Interpreter interpreter, object?[] @params)
     {
-        var environment = new InterpreterEnvironment(Closure);
+        var environment = new Environment(Closure);
         DefineArguments(interpreter, @params, environment);
 
         try
         {
-            interpreter.ExecuteScoped(statement.Body is BlockStatement block ? block.Statements : [statement.Body], new InterpreterEnvironment(environment));
+            interpreter.ExecuteScoped(statement.Body is BlockStatement block ? block.Statements : [statement.Body], new Environment(environment));
         }
         catch (ReturnException ex)
         {
@@ -50,7 +50,7 @@ internal class FunctionDeclaration(FunctionStatement statement, InterpreterEnvir
 
     public override string ToString() => $"function {Name}() {{...}}";
 
-    private void DefineArguments(Interpreter interpreter, object?[] @params, InterpreterEnvironment environment)
+    private void DefineArguments(Interpreter interpreter, object?[] @params, Environment environment)
     {
         foreach (var (index, argument) in statement.Arguments.Select((a, i) => (i, a)))
         {

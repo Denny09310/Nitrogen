@@ -6,11 +6,11 @@ namespace Nitrogen.Interpreting;
 
 public partial class Interpreter
 {
-    private readonly InterpreterEnvironment _globals;
+    private readonly Environment _globals;
     private readonly Dictionary<IExpression, int> _locals = [];
     private readonly InterpreterOptions _options = InterpreterOptions.Default;
 
-    private InterpreterEnvironment _environment;
+    private Environment _environment;
 
     public Interpreter() : this(InterpreterOptions.Default)
     {
@@ -19,7 +19,7 @@ public partial class Interpreter
     public Interpreter(InterpreterOptions options)
     {
         _globals = DefineGlobals();
-        _environment = new InterpreterEnvironment(_globals);
+        _environment = new Environment(_globals);
         _options = options ?? throw new ArgumentNullException(nameof(options));
     }
 
@@ -38,9 +38,9 @@ public partial class Interpreter
         _locals.TryAdd(expression, depth);
     }
 
-    private static InterpreterEnvironment DefineGlobals()
+    private static Environment DefineGlobals()
     {
-        var environment = new InterpreterEnvironment();
+        var environment = new Environment();
         return environment;
     }
 
