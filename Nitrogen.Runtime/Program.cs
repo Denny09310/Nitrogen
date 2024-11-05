@@ -1,4 +1,5 @@
-﻿using Nitrogen.Exceptions;
+﻿using System.Text;
+using Nitrogen.Exceptions;
 using Nitrogen.Interpreting;
 using Nitrogen.Interpreting.Binding;
 using Nitrogen.Lexing;
@@ -8,11 +9,10 @@ using Nitrogen.Syntax.Abstractions;
 
 namespace Nitrogen.Runtime;
 
-internal static class Program
+public static class Program
 {
     private static readonly Interpreter _interpreter = new();
     private static readonly Resolver _resolver = new(_interpreter);
-    private static readonly AbstractSyntaxTree _sintaxTree = new();
 
     public static bool HasRuntimeErrors { get; set; }
     public static bool ShowAbstractSyntaxTree { get; set; }
@@ -107,41 +107,52 @@ internal static class Program
         const string Prompt = "> ";
         const string ExitCommand = "exit";
         const string ClearCommand = "clear";
-        const string ShowAbstractSyntaxTreeCommand = "show-ast";
+
+        StringBuilder sb = new();
+        int count = 0; // Counter for consecutive Enter presses
 
         while (true)
         {
             Console.Write(Prompt);
+            if (Console.ReadLine() is not string input) continue;
 
-            if (Console.ReadLine() is not string source) continue;
-
-            if (source == ExitCommand)
+            if (input == ExitCommand)
             {
                 break;
             }
-            else if (source == ClearCommand)
+            else if (input == ClearCommand)
             {
                 Console.Clear();
                 continue;
             }
-            else if (source == ShowAbstractSyntaxTreeCommand)
+            else if (string.IsNullOrWhiteSpace(input))
             {
-                ShowAbstractSyntaxTree = !ShowAbstractSyntaxTree;
-                Console.WriteLine($"{(ShowAbstractSyntaxTree ? "Showing" : "Hiding")} Abstract Syntax Tree");
-                continue;
+                // Increment the Enter key press count if input is empty (Enter pressed)
+                count++;
+            }
+            else
+            {
+                // Reset the Enter key press count if any other input is received
+                count = 0;
+
+                // Append the command to the StringBuilder
+                sb.AppendLine(input);
             }
 
-            Run(source);
+            // Execute if Enter is pressed twice
+            if (count == 1)
+            {
+                Run(sb.ToString());
+
+                // Reset buffer and counter
+                sb.Clear();
+                count = 0;
+            }
         }
     }
 
     private static void RunInterpreter(List<IStatement> statements)
     {
-        if (ShowAbstractSyntaxTree)
-        {
-            Console.WriteLine(_sintaxTree.Print(statements));
-        }
-
         try
         {
             _interpreter.Execute(statements);
