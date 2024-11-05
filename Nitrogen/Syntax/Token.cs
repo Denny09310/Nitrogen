@@ -78,6 +78,8 @@ public enum TokenKind
     This,
     Super,
     Extends,
+    Import,
+    From,
 
     #endregion Keywords
 
