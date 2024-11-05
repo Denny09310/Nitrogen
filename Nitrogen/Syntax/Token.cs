@@ -63,7 +63,6 @@ public enum TokenKind
     True,
     False,
     While,
-    Print,
     And,
     Or,
     For,

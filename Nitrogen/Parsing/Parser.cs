@@ -344,13 +344,6 @@ public partial class Parser(List<Token> tokens)
         throw new ParseException(current, $"Token '{current.Lexeme}' not recognized.");
     }
 
-    private PrintStatement ParsePrintStatement()
-    {
-        var expression = ParseExpression();
-        Consume(TokenKind.Semicolon, "Expect ';' after statement.");
-        return new PrintStatement(expression);
-    }
-
     private IStatement ParseStatement()
     {
         if (Match(TokenKind.Function)) return ParseFunctionStatement();
@@ -358,7 +351,6 @@ public partial class Parser(List<Token> tokens)
         if (Match(TokenKind.Class)) return ParseClassStatement();
         if (Match(TokenKind.Import)) return ParseImportStatement();
 
-        if (Match(TokenKind.Print)) return ParsePrintStatement();
         if (Match(TokenKind.While)) return ParseWhileStatement();
         if (Match(TokenKind.For)) return ParseForStatement();
         if (Match(TokenKind.If)) return ParseIfStatement();

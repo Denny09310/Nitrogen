@@ -10,7 +10,6 @@ public partial class Lexer
     {
         ["true"] = TokenKind.True,
         ["false"] = TokenKind.False,
-        ["print"] = TokenKind.Print,
         ["and"] = TokenKind.And,
         ["or"] = TokenKind.Or,
         ["while"] = TokenKind.While,

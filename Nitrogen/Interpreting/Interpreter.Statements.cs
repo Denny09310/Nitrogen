@@ -13,7 +13,6 @@ public partial class Interpreter
     public object? Execute(IStatement stmt) => stmt switch
     {
         ExpressionStatement statement => Execute(statement),
-        PrintStatement statement => Execute(statement),
         WhileStatement statement => Execute(statement),
         ForStatement statement => Execute(statement),
         BlockStatement statement => Execute(statement),
@@ -25,7 +24,7 @@ public partial class Interpreter
         _ => throw new UnreachableException($"Statement {stmt.GetType()} not recognized.")
     };
 
-    public void ExecuteScoped(List<IStatement> statements, Environment environment)
+    public void Execute(List<IStatement> statements, Environment environment)
     {
         (var enclosing, _environment) = (_environment, environment);
 
@@ -59,19 +58,19 @@ public partial class Interpreter
         foreach (var import in statement.Imports)
         {
             // Assuming import is an `IdentifierExpression`
-            string importName = ((IdentifierExpression)import).Name.Lexeme;
+            var token = ((IdentifierExpression)import).Name;
 
             // Step 4: Find and add the symbol to the current scope
             try
             {
-                var symbol =  module.Environment.Get(importName);
-                
+                var symbol = module.Environment.Get(token);
+
                 // Add to the current execution context, assume `currentScope` exists
-                Environment.Define(importName, symbol);
+                Environment.Define(token, symbol);
             }
             catch (Exception ex)
             {
-                throw new RuntimeException($"Symbol '{importName}' not found in module '{source}'.", ex);
+                throw new RuntimeException($"Symbol '{token.Lexeme}' not found in module '{source}'.", ex);
             }
         }
 
@@ -106,7 +105,7 @@ public partial class Interpreter
 
     private object? Execute(BlockStatement statement)
     {
-        ExecuteScoped(statement.Statements, new Environment(_environment));
+        Execute(statement.Statements, new Environment(_environment));
         return null;
     }
 
