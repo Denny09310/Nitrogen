@@ -1,5 +1,5 @@
 ﻿using Nitrogen.Exceptions;
-using Nitrogen.Interpreting.Declarations;
+using Nitrogen.Interpreting.Declarations.Classes;
 using Nitrogen.Syntax;
 using Nitrogen.Syntax.Abstractions;
 
@@ -46,7 +46,9 @@ public partial class Interpreter
     private static Environment DefineGlobals()
     {
         var environment = new Environment();
-        environment.Define("print", new PrintFunctionDeclaration());
+
+        environment.Define("Console", new ConsoleInstance());
+
         return environment;
     }
 

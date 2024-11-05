@@ -12,7 +12,6 @@ public partial class Resolver
 	{
 		switch (statement)
 		{
-			case PrintStatement print: Resolve(print); break;
 			case VarStatement variable: Resolve(variable); break;
 			case ExpressionStatement expression: Resolve(expression); break;
 			case WhileStatement @while: Resolve(@while); break;
@@ -25,11 +24,6 @@ public partial class Resolver
 
 			default: break;
 		}
-	}
-
-	private void Resolve(PrintStatement statement)
-	{
-		Resolve(statement.Expression);
 	}
 
 	private void Resolve(VarStatement statement)

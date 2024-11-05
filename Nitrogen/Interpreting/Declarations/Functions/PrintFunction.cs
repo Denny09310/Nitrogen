@@ -1,8 +1,8 @@
 ﻿using Nitrogen.Exceptions;
 
-namespace Nitrogen.Interpreting.Declarations;
+namespace Nitrogen.Interpreting.Declarations.Functions;
 
-public class PrintFunctionDeclaration : ICallable
+public class PrintFunction : ICallable
 {
     public string Name { get; } = "print";
 

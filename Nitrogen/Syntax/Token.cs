@@ -6,6 +6,11 @@ public readonly record struct Token
     public SourceSpan Span { get; init; }
     public string Lexeme { get; init; }
     public object? Value { get; init; }
+
+    public static Token FromName(string name) => new()
+    {
+        Lexeme = name
+    };
 }
 
 public enum TokenKind
