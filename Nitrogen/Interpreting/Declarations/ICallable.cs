@@ -4,7 +4,7 @@ public interface ICallable
 {
     string Name { get; }
 
-    void Arity(object?[] @params);
+    void EnsureArity(object?[] @params);
 
     object? Call(Interpreter interpreter, object?[] @params);
 }

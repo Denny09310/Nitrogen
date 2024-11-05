@@ -11,12 +11,12 @@ public class ClassDeclaration(ClassStatement statement, ClassDeclaration? superc
     public Token Name { get; } = statement.Name;
     string ICallable.Name => Name.Lexeme;
 
-    public void Arity(object?[] @params)
+    public void EnsureArity(object?[] @params)
     {
         _constructor = FindMethod("constructor");
         if (_constructor == null) return;
 
-        _constructor.Arity(@params);
+        _constructor.EnsureArity(@params);
     }
 
     public object? Call(Interpreter interpreter, object?[] @params)

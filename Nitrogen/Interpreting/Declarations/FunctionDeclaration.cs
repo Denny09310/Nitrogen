@@ -10,7 +10,7 @@ public class FunctionDeclaration(FunctionStatement statement, Environment closur
 
     public string Name { get; } = statement.Name.Lexeme;
 
-    public void Arity(object?[] @params)
+    public void EnsureArity(object?[] @params)
     {
         var mandatory = statement.Arguments.Where(argument => argument is IdentifierExpression).ToArray();
         var optionals = statement.Arguments.Where(argument => argument is AssignmentExpression).ToArray();
