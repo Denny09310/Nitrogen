@@ -5,7 +5,7 @@ using Nitrogen.Syntax.Statements;
 
 namespace Nitrogen.Interpreting.Binding;
 
-internal partial class Resolver
+public partial class Resolver
 {
     public void Resolve(IExpression expression)
     {

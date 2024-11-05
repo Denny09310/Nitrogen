@@ -3,7 +3,7 @@
 
 #pragma warning disable S3871 // Exception types should be "public"
 
-internal class ReturnException(object? value) : Exception
+public class ReturnException(object? value) : Exception
 {
     public object? Value { get; } = value;
 }

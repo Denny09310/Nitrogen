@@ -11,8 +11,3 @@ public readonly struct SourceLocation(int line, int column)
         return new SourceSpan(this, other);
     }
 }
-
-public record struct SourceSpan(SourceLocation Start, SourceLocation End)
-{
-    public readonly int Length => End.Column - Start.Column;
-}

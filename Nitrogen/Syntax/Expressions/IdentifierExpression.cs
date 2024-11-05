@@ -2,7 +2,7 @@
 
 namespace Nitrogen.Syntax.Expressions;
 
-internal class IdentifierExpression(Token name) : IExpression
+public class IdentifierExpression(Token name) : IExpression
 {
     public Token Name { get; } = name;
 }

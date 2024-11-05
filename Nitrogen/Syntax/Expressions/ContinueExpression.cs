@@ -2,4 +2,4 @@
 
 namespace Nitrogen.Syntax.Expressions;
 
-internal class ContinueExpression : IExpression;
+public class ContinueExpression : IExpression;

@@ -2,14 +2,14 @@
 
 namespace Nitrogen.Syntax.Statements;
 
-internal class WhileStatement(Token keyword, IExpression condition, IStatement body) : IStatement
+public class WhileStatement(Token keyword, IExpression condition, IStatement body) : IStatement
 {
     public IStatement Body { get; } = body;
     public IExpression Condition { get; } = condition;
     public Token Keyword { get; } = keyword;
 }
 
-internal enum LoopType
+public enum LoopType
 {
     None,
     While,

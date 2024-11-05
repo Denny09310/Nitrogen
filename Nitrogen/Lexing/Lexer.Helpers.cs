@@ -4,7 +4,7 @@ using System.Globalization;
 
 namespace Nitrogen.Lexing;
 
-internal partial class Lexer
+public partial class Lexer
 {
     private static readonly Dictionary<string, TokenKind> _keywords = new()
     {

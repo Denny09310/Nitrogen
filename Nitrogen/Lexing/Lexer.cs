@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Nitrogen.Lexing;
 
-internal partial class Lexer(SourceText source)
+public partial class Lexer(SourceText source)
 {
     private readonly StringBuilder _buffer = new();
 

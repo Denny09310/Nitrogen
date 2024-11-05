@@ -63,7 +63,7 @@ public class Environment
         return Ancestor(distance).Get(name);
     }
 
-    internal void AssignAt(int distance, Token name, object? value)
+    public void AssignAt(int distance, Token name, object? value)
     {
         Ancestor(distance).Assign(name, value);
     }

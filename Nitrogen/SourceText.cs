@@ -1,6 +1,6 @@
 ﻿namespace Nitrogen;
 
-internal class SourceText(string source)
+public class SourceText(string source)
 {
     private readonly Lazy<string[]> _lines = new(() => source.Split('\n'));
 

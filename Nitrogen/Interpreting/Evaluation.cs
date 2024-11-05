@@ -3,7 +3,7 @@ using System.Globalization;
 
 namespace Nitrogen.Interpreting;
 
-internal readonly struct EvaluationResult(object? value)
+public readonly struct EvaluationResult(object? value)
 {
     public object? Value { get; } = value;
 

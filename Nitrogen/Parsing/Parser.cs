@@ -6,7 +6,7 @@ using Nitrogen.Syntax.Statements;
 
 namespace Nitrogen.Parsing;
 
-internal partial class Parser(List<Token> tokens)
+public partial class Parser(List<Token> tokens)
 {
     private readonly List<ParseException> _errors = [];
     private readonly List<IStatement> _statements = [];

@@ -2,7 +2,7 @@
 
 namespace Nitrogen.Syntax.Statements;
 
-internal class PrintStatement(IExpression expression) : IStatement
+public class PrintStatement(IExpression expression) : IStatement
 {
     public IExpression Expression { get; } = expression;
 }

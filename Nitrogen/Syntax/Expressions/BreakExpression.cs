@@ -2,4 +2,4 @@
 
 namespace Nitrogen.Syntax.Expressions;
 
-internal class BreakExpression : IExpression;
+public class BreakExpression : IExpression;

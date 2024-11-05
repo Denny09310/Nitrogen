@@ -2,14 +2,14 @@
 
 namespace Nitrogen.Syntax.Statements;
 
-internal class FunctionStatement(Token name, List<IExpression> arguments, IStatement body) : IStatement
+public class FunctionStatement(Token name, List<IExpression> arguments, IStatement body) : IStatement
 {
     public List<IExpression> Arguments { get; } = arguments;
     public IStatement Body { get; } = body;
     public Token Name { get; } = name;
 }
 
-internal enum FunctionType
+public enum FunctionType
 {
     None,
     Function,

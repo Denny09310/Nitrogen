@@ -7,7 +7,7 @@ using System.Diagnostics;
 
 namespace Nitrogen.Interpreting.Binding;
 
-internal partial class Resolver(Interpreter interpreter)
+public partial class Resolver(Interpreter interpreter)
 {
     private readonly List<BindingException> _errors = [];
     private readonly Stack<(Dictionary<int, Variable> variables, HashSet<int> variableHashes)> _scopes = [];

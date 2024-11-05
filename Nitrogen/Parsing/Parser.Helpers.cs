@@ -3,7 +3,7 @@ using Nitrogen.Syntax;
 
 namespace Nitrogen.Parsing;
 
-internal partial class Parser
+public partial class Parser
 {
     private bool Check(TokenKind kind) => Peek().Kind == kind;
 

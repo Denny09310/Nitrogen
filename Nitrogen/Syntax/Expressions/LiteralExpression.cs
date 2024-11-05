@@ -2,7 +2,7 @@
 
 namespace Nitrogen.Syntax.Expressions;
 
-internal class LiteralExpression(object? literal) : IExpression
+public class LiteralExpression(object? literal) : IExpression
 {
     public object? Literal { get; } = literal;
 }

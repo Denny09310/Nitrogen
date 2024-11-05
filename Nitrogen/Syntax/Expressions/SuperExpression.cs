@@ -2,7 +2,7 @@
 
 namespace Nitrogen.Syntax.Expressions;
 
-internal class SuperExpression : IExpression
+public class SuperExpression : IExpression
 {
     public SuperExpression(Token keyword, List<IExpression> parameters)
     {
@@ -34,7 +34,7 @@ internal class SuperExpression : IExpression
     public SuperType Type { get; set; }
 }
 
-internal enum SuperType
+public enum SuperType
 {
     Constructor,
     Accessor

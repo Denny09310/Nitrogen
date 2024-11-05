@@ -4,7 +4,7 @@ namespace Nitrogen.Exceptions;
 
 #pragma warning disable S3871 // Exception types should be "public"
 
-internal class RuntimeException : Exception
+public class RuntimeException : Exception
 {
     public RuntimeException(string message) : base(message)
     {

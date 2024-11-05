@@ -4,7 +4,7 @@ using Nitrogen.Syntax.Statements;
 
 namespace Nitrogen.Interpreting.Declarations;
 
-internal class FunctionDeclaration(FunctionStatement statement, Environment closure, bool isConstructor = false) : ICallable
+public class FunctionDeclaration(FunctionStatement statement, Environment closure, bool isConstructor = false) : ICallable
 {
     public Environment Closure { get; } = closure;
 

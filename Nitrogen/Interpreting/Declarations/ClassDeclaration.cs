@@ -4,7 +4,7 @@ using Nitrogen.Syntax.Statements;
 
 namespace Nitrogen.Interpreting.Declarations;
 
-internal class ClassDeclaration(ClassStatement statement, ClassDeclaration? superclass, Dictionary<string, FunctionDeclaration> methods) : ICallable
+public class ClassDeclaration(ClassStatement statement, ClassDeclaration? superclass, Dictionary<string, FunctionDeclaration> methods) : ICallable
 {
     private FunctionDeclaration? _constructor;
 
@@ -39,7 +39,7 @@ internal class ClassDeclaration(ClassStatement statement, ClassDeclaration? supe
     public override string ToString() => $"class {Name.Lexeme} {{...}}";
 }
 
-internal class ClassInstance(ClassDeclaration declaration)
+public class ClassInstance(ClassDeclaration declaration)
 {
     private readonly Dictionary<string, object?> _fields = [];
 

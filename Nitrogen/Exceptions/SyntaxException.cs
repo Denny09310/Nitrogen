@@ -2,7 +2,7 @@
 
 #pragma warning disable S3871 // Exception types should be "public"
 
-internal class SyntaxException(SourceLocation location, string? message) : Exception(message)
+public class SyntaxException(SourceLocation location, string? message) : Exception(message)
 {
     public SourceLocation Location { get; } = location;
 }

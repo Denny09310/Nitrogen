@@ -1,6 +1,6 @@
 ﻿namespace Nitrogen.Interpreting.Declarations;
 
-internal interface ICallable
+public interface ICallable
 {
     string Name { get; }
 
