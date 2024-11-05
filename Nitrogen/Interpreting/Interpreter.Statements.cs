@@ -1,6 +1,7 @@
 ﻿using Nitrogen.Exceptions;
 using Nitrogen.Interpreting.Declarations;
 using Nitrogen.Syntax.Abstractions;
+using Nitrogen.Syntax.Expressions;
 using Nitrogen.Syntax.Statements;
 
 using System.Diagnostics;
@@ -20,6 +21,7 @@ public partial class Interpreter
         FunctionStatement statement => Execute(statement),
         VarStatement statement => Execute(statement),
         ClassStatement statement => Execute(statement),
+        ImportStatement statement => Execute(statement),
         _ => throw new UnreachableException($"Statement {stmt.GetType()} not recognized.")
     };
 
@@ -38,6 +40,42 @@ public partial class Interpreter
         {
             _environment = enclosing;
         }
+    }
+
+    private object? Execute(ImportStatement statement)
+    {
+        // Step 1: Evaluate the source expression to get the module path
+        var source = Evaluate(statement.Source) as string ?? throw new ArgumentException("Invalid import 'source'.");
+
+        // Step 2: Load the module
+        var module = _loader.LoadModule(source) ?? throw new RuntimeException($"Module '{source}' could not be loaded.");
+
+        foreach (var (key, value) in module.Locals)
+        {
+            Locals.Add(key, value);
+        }
+
+        // Step 3: Import each symbol specified in 'Imports'
+        foreach (var import in statement.Imports)
+        {
+            // Assuming import is an `IdentifierExpression`
+            string importName = ((IdentifierExpression)import).Name.Lexeme;
+
+            // Step 4: Find and add the symbol to the current scope
+            try
+            {
+                var symbol =  module.Environment.Get(importName);
+                
+                // Add to the current execution context, assume `currentScope` exists
+                Environment.Define(importName, symbol);
+            }
+            catch (Exception ex)
+            {
+                throw new RuntimeException($"Symbol '{importName}' not found in module '{source}'.", ex);
+            }
+        }
+
+        return null;
     }
 
     private object? Execute(ExpressionStatement statement)

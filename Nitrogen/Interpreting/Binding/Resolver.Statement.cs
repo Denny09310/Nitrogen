@@ -1,6 +1,8 @@
 ﻿using Nitrogen.Exceptions;
 using Nitrogen.Syntax.Abstractions;
+using Nitrogen.Syntax.Expressions;
 using Nitrogen.Syntax.Statements;
+using System;
 
 namespace Nitrogen.Interpreting.Binding;
 
@@ -19,6 +21,7 @@ public partial class Resolver
 			case IfStatement @if: Resolve(@if); break;
 			case FunctionStatement function: Resolve(function); break;
 			case ClassStatement function: Resolve(function); break;
+			case ImportStatement import: Resolve(import); break;
 
 			default: break;
 		}
@@ -119,4 +122,17 @@ public partial class Resolver
 
 		_currentClass = enclosing;
 	}
+
+	private void Resolve(ImportStatement statement)
+	{
+        foreach (var import in statement.Imports)
+        {
+            var name = ((IdentifierExpression)import).Name;
+           
+			Define(name);
+            Declare(name);
+
+			ResolveLocal(import, name);
+        }
+    }
 }
