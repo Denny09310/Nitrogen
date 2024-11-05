@@ -9,9 +9,11 @@ namespace Nitrogen.Interpreting.Binding;
 
 public partial class Resolver(Interpreter interpreter, bool module = false)
 {
+    private readonly Interpreter _interpreter = interpreter;
+    private readonly bool _module = module;
+
     private readonly List<BindingException> _errors = [];
     private readonly Stack<Dictionary<int, Variable>> _scopes = [];
-
     private ClassType _currentClass;
     private FunctionType _currentFunction;
     private Loop? _currentLoop;
@@ -21,6 +23,7 @@ public partial class Resolver(Interpreter interpreter, bool module = false)
     public List<BindingException> Resolve(List<IStatement> statements)
     {
         BeginScope();
+        InitializeGlobalScope();
 
         foreach (var statement in statements)
         {
@@ -30,6 +33,18 @@ public partial class Resolver(Interpreter interpreter, bool module = false)
         EndScope();
 
         return _errors;
+    }
+
+    private void InitializeGlobalScope()
+    {
+        var global = _interpreter.Environment.Enclosing ?? throw new RuntimeException("'global' scope not initialized.");
+        foreach (var item in global)
+        {
+            Token name = new() { Lexeme = item };
+
+            Define(name);
+            Declare(name);
+        }
     }
 
     private void AddVariable(string name, Variable? variable = null)
@@ -62,7 +77,7 @@ public partial class Resolver(Interpreter interpreter, bool module = false)
             return;
         }
 
-        variable.Declared = true;
+        variable!.Declared = true;
     }
 
     private void Define(Token name)
@@ -85,7 +100,7 @@ public partial class Resolver(Interpreter interpreter, bool module = false)
         var scope = _scopes.Pop();
         foreach (var variable in scope.Values)
         {
-            if (!module && !variable.Used)
+            if (!_module && !variable.Used)
             {
                 Report(ExceptionLevel.Warning, variable.Name, $"Unusued variable '{variable.Name.Lexeme}'.");
             }
@@ -133,12 +148,12 @@ public partial class Resolver(Interpreter interpreter, bool module = false)
             if (scope.TryGetValue(name.Lexeme.GetHashCode(), out var variable))
             {
                 variable.Used = true;
-                interpreter.Resolve(statement, index);
+                _interpreter.Resolve(statement, index);
                 return;
             }
         }
 
-        interpreter.Resolve(statement, _scopes.Count - 1);
+        _interpreter.Resolve(statement, _scopes.Count - 1);
     }
 
     private void ResolveLoop(IStatement statement, LoopType type)

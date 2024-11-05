@@ -2,7 +2,6 @@
 using Nitrogen.Syntax.Abstractions;
 using Nitrogen.Syntax.Expressions;
 using Nitrogen.Syntax.Statements;
-using System.Xml.Linq;
 
 namespace Nitrogen.Interpreting.Binding;
 
