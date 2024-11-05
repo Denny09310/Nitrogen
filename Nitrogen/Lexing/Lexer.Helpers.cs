@@ -26,6 +26,8 @@ public partial class Lexer
         ["this"] = TokenKind.This,
         ["super"] = TokenKind.Super,
         ["extends"] = TokenKind.Extends,
+        ["import"] = TokenKind.Import,
+        ["from"] = TokenKind.From,
     };
 
     private static object? GetValue(TokenKind kind, string lexeme)
