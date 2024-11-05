@@ -9,6 +9,7 @@ namespace Nitrogen.Interpreting;
 public class Loader(string @base)
 {
     private readonly string _base = @base;
+
     private readonly Dictionary<string, Module> _cache = [];
 
     public Module LoadModule(string sourcePath)
@@ -22,6 +23,11 @@ public class Loader(string @base)
         }
 
         // Step 2: Load and read the module file
+        if (!Path.HasExtension(fullPath))
+        {
+            fullPath = Path.ChangeExtension(fullPath, "nt");
+        }
+
         string moduleContent = File.ReadAllText(fullPath);
 
         // Step 3: Parse and evaluate the module content
