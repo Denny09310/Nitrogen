@@ -4,15 +4,15 @@ using Nitrogen.Syntax.Statements;
 
 namespace Nitrogen.Interpreting.Declarations;
 
-public class FunctionDeclaration(FunctionStatement statement, Environment closure, bool isConstructor = false) : ICallable
+public class FunctionDeclaration(FunctionStatement statement, Environment closure, bool isConstructor = false) : CallableBase
 {
     private readonly FunctionStatement _statement = statement;
 
     public Environment Closure { get; } = closure;
 
-    public string Name { get; } = statement.Name.Lexeme;
+    public override string Name => _statement.Name.Lexeme;
 
-    public void EnsureArity(object?[] @params)
+    public override void EnsureArity(object?[] @params)
     {
         var mandatory = _statement.Arguments.Where(argument => argument is IdentifierExpression).ToArray();
         var optionals = _statement.Arguments.Where(argument => argument is AssignmentExpression).ToArray();
@@ -30,7 +30,7 @@ public class FunctionDeclaration(FunctionStatement statement, Environment closur
         return new FunctionDeclaration(_statement, environment);
     }
 
-    public object? Call(Interpreter interpreter, object?[] @params)
+    public override object? Call(Interpreter interpreter, object?[] @params)
     {
         var environment = new Environment(Closure);
         DefineArguments(interpreter, @params, environment);

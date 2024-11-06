@@ -1,28 +1,11 @@
-﻿using Nitrogen.Exceptions;
-using Nitrogen.Interpreting.Declarations.Functions;
+﻿namespace Nitrogen.Interpreting.Declarations.Classes;
 
-namespace Nitrogen.Interpreting.Declarations.Classes;
-
-internal class ConsoleInstance : InstanceBase
+public class ConsoleInstance(Interpreter interpreter) : GlobalInstance(interpreter)
 {
-    private static readonly Dictionary<string, object?> _fields = new()
-    {
-        ["print"] = new PrintFunction(),
-        ["color"] = "Black",
-    };
+    private static readonly Dictionary<string, MethodCallable> _methods = WrapMethods(typeof(Console));
+    private static readonly Dictionary<string, PropertyCallable> _properties = WrapProperties(typeof(Console));
 
-    protected override object? Get(string property)
-    {
-        return _fields[property];
-    }
-
-    protected override void Set(string property, object? value)
-    {
-        if (!_fields.ContainsKey(property))
-        {
-            throw new RuntimeException($"The class 'Console' has not field '{property}'");
-        }
-
-        _fields[property] = value;
-    }
+    public override string Name => "console";
+    public override Dictionary<string, MethodCallable> Methods => _methods;
+    public override Dictionary<string, PropertyCallable> Properties => _properties;
 }

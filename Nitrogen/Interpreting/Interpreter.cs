@@ -43,11 +43,11 @@ public partial class Interpreter
         _locals.TryAdd(expression, depth);
     }
 
-    private static Environment DefineGlobals()
+    private Environment DefineGlobals()
     {
         var environment = new Environment();
 
-        environment.Define("Console", new ConsoleInstance());
+        environment.Define("console", new ConsoleInstance(this));
 
         return environment;
     }

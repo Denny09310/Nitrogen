@@ -4,24 +4,24 @@ namespace Nitrogen.Interpreting.Declarations;
 
 public interface IInstance
 {
-    object? Get(Token property);
+    object? Get(Token member);
 
-    void Set(Token property, object? value);
+    void Set(Token member, object? value);
 }
 
 public abstract class InstanceBase : IInstance
 {
-    public object? Get(Token property)
+    public object? Get(Token member)
     {
-        return Get(property.Lexeme);
+        return Get(member.Lexeme);
     }
 
-    public void Set(Token property, object? value)
+    public void Set(Token member, object? value)
     {
-        Set(property.Lexeme, value);
+        Set(member.Lexeme, value);
     }
 
-    protected abstract object? Get(string property);
+    protected abstract object? Get(string member);
 
-    protected abstract void Set(string property, object? value);
+    protected abstract void Set(string member, object? value);
 }
