@@ -34,7 +34,6 @@ public static class Program
         Console.ForegroundColor = ConsoleColor.Red;
         foreach (var error in errors)
         {
-            var location = error.Token.Span.Start;
             Console.WriteLine($"{error.Message}");
         }
 
