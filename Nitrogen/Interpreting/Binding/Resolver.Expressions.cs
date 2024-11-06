@@ -21,8 +21,10 @@ public partial class Resolver
             case ReturnExpression @return: Resolve(@return); break;
             case GetterExpression getter: Resolve(getter); break;
             case SetterExpression setter: Resolve(setter); break;
-            case ThisExpression setter: Resolve(setter); break;
-            case SuperExpression setter: Resolve(setter); break;
+            case ThisExpression @this: Resolve(@this); break;
+            case SuperExpression super: Resolve(super); break;
+            case ArrayExpression array: Resolve(array); break;
+            case IndexExpression index: Resolve(index); break;
 
             case BreakExpression:
                 if (_currentLoop != null) _currentLoop.Infinite = false;
@@ -164,5 +166,19 @@ public partial class Resolver
         }
 
         ResolveLocal(expression, expression.Keyword);
+    }
+
+    private void Resolve(ArrayExpression expression)
+    {
+        foreach (var item in expression.Items)
+        {
+            Resolve(item);
+        }
+    }
+
+    private void Resolve(IndexExpression expression)
+    {
+        Resolve(expression.Array);
+        Resolve(expression.Index);
     }
 }

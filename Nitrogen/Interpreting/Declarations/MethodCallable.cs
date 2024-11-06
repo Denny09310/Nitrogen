@@ -35,18 +35,7 @@ public partial class MethodCallable(string name, List<MethodInfo> overloads) : C
 
         // Invoke the selected method
         var result = method.Invoke(_instance, args);
-
-        if (result != null && method.ReturnType is { IsClass: true, IsPrimitive: false } && method.ReturnType != typeof(string))
-        {
-            return new WrapperInstance(result);
-        }
-
-        return result switch
-        {
-            long or float or decimal or int or byte or short => Convert.ToDouble(result),
-            Enum => result.ToString(),
-            _ => result
-        };
+        return result.ToInternal();
     }
 
     private static bool IsMatchingOverload(MethodInfo method, object?[] args)
@@ -67,15 +56,13 @@ public partial class MethodCallable(string name, List<MethodInfo> overloads) : C
             {
                 // Null is compatible with reference types or nullable value types
                 if (!paramType.IsClass && Nullable.GetUnderlyingType(paramType) == null)
+                {
                     return false;
+                }
             }
             else if (argType == typeof(double))
             {
-                try
-                {
-                    args[i] = Convert.ChangeType(args[i], paramType);
-                }
-                catch (Exception)
+                if (!TryConvertArgument(args, i, paramType))
                 {
                     return false;
                 }
@@ -88,5 +75,23 @@ public partial class MethodCallable(string name, List<MethodInfo> overloads) : C
         }
 
         return true;
+    }
+
+    private static bool TryConvertArgument(object?[] args, int index, Type targetType)
+    {
+        try
+        {
+            if (targetType == typeof(float) || targetType == typeof(int) || targetType == typeof(long) || targetType == typeof(decimal) || targetType == typeof(double))
+            {
+                args[index] = Convert.ChangeType(args[index], targetType);
+                return true;
+            }
+
+            return false;
+        }
+        catch
+        {
+            return false;
+        }
     }
 }

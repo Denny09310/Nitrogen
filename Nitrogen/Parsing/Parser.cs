@@ -99,6 +99,13 @@ public partial class Parser(List<Token> tokens)
                 var name = Consume(TokenKind.Identifier, "Expect property name after '.'.");
                 expression = new GetterExpression(name, expression);
             }
+            else if (Match(TokenKind.LeftBracket))
+            {
+                var bracket = Peek(-1);
+                var index = ParseExpression();
+                Consume(TokenKind.RightBracket, "Expect ']' after indexing expression.");
+                expression = new IndexExpression(bracket, expression, index);
+            }
             else
             {
                 break;
@@ -339,8 +346,8 @@ public partial class Parser(List<Token> tokens)
                 items.Add(ParseExpression());
             }
             while (Match(TokenKind.Comma));
-            var paren = Consume(TokenKind.RightBracket, "Expect ']' after array expression.");
-            return new ArrayExpression(paren, items);
+            Consume(TokenKind.RightBracket, "Expect ']' after array expression.");
+            return new ArrayExpression(items);
         }
 
         if (current is { Kind: TokenKind.Number or TokenKind.String })

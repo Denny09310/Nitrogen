@@ -26,6 +26,7 @@ public partial class Interpreter
         ThisExpression expression => Evaluate(expression),
         SuperExpression expression => Evaluate(expression),
         ArrayExpression expression => Evaluate(expression),
+        IndexExpression expression => Evaluate(expression),
         BreakExpression => throw new BreakException(),
         ContinueExpression => throw new ContinueException(),
         _ => throw new UnreachableException($"Expression {expr.GetType()} not recognized.")
@@ -211,8 +212,35 @@ public partial class Interpreter
         return constructor.Bind(instance).Call(this, args);
     }
 
-    private object?[] Evaluate(ArrayExpression expression)
+    private object? Evaluate(ArrayExpression expression)
     {
-        return expression.Items.Select(Evaluate).ToArray();
+        var result = expression.Items.Select(Evaluate).ToArray();
+        return new WrapperInstance(result);
+    }
+
+    private object? Evaluate(IndexExpression expression)
+    {
+        var array = (Evaluate(expression.Array) as WrapperInstance)?.Instance;
+        var index = Evaluate(expression.Index);
+
+        // Check that the array is indeed an array
+        if (array is not object?[] value)
+        {
+            throw new RuntimeException(expression.Bracket, "Target is not an array.");
+        }
+
+        // Ensure the index is an integer
+        if (index is not double @double)
+        {
+            throw new RuntimeException(expression.Bracket, "Array index must be an integer.");
+        }
+
+        // Check bounds
+        if (@double < 0 || @double >= value.Length)
+        {
+            throw new RuntimeException(expression.Bracket, "Array index out of bounds.");
+        }
+
+        return value[(int)@double];
     }
 }
