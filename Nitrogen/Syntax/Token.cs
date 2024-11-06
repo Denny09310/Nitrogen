@@ -35,7 +35,9 @@ public enum TokenKind
     #region Compound operators
 
     PlusPlus,
+    PlusEqual,
     MinusMinus,
+    MinusEqual,
     PipePipe,
     AmpersandAmpersand,
     EqualEqual,

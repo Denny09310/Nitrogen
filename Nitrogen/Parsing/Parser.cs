@@ -299,10 +299,34 @@ public partial class Parser(List<Token> tokens)
     }
 
     private IExpression ParseMoltiplicativeExpression()
-        => ParseBinaryExpression(ParseUnaryExpression, TokenKind.Star, TokenKind.Slash);
+        => ParseBinaryExpression(ParsePostfixExpression, TokenKind.Star, TokenKind.Slash);
 
     private IExpression ParseOrExpression()
         => ParseLogicalExpression(ParseAndExpression, TokenKind.PipePipe, TokenKind.Or);
+
+    private IExpression ParsePostfixExpression()
+    {
+        var expression = ParsePrefixExpression();
+
+        if (Match(TokenKind.PlusPlus, TokenKind.MinusMinus))
+        {
+            var @operator = Peek(-1);
+            return new PostfixExpression(@operator, expression);
+        }
+
+        return expression;
+    }
+
+    private IExpression ParsePrefixExpression()
+    {
+        if (Match(TokenKind.PlusPlus, TokenKind.MinusMinus))
+        {
+            var @operator = Peek(-1);
+            return new PrefixExpression(@operator, ParseExpression());
+        }
+
+        return ParseUnaryExpression();
+    }
 
     private IExpression ParsePrimaryExpression()
     {

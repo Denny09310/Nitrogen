@@ -5,6 +5,8 @@ namespace Nitrogen.Interpreting;
 
 public readonly struct Evaluation(object? value)
 {
+    public static readonly Evaluation One = new((double)1);
+
     public object? Value { get; } = value;
 
     public static implicit operator bool(Evaluation evaluation)

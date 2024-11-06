@@ -25,6 +25,8 @@ public partial class Resolver
             case SuperExpression super: Resolve(super); break;
             case ArrayExpression array: Resolve(array); break;
             case IndexExpression index: Resolve(index); break;
+            case PrefixExpression prefix: Resolve(prefix); break;
+            case PostfixExpression postfix: Resolve(postfix); break;
 
             case BreakExpression:
                 if (_currentLoop != null) _currentLoop.Infinite = false;
@@ -180,5 +182,15 @@ public partial class Resolver
     {
         Resolve(expression.Array);
         Resolve(expression.Index);
+    }
+
+    private void Resolve(PrefixExpression expression)
+    {
+        Resolve(expression.Identifier);
+    }
+
+    private void Resolve(PostfixExpression expression)
+    {
+        Resolve(expression.Identifier);
     }
 }

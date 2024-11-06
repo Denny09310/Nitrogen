@@ -154,10 +154,12 @@ public partial class Lexer(SourceText source)
 
             case '-':
                 if (Match('-')) return CreateToken(TokenKind.MinusMinus);
+                if (Match('=')) return CreateToken(TokenKind.MinusEqual);
                 return CreateToken(TokenKind.Minus);
 
             case '+':
                 if (Match('+')) return CreateToken(TokenKind.PlusPlus);
+                if (Match('=')) return CreateToken(TokenKind.PlusEqual);
                 return CreateToken(TokenKind.Plus);
 
             case '<':

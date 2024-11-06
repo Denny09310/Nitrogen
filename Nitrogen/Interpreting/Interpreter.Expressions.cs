@@ -28,6 +28,8 @@ public partial class Interpreter
         SuperExpression expression => Evaluate(expression),
         ArrayExpression expression => Evaluate(expression),
         IndexExpression expression => Evaluate(expression),
+        PrefixExpression expression => Evaluate(expression),
+        PostfixExpression expression => Evaluate(expression),
         BreakExpression => throw new BreakException(),
         ContinueExpression => throw new ContinueException(),
         _ => throw new UnreachableException($"Expression {expr.GetType()} not recognized.")
@@ -242,5 +244,50 @@ public partial class Interpreter
         }
 
         return value[(int)@double];
+    }
+
+    private object? Evaluate(PrefixExpression expression)
+    {
+        var identifier = new Evaluation(Evaluate(expression.Identifier));
+        var @operator = expression.Operator;
+
+        return @operator.Kind switch
+        {
+            TokenKind.PlusPlus => identifier + Evaluation.One,
+            TokenKind.MinusMinus => identifier - Evaluation.One,
+
+            _ => throw new RuntimeException(@operator, $"{@operator.Lexeme} not supported.")
+        };
+    }
+
+    private object? Evaluate(PostfixExpression expression)
+    {
+        var identifier = new Evaluation(Evaluate(expression.Identifier));
+        var @operator = expression.Operator;
+
+        if (@operator.Kind is not TokenKind.PlusPlus and not TokenKind.MinusMinus)
+        {
+            throw new RuntimeException(@operator, $"{@operator.Lexeme} not supported as postfix.");
+        }
+
+        var currentValue = new Evaluation(identifier.Value);
+
+        switch (@operator.Kind)
+        {
+            case TokenKind.PlusPlus:
+                identifier = new Evaluation(currentValue + Evaluation.One);
+                break;
+
+            case TokenKind.MinusMinus:
+                identifier = new Evaluation(currentValue - Evaluation.One);
+                break;
+        }
+
+        if (expression.Identifier is IdentifierExpression identifierExpr)
+        {
+            _environment.Assign(identifierExpr.Name, identifier.Value);
+        }
+
+        return currentValue;
     }
 }
