@@ -25,6 +25,7 @@ public partial class Interpreter
         SetterExpression expression => Evaluate(expression),
         ThisExpression expression => Evaluate(expression),
         SuperExpression expression => Evaluate(expression),
+        ArrayExpression expression => Evaluate(expression),
         BreakExpression => throw new BreakException(),
         ContinueExpression => throw new ContinueException(),
         _ => throw new UnreachableException($"Expression {expr.GetType()} not recognized.")
@@ -208,5 +209,10 @@ public partial class Interpreter
 
         var args = expression.Parameters.Select(Evaluate).ToArray();
         return constructor.Bind(instance).Call(this, args);
+    }
+
+    private object?[] Evaluate(ArrayExpression expression)
+    {
+        return expression.Items.Select(Evaluate).ToArray();
     }
 }

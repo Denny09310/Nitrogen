@@ -331,6 +331,18 @@ public partial class Parser(List<Token> tokens)
             return new GroupingExpression(paren, expression);
         }
 
+        if (current.Kind is TokenKind.LeftBracket)
+        {
+            ICollection<IExpression> items = [];
+            do
+            {
+                items.Add(ParseExpression());
+            }
+            while (Match(TokenKind.Comma));
+            var paren = Consume(TokenKind.RightBracket, "Expect ']' after array expression.");
+            return new ArrayExpression(paren, items);
+        }
+
         if (current is { Kind: TokenKind.Number or TokenKind.String })
         {
             return new LiteralExpression(current.Value);
