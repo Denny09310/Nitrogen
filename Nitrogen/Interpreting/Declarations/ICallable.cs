@@ -4,18 +4,18 @@ public interface ICallable
 {
     string Name { get; }
 
-    object? Call(Interpreter interpreter, object?[] @params);
+    object? Call(Interpreter interpreter, object?[] args);
 
-    void EnsureArity(object?[] @params);
+    void Arity(object?[] args);
 }
 
 public abstract class CallableBase : ICallable
 {
     public abstract string Name { get; }
 
-    public abstract object? Call(Interpreter interpreter, object?[] @params);
+    public abstract object? Call(Interpreter interpreter, object?[] args);
 
-    public virtual void EnsureArity(object?[] @params)
+    public virtual void Arity(object?[] args)
     {
     }
 }

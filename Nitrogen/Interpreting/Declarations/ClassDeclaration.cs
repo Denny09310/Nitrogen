@@ -1,5 +1,4 @@
-﻿using Nitrogen.Exceptions;
-using Nitrogen.Syntax;
+﻿using Nitrogen.Syntax;
 using Nitrogen.Syntax.Statements;
 
 namespace Nitrogen.Interpreting.Declarations;
@@ -12,19 +11,19 @@ public class ClassDeclaration(ClassStatement statement, ClassDeclaration? superc
 
     string ICallable.Name => Name.Lexeme;
 
-    public virtual object? Call(Interpreter interpreter, object?[] @params)
+    public virtual object? Call(Interpreter interpreter, object?[] args)
     {
         var instance = new ClassInstance(this);
-        _constructor?.Bind(instance).Call(interpreter, @params);
+        _constructor?.Bind(instance).Call(interpreter, args);
         return instance;
     }
 
-    public virtual void EnsureArity(object?[] @params)
+    public virtual void Arity(object?[] args)
     {
         _constructor = FindMethod("constructor");
         if (_constructor == null) return;
 
-        _constructor.EnsureArity(@params);
+        _constructor.Arity(args);
     }
 
     public FunctionDeclaration? FindMethod(string name)
@@ -38,31 +37,4 @@ public class ClassDeclaration(ClassStatement statement, ClassDeclaration? superc
     }
 
     public override string ToString() => $"class {Name.Lexeme} {{...}}";
-}
-
-public class ClassInstance(ClassDeclaration declaration) : InstanceBase
-{
-    private readonly Dictionary<string, object?> _fields = [];
-
-    public override string ToString() => $"instanceof {declaration.Name.Lexeme}";
-
-    protected override object? Get(string property)
-    {
-        if (_fields.TryGetValue(property, out var field))
-        {
-            return field;
-        }
-
-        if (declaration.FindMethod(property) is FunctionDeclaration method)
-        {
-            return method.Bind(this);
-        }
-
-        throw new RuntimeException($"The class '{declaration.Name.Lexeme}' has no property named '{property}'.");
-    }
-
-    protected override void Set(string property, object? value)
-    {
-        _fields[property] = value;
-    }
 }

@@ -1,4 +1,5 @@
-﻿using Nitrogen.Extensions;
+﻿using Nitrogen.Exceptions;
+using Nitrogen.Extensions;
 using System.Reflection;
 
 namespace Nitrogen.Interpreting.Declarations;
@@ -8,38 +9,53 @@ public partial class MethodCallable(string name, List<MethodInfo> overloads) : C
     private readonly string _name = name.ToSnakeCase();
     private readonly List<MethodInfo> _overloads = overloads;
 
+    private object? _instance;
+
     public override string Name => _name;
 
-    public override object? Call(Interpreter interpreter, object?[] @params)
+    public override void Arity(object?[] args)
     {
-        // Select the overload based on the number of parameters
-        var method = _overloads.Find(m => IsMatchingOverload(m, @params))
-            ?? throw new ArgumentException($"No overload found for method '{_name}' with {@params.Length} parameters.");
-
-        // Invoke the selected method
-        return method.Invoke(null, @params);
-    }
-
-    public override void EnsureArity(object?[] @params)
-    {
-        if (!_overloads.Exists(m => m.GetParameters().Length == @params.Length))
+        if (!_overloads.Exists(m => m.GetParameters().Length == args.Length))
         {
-            throw new ArgumentException($"No overload of '{_name}' accepts {@params.Length} parameters.");
+            throw new RuntimeException($"No overload of '{_name}' accepts {args.Length} parameters.");
         }
     }
 
-    private static bool IsMatchingOverload(MethodInfo method, object?[] @params)
+    public MethodCallable Bind(object instance)
+    {
+        _instance = instance;
+        return this;
+    }
+
+    public override object? Call(Interpreter interpreter, object?[] args)
+    {
+        // Select the overload based on the number of parameters
+        var method = _overloads.Find(m => IsMatchingOverload(m, args))
+            ?? throw new RuntimeException($"No overload found for method '{_name}' with {args.Length} parameters.");
+
+        // Invoke the selected method
+        var result = method.Invoke(_instance, args);
+
+        return result switch
+        {
+            long or float or decimal or int or byte or short => Convert.ToDouble(result),
+            Enum => result.ToString(),
+            _ => result
+        };
+    }
+
+    private static bool IsMatchingOverload(MethodInfo method, object?[] args)
     {
         var parameters = method.GetParameters();
 
         // Check if parameter count matches
-        if (parameters.Length != @params.Length) return false;
+        if (parameters.Length != args.Length) return false;
 
         // Check if each parameter type is compatible with the corresponding argument type
         for (int i = 0; i < parameters.Length; i++)
         {
             var paramType = parameters[i].ParameterType;
-            var argType = @params[i]?.GetType();
+            var argType = args[i]?.GetType();
 
             // Handle null arguments
             if (argType == null)
@@ -47,6 +63,17 @@ public partial class MethodCallable(string name, List<MethodInfo> overloads) : C
                 // Null is compatible with reference types or nullable value types
                 if (!paramType.IsClass && Nullable.GetUnderlyingType(paramType) == null)
                     return false;
+            }
+            else if (argType == typeof(double))
+            {
+                try
+                {
+                    args[i] = Convert.ChangeType(args[i], paramType);
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
             }
             else if (!paramType.IsAssignableFrom(argType))
             {

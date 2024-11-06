@@ -9,29 +9,36 @@ public class PropertyCallable(PropertyInfo property) : CallableBase
     private readonly string _name = property.Name.ToSnakeCase();
     private readonly PropertyInfo _property = property;
 
+    private object? _instance;
+
     public override string Name => _name;
 
-    public override object? Call(Interpreter interpreter, object?[] @params)
+    public override void Arity(object?[] args)
     {
-        // Determine if this is a 'get' or 'set' operation based on parameter count
-        if (@params.Length == 0) // Getter
-        {
-            return Get();
-        }
-        else if (@params.Length == 1) // Setter
-        {
-            Set(@params[0]);
-            return null;
-        }
-        else
+        if (args.Length != 0 && args.Length != 1)
         {
             throw new RuntimeException($"Property '{_name}' requires either 0 (get) or 1 (set) parameter.");
         }
     }
 
-    public override void EnsureArity(object?[] @params)
+    public PropertyCallable Bind(object instance)
     {
-        if (@params.Length != 0 && @params.Length != 1)
+        _instance = instance;
+        return this;
+    }
+
+    public override object? Call(Interpreter interpreter, object?[] args)
+    {
+        if (args.Length == 0)
+        {
+            return Get();
+        }
+        else if (args.Length == 1)
+        {
+            Set(args[0]);
+            return null;
+        }
+        else
         {
             throw new RuntimeException($"Property '{_name}' requires either 0 (get) or 1 (set) parameter.");
         }
@@ -44,7 +51,14 @@ public class PropertyCallable(PropertyInfo property) : CallableBase
             throw new RuntimeException($"Property '{_name}' is not readable.");
         }
 
-        return _property.GetValue(null);
+        var value = _property.GetValue(_instance);
+
+        if (value != null && _property.PropertyType.IsClass)
+        {
+            return new WrapperInstance(value);
+        }
+
+        return value;
     }
 
     private void Set(object? value)
@@ -83,6 +97,6 @@ public class PropertyCallable(PropertyInfo property) : CallableBase
             }
         }
 
-        _property.SetValue(null, converted);
+        _property.SetValue(_instance, converted);
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace Nitrogen.Interpreting.Declarations.Classes;
 
-public class ConsoleInstance(Interpreter interpreter) : GlobalInstance(interpreter)
+public class ConsoleInstance : NativeInstance
 {
     private static readonly Dictionary<string, MethodCallable> _methods = WrapMethods(typeof(Console));
     private static readonly Dictionary<string, PropertyCallable> _properties = WrapProperties(typeof(Console));

@@ -1,5 +1,5 @@
 ﻿using Nitrogen.Exceptions;
-using Nitrogen.Interpreting.Declarations.Classes;
+using Nitrogen.Interpreting.Declarations;
 using Nitrogen.Syntax;
 using Nitrogen.Syntax.Abstractions;
 
@@ -43,11 +43,23 @@ public partial class Interpreter
         _locals.TryAdd(expression, depth);
     }
 
-    private Environment DefineGlobals()
+    private static Environment DefineGlobals()
     {
         var environment = new Environment();
 
-        environment.Define("console", new ConsoleInstance(this));
+        var globals = typeof(Interpreter).Assembly
+            .ExportedTypes
+            .Where(t => !t.IsAbstract && t.Name != nameof(WrapperInstance) && typeof(NativeInstance).IsAssignableFrom(t));
+
+        foreach (var global in globals)
+        {
+            if (Activator.CreateInstance(global) is not NativeInstance instance)
+            {
+                throw new RuntimeException($"Type '{global.Name}' can't be instantiated into 'global scope'");
+            }
+
+            environment.Define(instance.Name, instance);
+        }
 
         return environment;
     }

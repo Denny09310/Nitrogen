@@ -46,8 +46,8 @@ public partial class Interpreter
 
     private object? Evaluate(BinaryExpression expression)
     {
-        var left = new EvaluationResult(Evaluate(expression.Left));
-        var right = new EvaluationResult(Evaluate(expression.Right));
+        var left = new Evaluation(Evaluate(expression.Left));
+        var right = new Evaluation(Evaluate(expression.Right));
 
         var @operator = expression.Operator;
 
@@ -77,7 +77,7 @@ public partial class Interpreter
 
     private object? Evaluate(LogicalExpression expression)
     {
-        bool left = new EvaluationResult(expression.Left);
+        bool left = new Evaluation(expression.Left);
 
         if (expression.Operator is { Kind: TokenKind.Or or TokenKind.PipePipe })
         {
@@ -88,13 +88,13 @@ public partial class Interpreter
             if (!left) return left;
         }
 
-        bool right = new EvaluationResult(Evaluate(expression.Right));
+        bool right = new Evaluation(Evaluate(expression.Right));
         return right;
     }
 
     private object? Evaluate(UnaryExpression expression)
     {
-        var value = new EvaluationResult(Evaluate(expression.Expression));
+        var value = new Evaluation(Evaluate(expression.Expression));
         var @operator = expression.Operator;
 
         return @operator.Kind switch
@@ -121,7 +121,7 @@ public partial class Interpreter
         }
 
         var parameters = expression.Parameters.Select(Evaluate).ToArray();
-        callable.EnsureArity(parameters);
+        callable.Arity(parameters);
 
         return callable.Call(this, parameters);
     }
@@ -206,7 +206,7 @@ public partial class Interpreter
             throw new RuntimeException(expression.Keyword, "The class has no super class");
         }
 
-        var @params = expression.Parameters.Select(Evaluate).ToArray();
-        return constructor.Bind(instance).Call(this, @params);
+        var args = expression.Parameters.Select(Evaluate).ToArray();
+        return constructor.Bind(instance).Call(this, args);
     }
 }

@@ -76,14 +76,14 @@ public partial class Interpreter
 
     private object? Execute(WhileStatement statement)
     {
-        Loop(() => new EvaluationResult(Evaluate(statement.Condition)), statement.Body);
+        Loop(() => new Evaluation(Evaluate(statement.Condition)), statement.Body);
         return null;
     }
 
     private object? Execute(ForStatement statement)
     {
         if (statement.Initialization is not null) Execute(statement.Initialization);
-        Loop(() => new EvaluationResult(Evaluate(statement.Condition)), statement.Body, statement.Increment);
+        Loop(() => new Evaluation(Evaluate(statement.Condition)), statement.Body, statement.Increment);
         return null;
     }
 
@@ -95,7 +95,7 @@ public partial class Interpreter
 
     private object? Execute(IfStatement statement)
     {
-        var condition = new EvaluationResult(Evaluate(statement.Condition));
+        var condition = new Evaluation(Evaluate(statement.Condition));
         if (condition) Execute(statement.Then);
         else if (statement.Else is not null) Execute(statement.Else);
 

@@ -3,11 +3,11 @@ using System.Globalization;
 
 namespace Nitrogen.Interpreting;
 
-public readonly struct EvaluationResult(object? value)
+public readonly struct Evaluation(object? value)
 {
     public object? Value { get; } = value;
 
-    public static implicit operator bool(EvaluationResult evaluation)
+    public static implicit operator bool(Evaluation evaluation)
     {
         if (evaluation.Value is null) return false;
         if (evaluation.Value is bool bool1) return bool1;
@@ -16,13 +16,13 @@ public readonly struct EvaluationResult(object? value)
 
     #region Additive
 
-    public static object? operator -(EvaluationResult left, EvaluationResult right) => (left.Value, right.Value) switch
+    public static object? operator -(Evaluation left, Evaluation right) => (left.Value, right.Value) switch
     {
         (double double1, double double2) => double1 - double2,
         _ => throw new RuntimeException($"Unsupported operation between types {left.Value?.GetType()} and {right.Value?.GetType()}."),
     };
 
-    public static object? operator +(EvaluationResult left, EvaluationResult right) => (left.Value, right.Value) switch
+    public static object? operator +(Evaluation left, Evaluation right) => (left.Value, right.Value) switch
     {
         (string string1, string string2) => string1 + string2,
         (double double1, double double2) => double1 + double2,
@@ -37,13 +37,13 @@ public readonly struct EvaluationResult(object? value)
 
     #region Multiplicative
 
-    public static object? operator *(EvaluationResult left, EvaluationResult right) => (left.Value, right.Value) switch
+    public static object? operator *(Evaluation left, Evaluation right) => (left.Value, right.Value) switch
     {
         (double double1, double double2) => double1 * double2,
         _ => throw new RuntimeException($"Unsupported operation between types {left.Value?.GetType()} and {right.Value?.GetType()}."),
     };
 
-    public static object? operator /(EvaluationResult left, EvaluationResult right) => (left.Value, right.Value) switch
+    public static object? operator /(Evaluation left, Evaluation right) => (left.Value, right.Value) switch
     {
         (double double1, double double2) => double1 / double2,
         _ => throw new RuntimeException($"Unsupported operation between types {left.Value?.GetType()} and {right.Value?.GetType()}."),
@@ -53,14 +53,14 @@ public readonly struct EvaluationResult(object? value)
 
     #region Equality
 
-    public static bool operator !=(EvaluationResult left, EvaluationResult right) => (left.Value, right.Value) switch
+    public static bool operator !=(Evaluation left, Evaluation right) => (left.Value, right.Value) switch
     {
         (string string1, string string2) => string1 != string2,
         (double double1, double double2) => !double1.Equals(double2),
         _ => false,
     };
 
-    public static bool operator ==(EvaluationResult left, EvaluationResult right) => (left.Value, right.Value) switch
+    public static bool operator ==(Evaluation left, Evaluation right) => (left.Value, right.Value) switch
     {
         (string string1, string string2) => string1 == string2,
         (double double1, double double2) => double1.Equals(double2),
@@ -71,28 +71,28 @@ public readonly struct EvaluationResult(object? value)
 
     #region Comparison
 
-    public static bool operator <(EvaluationResult left, EvaluationResult right) => (left.Value, right.Value) switch
+    public static bool operator <(Evaluation left, Evaluation right) => (left.Value, right.Value) switch
     {
         (string string1, string string2) => string1.CompareTo(string2) < 0,
         (double double1, double double2) => double1 < double2,
         _ => false,
     };
 
-    public static bool operator <=(EvaluationResult left, EvaluationResult right) => (left.Value, right.Value) switch
+    public static bool operator <=(Evaluation left, Evaluation right) => (left.Value, right.Value) switch
     {
         (string string1, string string2) => string1.CompareTo(string2) <= 0,
         (double double1, double double2) => double1 <= double2,
         _ => false,
     };
 
-    public static bool operator >(EvaluationResult left, EvaluationResult right) => (left.Value, right.Value) switch
+    public static bool operator >(Evaluation left, Evaluation right) => (left.Value, right.Value) switch
     {
         (string string1, string string2) => string1.CompareTo(string2) > 0,
         (double double1, double double2) => double1 > double2,
         _ => false,
     };
 
-    public static bool operator >=(EvaluationResult left, EvaluationResult right) => (left.Value, right.Value) switch
+    public static bool operator >=(Evaluation left, Evaluation right) => (left.Value, right.Value) switch
     {
         (string string1, string string2) => string1.CompareTo(string2) >= 0,
         (double double1, double double2) => double1 >= double2,
@@ -103,7 +103,7 @@ public readonly struct EvaluationResult(object? value)
 
     #region Unary
 
-    public static object? operator -(EvaluationResult left) => left.Value switch
+    public static object? operator -(Evaluation left) => left.Value switch
     {
         (double double1) => -double1,
         _ => throw new RuntimeException($"Unsupported operation for type {left.Value?.GetType()}."),
@@ -113,7 +113,7 @@ public readonly struct EvaluationResult(object? value)
 
     public override bool Equals(object? obj)
     {
-        if (obj is not EvaluationResult result) return false;
+        if (obj is not Evaluation result) return false;
         return this == result;
     }
 
