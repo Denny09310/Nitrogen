@@ -1,4 +1,5 @@
 ﻿using Nitrogen.Exceptions;
+using Nitrogen.Extensions;
 using Nitrogen.Interpreting.Declarations;
 using Nitrogen.Syntax;
 using Nitrogen.Syntax.Abstractions;
@@ -19,7 +20,7 @@ public partial class Interpreter
         GroupingExpression expression => Evaluate(expression),
         IdentifierExpression expression => Evaluate(expression),
         CallExpression expression => Evaluate(expression),
-        LiteralExpression expression => expression.Literal,
+        LiteralExpression expression => expression.Literal.ToInternal(),
         ReturnExpression expression => Evaluate(expression),
         GetterExpression expression => Evaluate(expression),
         SetterExpression expression => Evaluate(expression),
@@ -38,7 +39,7 @@ public partial class Interpreter
 
         if (!_locals.TryGetValue(expression, out var distance))
         {
-            throw new RuntimeException(expression.Name, "Can't variable in global scope.");
+            throw new RuntimeException(expression.Name, "Can't assign variable in global scope.");
         }
 
         _environment.AssignAt(distance, expression.Name, value);
@@ -214,13 +215,12 @@ public partial class Interpreter
 
     private object? Evaluate(ArrayExpression expression)
     {
-        var result = expression.Items.Select(Evaluate).ToArray();
-        return new WrapperInstance(result);
+        return expression.Items.Select(Evaluate).ToInternal();
     }
 
     private object? Evaluate(IndexExpression expression)
     {
-        var array = (Evaluate(expression.Array) as WrapperInstance)?.Instance;
+        var array = Evaluate(expression.Array).Unwrap();
         var index = Evaluate(expression.Index);
 
         // Check that the array is indeed an array

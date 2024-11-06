@@ -29,6 +29,8 @@ public partial class MethodCallable(string name, List<MethodInfo> overloads) : C
 
     public override object? Call(Interpreter interpreter, object?[] args)
     {
+        args.Unwrap();
+
         // Select the overload based on the number of parameters
         var method = _overloads.Find(m => IsMatchingOverload(m, args))
             ?? throw new RuntimeException($"No overload found for method '{_name}' with {args.Length} parameters.");
