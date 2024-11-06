@@ -95,12 +95,12 @@ public partial class Resolver
 			Resolve(statement.Superclass);
 
 			BeginScope();
-			AddVariable("super");
+			Declare("super");
 		}
 
 		BeginScope();
 
-		AddVariable("this");
+		Declare("this");
 
 		foreach (var method in statement.Methods)
 		{

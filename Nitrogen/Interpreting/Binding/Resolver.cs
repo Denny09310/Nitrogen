@@ -14,6 +14,7 @@ public partial class Resolver(Interpreter interpreter, bool module = false)
 
     private readonly List<BindingException> _errors = [];
     private readonly Stack<Dictionary<int, Variable>> _scopes = [];
+
     private ClassType _currentClass;
     private FunctionType _currentFunction;
     private Loop? _currentLoop;
@@ -35,19 +36,7 @@ public partial class Resolver(Interpreter interpreter, bool module = false)
         return _errors;
     }
 
-    private void InitializeGlobalScope()
-    {
-        var global = _interpreter.Environment.Enclosing ?? throw new RuntimeException("'global' scope not initialized.");
-        foreach (var item in global)
-        {
-            Token name = new() { Lexeme = item };
-
-            Define(name);
-            Declare(name);
-        }
-    }
-
-    private void AddVariable(string name, Variable? variable = null)
+    private void Declare(string name, Variable? variable = null)
     {
         variable ??= new()
         {
@@ -77,7 +66,7 @@ public partial class Resolver(Interpreter interpreter, bool module = false)
             return;
         }
 
-        variable!.Declared = true;
+        variable.Declared = true;
     }
 
     private void Define(Token name)
@@ -104,6 +93,16 @@ public partial class Resolver(Interpreter interpreter, bool module = false)
             {
                 Report(ExceptionLevel.Warning, variable.Name, $"Unusued variable '{variable.Name.Lexeme}'.");
             }
+        }
+    }
+
+    private void InitializeGlobalScope()
+    {
+        var global = _interpreter.Environment.Enclosing ?? throw new RuntimeException("'global' scope not initialized.");
+
+        foreach (var item in global)
+        {
+            Declare(item);
         }
     }
 
