@@ -251,13 +251,20 @@ public partial class Interpreter
         var identifier = new Evaluation(Evaluate(expression.Identifier));
         var @operator = expression.Operator;
 
-        return @operator.Kind switch
+        var currentValue = @operator.Kind switch
         {
             TokenKind.PlusPlus => identifier + Evaluation.One,
             TokenKind.MinusMinus => identifier - Evaluation.One,
 
             _ => throw new RuntimeException(@operator, $"{@operator.Lexeme} not supported.")
         };
+
+        if (expression.Identifier is IdentifierExpression identifierExpr)
+        {
+            _environment.Assign(identifierExpr.Name, currentValue);
+        }
+
+        return currentValue;
     }
 
     private object? Evaluate(PostfixExpression expression)
