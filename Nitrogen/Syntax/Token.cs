@@ -6,6 +6,11 @@ public readonly record struct Token
     public SourceSpan Span { get; init; }
     public string Lexeme { get; init; }
     public object? Value { get; init; }
+
+    public static Token FromName(string name) => new()
+    {
+        Lexeme = name
+    };
 }
 
 public enum TokenKind
@@ -63,7 +68,6 @@ public enum TokenKind
     True,
     False,
     While,
-    Print,
     And,
     Or,
     For,
@@ -78,6 +82,8 @@ public enum TokenKind
     This,
     Super,
     Extends,
+    Import,
+    From,
 
     #endregion Keywords
 

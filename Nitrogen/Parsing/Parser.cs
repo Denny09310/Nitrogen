@@ -255,6 +255,30 @@ public partial class Parser(List<Token> tokens)
         return new IfStatement(keyword, condition, then, @else);
     }
 
+    private ImportStatement ParseImportStatement()
+    {
+        var keyword = Peek(-1);
+
+        ICollection<IExpression> imports = [];
+        do
+        {
+            var expression = ParseExpression();
+
+            if (expression is not IdentifierExpression)
+            {
+                throw new ParseException(keyword, "Expect 'import name' after import statement.");
+            }
+
+            imports.Add(expression);
+        }
+        while (Match(TokenKind.Comma));
+
+        Consume(TokenKind.From, "Expected 'from' keyword after import statement.");
+        var source = ParseExpression();
+
+        return new ImportStatement(imports, source);
+    }
+
     private IExpression ParseLogicalExpression(Func<IExpression> descendant, params TokenKind[] kinds)
     {
         var left = descendant();
@@ -320,20 +344,13 @@ public partial class Parser(List<Token> tokens)
         throw new ParseException(current, $"Token '{current.Lexeme}' not recognized.");
     }
 
-    private PrintStatement ParsePrintStatement()
-    {
-        var expression = ParseExpression();
-        Consume(TokenKind.Semicolon, "Expect ';' after statement.");
-        return new PrintStatement(expression);
-    }
-
     private IStatement ParseStatement()
     {
         if (Match(TokenKind.Function)) return ParseFunctionStatement();
         if (Match(TokenKind.Var)) return ParseVariableStatement();
         if (Match(TokenKind.Class)) return ParseClassStatement();
+        if (Match(TokenKind.Import)) return ParseImportStatement();
 
-        if (Match(TokenKind.Print)) return ParsePrintStatement();
         if (Match(TokenKind.While)) return ParseWhileStatement();
         if (Match(TokenKind.For)) return ParseForStatement();
         if (Match(TokenKind.If)) return ParseIfStatement();

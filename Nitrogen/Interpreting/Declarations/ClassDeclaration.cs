@@ -9,21 +9,22 @@ public class ClassDeclaration(ClassStatement statement, ClassDeclaration? superc
     private FunctionDeclaration? _constructor;
 
     public Token Name { get; } = statement.Name;
+
     string ICallable.Name => Name.Lexeme;
 
-    public void Arity(object?[] @params)
-    {
-        _constructor = FindMethod("constructor");
-        if (_constructor == null) return;
-
-        _constructor.Arity(@params);
-    }
-
-    public object? Call(Interpreter interpreter, object?[] @params)
+    public virtual object? Call(Interpreter interpreter, object?[] @params)
     {
         var instance = new ClassInstance(this);
         _constructor?.Bind(instance).Call(interpreter, @params);
         return instance;
+    }
+
+    public virtual void EnsureArity(object?[] @params)
+    {
+        _constructor = FindMethod("constructor");
+        if (_constructor == null) return;
+
+        _constructor.EnsureArity(@params);
     }
 
     public FunctionDeclaration? FindMethod(string name)
@@ -39,29 +40,29 @@ public class ClassDeclaration(ClassStatement statement, ClassDeclaration? superc
     public override string ToString() => $"class {Name.Lexeme} {{...}}";
 }
 
-public class ClassInstance(ClassDeclaration declaration)
+public class ClassInstance(ClassDeclaration declaration) : InstanceBase
 {
     private readonly Dictionary<string, object?> _fields = [];
 
-    public object? Get(Token property)
+    public override string ToString() => $"instanceof {declaration.Name.Lexeme}";
+
+    protected override object? Get(string property)
     {
-        if (_fields.TryGetValue(property.Lexeme, out var field))
+        if (_fields.TryGetValue(property, out var field))
         {
             return field;
         }
 
-        if (declaration.FindMethod(property.Lexeme) is FunctionDeclaration method)
+        if (declaration.FindMethod(property) is FunctionDeclaration method)
         {
             return method.Bind(this);
         }
 
-        throw new RuntimeException(property, $"The class '{declaration.Name.Lexeme}' has no property named '{property.Lexeme}'.");
+        throw new RuntimeException($"The class '{declaration.Name.Lexeme}' has no property named '{property}'.");
     }
 
-    public void Set(Token property, object? value)
+    protected override void Set(string property, object? value)
     {
-        _fields[property.Lexeme] = value;
+        _fields[property] = value;
     }
-
-    public override string ToString() => $"instanceof {declaration.Name.Lexeme}";
 }

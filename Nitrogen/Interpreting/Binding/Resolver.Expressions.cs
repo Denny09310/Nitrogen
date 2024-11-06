@@ -42,30 +42,26 @@ public partial class Resolver
     private void Resolve(IdentifierExpression expression)
     {
         int identifier = expression.Name.Lexeme.GetHashCode();
+
         Variable? variable = null;
 
-        // Iterate through the scopes to find the variable
-        foreach (var (variables, _) in _scopes)
+        foreach (var scope in _scopes)
         {
-            if (variables.TryGetValue(identifier, out variable))
-                break;
+            if (scope.TryGetValue(identifier, out variable)) break;
         }
 
-        // If variable is not found in any scope, report an error
         if (variable is null)
         {
             Report(ExceptionLevel.Error, expression.Name, $"Undefined variable '{expression.Name.Lexeme}'.");
             return;
         }
 
-        // Check if the variable is declared to avoid initializer usage issues
         if (!variable.Declared)
         {
             Report(ExceptionLevel.Error, expression.Name, "Cannot read local variable in its own initializer.");
             return;
         }
 
-        // Mark the variable as resolved at the current scope level
         ResolveLocal(expression, expression.Name);
     }
 

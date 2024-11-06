@@ -121,7 +121,7 @@ public partial class Interpreter
         }
 
         var parameters = expression.Parameters.Select(Evaluate).ToArray();
-        callable.Arity(parameters);
+        callable.EnsureArity(parameters);
 
         return callable.Call(this, parameters);
     }
@@ -145,7 +145,8 @@ public partial class Interpreter
     private object? Evaluate(GetterExpression expression)
     {
         var target = Evaluate(expression.Expression);
-        if (target is ClassInstance instance)
+
+        if (target is IInstance instance)
         {
             return instance.Get(expression.Name);
         }
@@ -157,7 +158,7 @@ public partial class Interpreter
     {
         var target = Evaluate(expression.Object);
 
-        if (target is not ClassInstance instance)
+        if (target is not IInstance instance)
         {
             throw new RuntimeException(expression.Name, "Only instances have properties.");
         }

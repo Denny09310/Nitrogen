@@ -10,7 +10,6 @@ public partial class Lexer
     {
         ["true"] = TokenKind.True,
         ["false"] = TokenKind.False,
-        ["print"] = TokenKind.Print,
         ["and"] = TokenKind.And,
         ["or"] = TokenKind.Or,
         ["while"] = TokenKind.While,
@@ -26,6 +25,8 @@ public partial class Lexer
         ["this"] = TokenKind.This,
         ["super"] = TokenKind.Super,
         ["extends"] = TokenKind.Extends,
+        ["import"] = TokenKind.Import,
+        ["from"] = TokenKind.From,
     };
 
     private static object? GetValue(TokenKind kind, string lexeme)

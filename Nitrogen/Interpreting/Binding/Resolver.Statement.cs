@@ -1,6 +1,8 @@
 ﻿using Nitrogen.Exceptions;
 using Nitrogen.Syntax.Abstractions;
+using Nitrogen.Syntax.Expressions;
 using Nitrogen.Syntax.Statements;
+using System;
 
 namespace Nitrogen.Interpreting.Binding;
 
@@ -10,7 +12,6 @@ public partial class Resolver
 	{
 		switch (statement)
 		{
-			case PrintStatement print: Resolve(print); break;
 			case VarStatement variable: Resolve(variable); break;
 			case ExpressionStatement expression: Resolve(expression); break;
 			case WhileStatement @while: Resolve(@while); break;
@@ -19,14 +20,10 @@ public partial class Resolver
 			case IfStatement @if: Resolve(@if); break;
 			case FunctionStatement function: Resolve(function); break;
 			case ClassStatement function: Resolve(function); break;
+			case ImportStatement import: Resolve(import); break;
 
 			default: break;
 		}
-	}
-
-	private void Resolve(PrintStatement statement)
-	{
-		Resolve(statement.Expression);
 	}
 
 	private void Resolve(VarStatement statement)
@@ -119,4 +116,17 @@ public partial class Resolver
 
 		_currentClass = enclosing;
 	}
+
+	private void Resolve(ImportStatement statement)
+	{
+        foreach (var import in statement.Imports)
+        {
+            var name = ((IdentifierExpression)import).Name;
+           
+			Define(name);
+            Declare(name);
+
+			ResolveLocal(import, name);
+        }
+    }
 }

@@ -7,20 +7,23 @@ using System.Diagnostics;
 
 namespace Nitrogen.Interpreting.Binding;
 
-public partial class Resolver(Interpreter interpreter)
+public partial class Resolver(Interpreter interpreter, bool module = false)
 {
-    private readonly List<BindingException> _errors = [];
-    private readonly Stack<(Dictionary<int, Variable> variables, HashSet<int> variableHashes)> _scopes = [];
+    private readonly Interpreter _interpreter = interpreter;
+    private readonly bool _module = module;
 
+    private readonly List<BindingException> _errors = [];
+    private readonly Stack<Dictionary<int, Variable>> _scopes = [];
     private ClassType _currentClass;
     private FunctionType _currentFunction;
     private Loop? _currentLoop;
 
-    public void BeginScope() => _scopes.Push((new Dictionary<int, Variable>(), new HashSet<int>()));
+    public void BeginScope() => _scopes.Push([]);
 
     public List<BindingException> Resolve(List<IStatement> statements)
     {
         BeginScope();
+        InitializeGlobalScope();
 
         foreach (var statement in statements)
         {
@@ -32,15 +35,31 @@ public partial class Resolver(Interpreter interpreter)
         return _errors;
     }
 
+    private void InitializeGlobalScope()
+    {
+        var global = _interpreter.Environment.Enclosing ?? throw new RuntimeException("'global' scope not initialized.");
+        foreach (var item in global)
+        {
+            Token name = new() { Lexeme = item };
+
+            Define(name);
+            Declare(name);
+        }
+    }
+
     private void AddVariable(string name, Variable? variable = null)
     {
-        variable ??= new Variable { Declared = true, Defined = true, Used = true, Name = new Token { Lexeme = name } };
+        variable ??= new()
+        {
+            Defined = true,
+            Declared = true,
+            Used = true,
+        };
 
-        var (variables, variableHashes) = _scopes.Peek();
-        int hash = name.GetHashCode();
+        variable.Name = new Token { Lexeme = name };
 
-        variables[hash] = variable;
-        variableHashes.Add(hash);
+        var scope = _scopes.Peek();
+        scope.Add(name.GetHashCode(), variable);
     }
 
     private void Declare(Token name)
@@ -51,20 +70,14 @@ public partial class Resolver(Interpreter interpreter)
             return;
         }
 
-        var (variables, variableHashes) = _scopes.Peek();
-        int hash = name.Lexeme.GetHashCode();
-
-        // Check if the variable already exists in the current scope
-        if (!variableHashes.Contains(hash))
+        var scope = _scopes.Peek();
+        if (!scope.TryGetValue(name.Lexeme.GetHashCode(), out var variable))
         {
             Report(ExceptionLevel.Error, name, $"Variable '{name.Lexeme}' not defined.");
             return;
         }
 
-        if (variables.TryGetValue(hash, out var variable))
-        {
-            variable.Declared = true;
-        }
+        variable!.Declared = true;
     }
 
     private void Define(Token name)
@@ -75,27 +88,21 @@ public partial class Resolver(Interpreter interpreter)
             return;
         }
 
-        var (variables, variableHashes) = _scopes.Peek();
-        int hash = name.Lexeme.GetHashCode();
-
-        // Attempt to add the variable to the current scope
-        if (!variableHashes.Add(hash))
+        var scope = _scopes.Peek();
+        if (!scope.TryAdd(name.Lexeme.GetHashCode(), new Variable { Name = name, Defined = true }))
         {
             Report(ExceptionLevel.Error, name, $"Variable with name '{name.Lexeme}' already declared in this scope.");
-            return;
         }
-
-        variables[hash] = new Variable { Name = name, Defined = true };
     }
 
     private void EndScope()
     {
-        var (variables, _) = _scopes.Pop();
-        foreach (var variable in variables.Values)
+        var scope = _scopes.Pop();
+        foreach (var variable in scope.Values)
         {
-            if (!variable.Used)
+            if (!_module && !variable.Used)
             {
-                Report(ExceptionLevel.Warning, variable.Name, $"Unused variable '{variable.Name.Lexeme}'.");
+                Report(ExceptionLevel.Warning, variable.Name, $"Unusued variable '{variable.Name.Lexeme}'.");
             }
         }
     }
@@ -134,19 +141,19 @@ public partial class Resolver(Interpreter interpreter)
         _currentFunction = enclosing;
     }
 
-    private void ResolveLocal(IExpression expression, Token name)
+    private void ResolveLocal(IExpression statement, Token name)
     {
-        int hash = name.Lexeme.GetHashCode();
-
-        foreach (var (variables, variableHashes) in _scopes)
+        foreach (var (index, scope) in _scopes.Select((s, i) => (i, s)))
         {
-            if (variableHashes.Contains(hash) && variables.TryGetValue(hash, out var variable))
+            if (scope.TryGetValue(name.Lexeme.GetHashCode(), out var variable))
             {
                 variable.Used = true;
-                interpreter.Resolve(expression, _scopes.Count - 1);
+                _interpreter.Resolve(statement, index);
                 return;
             }
         }
+
+        _interpreter.Resolve(statement, _scopes.Count - 1);
     }
 
     private void ResolveLoop(IStatement statement, LoopType type)
@@ -209,4 +216,3 @@ public partial class Resolver(Interpreter interpreter)
         public bool Used { get; set; }
     }
 }
-

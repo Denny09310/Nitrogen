@@ -1,9 +1,10 @@
 ﻿using Nitrogen.Exceptions;
 using Nitrogen.Syntax;
+using System.Collections;
 
 namespace Nitrogen.Interpreting;
 
-public class Environment
+public class Environment : IEnumerable<string>
 {
     private readonly Dictionary<string, object?> _variables = [];
 
@@ -32,6 +33,11 @@ public class Environment
         {
             throw new RuntimeException(name, $"Variable with name '{name.Lexeme}' not defined in this scope.");
         }
+    }
+
+    public void AssignAt(int distance, Token name, object? value)
+    {
+        Ancestor(distance).Assign(name, value);
     }
 
     public void Define(Token name, object? value)
@@ -63,11 +69,6 @@ public class Environment
         return Ancestor(distance).Get(name);
     }
 
-    public void AssignAt(int distance, Token name, object? value)
-    {
-        Ancestor(distance).Assign(name, value);
-    }
-
     private Environment Ancestor(int distance)
     {
         var environment = this;
@@ -76,5 +77,15 @@ public class Environment
             environment = environment.Enclosing ?? throw new RuntimeException("Can't lookup variable.");
         }
         return environment;
+    }
+
+    public IEnumerator<string> GetEnumerator()
+    {
+        return _variables.Keys.GetEnumerator();
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
     }
 }

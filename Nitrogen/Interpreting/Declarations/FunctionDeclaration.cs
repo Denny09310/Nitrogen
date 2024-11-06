@@ -4,20 +4,22 @@ using Nitrogen.Syntax.Statements;
 
 namespace Nitrogen.Interpreting.Declarations;
 
-public class FunctionDeclaration(FunctionStatement statement, Environment closure, bool isConstructor = false) : ICallable
+public class FunctionDeclaration(FunctionStatement statement, Environment closure, bool isConstructor = false) : CallableBase
 {
+    private readonly FunctionStatement _statement = statement;
+
     public Environment Closure { get; } = closure;
 
-    public string Name { get; } = statement.Name.Lexeme;
+    public override string Name => _statement.Name.Lexeme;
 
-    public void Arity(object?[] @params)
+    public override void EnsureArity(object?[] @params)
     {
-        var mandatory = statement.Arguments.Where(argument => argument is IdentifierExpression).ToArray();
-        var optionals = statement.Arguments.Where(argument => argument is AssignmentExpression).ToArray();
+        var mandatory = _statement.Arguments.Where(argument => argument is IdentifierExpression).ToArray();
+        var optionals = _statement.Arguments.Where(argument => argument is AssignmentExpression).ToArray();
 
         if (@params.Length < mandatory.Length || @params.Length > mandatory.Length + optionals.Length)
         {
-            throw new RuntimeException(statement.Name, $"Parameters mismatch, required at least {mandatory.Length} and at most {mandatory.Length + optionals.Length}");
+            throw new RuntimeException(_statement.Name, $"Parameters mismatch, required at least {mandatory.Length} and at most {mandatory.Length + optionals.Length}");
         }
     }
 
@@ -25,17 +27,17 @@ public class FunctionDeclaration(FunctionStatement statement, Environment closur
     {
         var environment = new Environment(Closure);
         environment.Define("this", instance);
-        return new FunctionDeclaration(statement, environment);
+        return new FunctionDeclaration(_statement, environment);
     }
 
-    public object? Call(Interpreter interpreter, object?[] @params)
+    public override object? Call(Interpreter interpreter, object?[] @params)
     {
         var environment = new Environment(Closure);
         DefineArguments(interpreter, @params, environment);
 
         try
         {
-            interpreter.ExecuteScoped(statement.Body is BlockStatement block ? block.Statements : [statement.Body], new Environment(environment));
+            interpreter.Execute(_statement.Body is BlockStatement block ? block.Statements : [_statement.Body], new Environment(environment));
         }
         catch (ReturnException ex)
         {
@@ -52,7 +54,7 @@ public class FunctionDeclaration(FunctionStatement statement, Environment closur
 
     private void DefineArguments(Interpreter interpreter, object?[] @params, Environment environment)
     {
-        foreach (var (index, argument) in statement.Arguments.Select((a, i) => (i, a)))
+        foreach (var (index, argument) in _statement.Arguments.Select((a, i) => (i, a)))
         {
             if (argument is IdentifierExpression identifier)
             {

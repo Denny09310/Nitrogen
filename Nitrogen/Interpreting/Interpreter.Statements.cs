@@ -1,6 +1,7 @@
 ﻿using Nitrogen.Exceptions;
 using Nitrogen.Interpreting.Declarations;
 using Nitrogen.Syntax.Abstractions;
+using Nitrogen.Syntax.Expressions;
 using Nitrogen.Syntax.Statements;
 
 using System.Diagnostics;
@@ -12,7 +13,6 @@ public partial class Interpreter
     public object? Execute(IStatement stmt) => stmt switch
     {
         ExpressionStatement statement => Execute(statement),
-        PrintStatement statement => Execute(statement),
         WhileStatement statement => Execute(statement),
         ForStatement statement => Execute(statement),
         BlockStatement statement => Execute(statement),
@@ -20,10 +20,11 @@ public partial class Interpreter
         FunctionStatement statement => Execute(statement),
         VarStatement statement => Execute(statement),
         ClassStatement statement => Execute(statement),
+        ImportStatement statement => Execute(statement),
         _ => throw new UnreachableException($"Statement {stmt.GetType()} not recognized.")
     };
 
-    public void ExecuteScoped(List<IStatement> statements, Environment environment)
+    public void Execute(List<IStatement> statements, Environment environment)
     {
         (var enclosing, _environment) = (_environment, environment);
 
@@ -40,17 +41,37 @@ public partial class Interpreter
         }
     }
 
+    private object? Execute(ImportStatement statement)
+    {
+        var source = Evaluate(statement.Source) as string ?? throw new ArgumentException("Invalid import 'source'.");
+        var module = _loader.LoadModule(source) ?? throw new RuntimeException($"Module '{source}' could not be loaded.");
+
+        foreach (var (key, value) in module.Locals)
+        {
+            Locals.Add(key, value);
+        }
+        
+        foreach (var import in statement.Imports)
+        {
+            var token = ((IdentifierExpression)import).Name;
+
+            try
+            {
+                var symbol = module.Environment.Get(token);
+                Environment.Define(token, symbol);
+            }
+            catch (Exception ex)
+            {
+                throw new RuntimeException($"Symbol '{token.Lexeme}' not found in module '{source}'.", ex);
+            }
+        }
+
+        return null;
+    }
+
     private object? Execute(ExpressionStatement statement)
     {
         return Evaluate(statement.Expression);
-    }
-
-    private object? Execute(PrintStatement statement)
-    {
-        var value = new EvaluationResult(Evaluate(statement.Expression));
-        Output.WriteLine(value.ToString());
-
-        return null;
     }
 
     private object? Execute(WhileStatement statement)
@@ -68,7 +89,7 @@ public partial class Interpreter
 
     private object? Execute(BlockStatement statement)
     {
-        ExecuteScoped(statement.Statements, new Environment(_environment));
+        Execute(statement.Statements, new Environment(_environment));
         return null;
     }
 
