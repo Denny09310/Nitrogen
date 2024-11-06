@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "Nitrogen.Runtime": {
-      "commandName": "Project",
-      "commandLineArgs": "C:\\Users\\dkoja\\source\\github\\Nitrogen\\Nitrogen.Runtime\\bin\\Debug\\net8.0\\main.nt"
-    }
-  }
-}
