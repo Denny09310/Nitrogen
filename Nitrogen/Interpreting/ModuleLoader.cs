@@ -6,13 +6,13 @@ using Nitrogen.Syntax.Abstractions;
 
 namespace Nitrogen.Interpreting;
 
-public class Loader(string @base)
+public class ModuleLoader(string @base)
 {
     private readonly string _base = @base;
 
     private readonly Dictionary<string, Module> _cache = [];
 
-    public Module LoadModule(string sourcePath)
+    public Module Load(string sourcePath)
     {
         // Step 1: Resolve the full path
         string fullPath = ResolvePath(sourcePath);

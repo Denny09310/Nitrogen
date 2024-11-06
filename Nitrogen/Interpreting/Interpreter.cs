@@ -8,7 +8,7 @@ namespace Nitrogen.Interpreting;
 public partial class Interpreter
 {
     private readonly Environment _globals;
-    private readonly Loader _loader;
+    private readonly ModuleLoader _loader;
     private readonly Dictionary<IExpression, int> _locals = [];
     private readonly InterpreterOptions _options = InterpreterOptions.Default;
 
@@ -23,7 +23,7 @@ public partial class Interpreter
         _globals = DefineGlobals();
         _environment = new Environment(_globals);
         _options = options ?? throw new ArgumentNullException(nameof(options));
-        _loader = new Loader(Directory.GetCurrentDirectory());
+        _loader = new ModuleLoader(Directory.GetCurrentDirectory());
     }
 
     public Environment Environment => _environment;

@@ -44,7 +44,7 @@ public partial class Interpreter
     private object? Execute(ImportStatement statement)
     {
         var source = Evaluate(statement.Source) as string ?? throw new ArgumentException("Invalid import 'source'.");
-        var module = _loader.LoadModule(source) ?? throw new RuntimeException($"Module '{source}' could not be loaded.");
+        var module = _loader.Load(source) ?? throw new RuntimeException($"Module '{source}' could not be loaded.");
 
         foreach (var (key, value) in module.Locals)
         {
