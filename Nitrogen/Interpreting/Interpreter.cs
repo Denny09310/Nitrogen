@@ -20,7 +20,7 @@ public partial class Interpreter
 
     public Interpreter(InterpreterOptions options)
     {
-        _globals = DefineGlobals();
+        _globals = InitializeGlobals();
         _environment = new Environment(_globals);
         _options = options ?? throw new ArgumentNullException(nameof(options));
         _loader = new ModuleLoader(Directory.GetCurrentDirectory());
@@ -43,25 +43,55 @@ public partial class Interpreter
         _locals.TryAdd(expression, depth);
     }
 
-    private static Environment DefineGlobals()
+    private static Environment InitializeGlobals()
     {
         var environment = new Environment();
 
-        var globals = typeof(Interpreter).Assembly
+        var classes = typeof(Interpreter).Assembly
             .ExportedTypes
-            .Where(t => !t.IsAbstract && t.Name != nameof(WrapperInstance) && typeof(NativeInstance).IsAssignableFrom(t));
+            .Where(IsGlobalClass);
 
-        foreach (var global in globals)
+        foreach (var @class in classes)
         {
-            if (Activator.CreateInstance(global) is not NativeInstance instance)
+            if (Activator.CreateInstance(@class) is not NativeInstance instance)
             {
-                throw new RuntimeException($"Type '{global.Name}' can't be instantiated into 'global scope'");
+                throw new RuntimeException($"Type '{@class.Name}' can't be instantiated into 'global scope'");
+            }
+
+            environment.Define(instance.Name, instance);
+        }
+
+        var functions = typeof(Interpreter).Assembly
+            .ExportedTypes
+            .Where(IsGlobalFunction);
+
+        foreach (var function in functions)
+        {
+            if (Activator.CreateInstance(function) is not CallableBase instance)
+            {
+                throw new RuntimeException($"Type '{function.Name}' can't be instantiated into 'global scope'");
             }
 
             environment.Define(instance.Name, instance);
         }
 
         return environment;
+    }
+
+    private static bool IsGlobalClass(Type type)
+    {
+        return !type.IsAbstract
+            && type.Name != nameof(WrapperInstance)
+            && typeof(NativeInstance).IsAssignableFrom(type);
+    }
+
+    private static bool IsGlobalFunction(Type type)
+    {
+        return !type.IsAbstract
+            && type.Name != nameof(FunctionDeclaration)
+            && type.Name != nameof(MethodCallable)
+            && type.Name != nameof(PropertyCallable)
+            && typeof(CallableBase).IsAssignableFrom(type);
     }
 
     private object? LookupVariable(IExpression expression, Token name, bool global = true)

@@ -9,13 +9,15 @@ public class WrapperInstance(object instance) : NativeInstance
     private Dictionary<string, MethodCallable>? _methods;
     private Dictionary<string, PropertyCallable>? _properties;
 
-    public override Dictionary<string, MethodCallable> Methods => _methods ??= WrapMethods(instance.GetType());
-    public override Dictionary<string, PropertyCallable> Properties => _properties ??= WrapProperties(instance.GetType());
+    public object Instance { get; } = instance;
     public override string Name => _name;
 
-    protected override object? CallGetter(PropertyCallable getter) => getter.Bind(instance).Call(null!, []);
+    public override Dictionary<string, MethodCallable> Methods => _methods ??= WrapMethods(Instance.GetType());
+    public override Dictionary<string, PropertyCallable> Properties => _properties ??= WrapProperties(Instance.GetType());
 
-    protected override void CallSetter(PropertyCallable setter, object? value) => setter.Bind(instance).Call(null!, [value]);
+    protected override object? CallGetter(PropertyCallable getter) => getter.Bind(Instance).Call(null!, []);
 
-    protected override MethodCallable CreateMethod(MethodCallable method) => method.Bind(instance);
+    protected override void CallSetter(PropertyCallable setter, object? value) => setter.Bind(Instance).Call(null!, [value]);
+
+    protected override MethodCallable CreateMethod(MethodCallable method) => method.Bind(Instance);
 }

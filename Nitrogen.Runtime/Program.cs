@@ -103,7 +103,6 @@ public static class Program
 
     private static void RunInteractive()
     {
-        const string Prompt = "> ";
         const string ExitCommand = "exit";
         const string ClearCommand = "clear";
 
@@ -112,8 +111,10 @@ public static class Program
 
         while (true)
         {
-            Console.Write(Prompt);
-            if (Console.ReadLine() is not string input) continue;
+            if (Console.ReadLine() is not string input)
+            {
+                continue;
+            }
 
             if (input == ExitCommand)
             {

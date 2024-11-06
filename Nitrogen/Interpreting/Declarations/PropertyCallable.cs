@@ -52,13 +52,7 @@ public class PropertyCallable(PropertyInfo property) : CallableBase
         }
 
         var value = _property.GetValue(_instance);
-
-        if (value != null && _property.PropertyType.IsClass)
-        {
-            return new WrapperInstance(value);
-        }
-
-        return value;
+        return value.ToInternal();
     }
 
     private void Set(object? value)

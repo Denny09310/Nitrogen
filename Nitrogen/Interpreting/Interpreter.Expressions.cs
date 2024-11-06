@@ -1,4 +1,5 @@
 ﻿using Nitrogen.Exceptions;
+using Nitrogen.Extensions;
 using Nitrogen.Interpreting.Declarations;
 using Nitrogen.Syntax;
 using Nitrogen.Syntax.Abstractions;
@@ -19,12 +20,14 @@ public partial class Interpreter
         GroupingExpression expression => Evaluate(expression),
         IdentifierExpression expression => Evaluate(expression),
         CallExpression expression => Evaluate(expression),
-        LiteralExpression expression => expression.Literal,
+        LiteralExpression expression => expression.Literal.ToInternal(),
         ReturnExpression expression => Evaluate(expression),
         GetterExpression expression => Evaluate(expression),
         SetterExpression expression => Evaluate(expression),
         ThisExpression expression => Evaluate(expression),
         SuperExpression expression => Evaluate(expression),
+        ArrayExpression expression => Evaluate(expression),
+        IndexExpression expression => Evaluate(expression),
         BreakExpression => throw new BreakException(),
         ContinueExpression => throw new ContinueException(),
         _ => throw new UnreachableException($"Expression {expr.GetType()} not recognized.")
@@ -36,7 +39,7 @@ public partial class Interpreter
 
         if (!_locals.TryGetValue(expression, out var distance))
         {
-            throw new RuntimeException(expression.Name, "Can't variable in global scope.");
+            throw new RuntimeException(expression.Name, "Can't assign variable in global scope.");
         }
 
         _environment.AssignAt(distance, expression.Name, value);
@@ -208,5 +211,36 @@ public partial class Interpreter
 
         var args = expression.Parameters.Select(Evaluate).ToArray();
         return constructor.Bind(instance).Call(this, args);
+    }
+
+    private object? Evaluate(ArrayExpression expression)
+    {
+        return expression.Items.Select(Evaluate).ToInternal();
+    }
+
+    private object? Evaluate(IndexExpression expression)
+    {
+        var array = Evaluate(expression.Array).Unwrap();
+        var index = Evaluate(expression.Index);
+
+        // Check that the array is indeed an array
+        if (array is not object?[] value)
+        {
+            throw new RuntimeException(expression.Bracket, "Target is not an array.");
+        }
+
+        // Ensure the index is an integer
+        if (index is not double @double)
+        {
+            throw new RuntimeException(expression.Bracket, "Array index must be an integer.");
+        }
+
+        // Check bounds
+        if (@double < 0 || @double >= value.Length)
+        {
+            throw new RuntimeException(expression.Bracket, "Array index out of bounds.");
+        }
+
+        return value[(int)@double];
     }
 }
