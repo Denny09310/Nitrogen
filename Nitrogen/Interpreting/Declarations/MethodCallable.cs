@@ -36,6 +36,11 @@ public partial class MethodCallable(string name, List<MethodInfo> overloads) : C
         // Invoke the selected method
         var result = method.Invoke(_instance, args);
 
+        if (result != null && method.ReturnType is { IsClass: true, IsPrimitive: false } && method.ReturnType != typeof(string))
+        {
+            return new WrapperInstance(result);
+        }
+
         return result switch
         {
             long or float or decimal or int or byte or short => Convert.ToDouble(result),
