@@ -53,14 +53,14 @@ internal static class ObjectExtensions
     {
         if (obj is WrapperInstance wrapper)
         {
-            return wrapper.Instance;
+            return wrapper.Instance.Unwrap();
         }
 
         return obj;
     }
 
     // Unwrap for arrays
-    public static object? Unwrap(this object?[] obj)
+    public static object?[] Unwrap(this object?[] obj)
     {
         for (int i = 0; i < obj.Length; i++)
         {

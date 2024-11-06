@@ -217,7 +217,10 @@ public partial class Interpreter
 
     private object? Evaluate(ArrayExpression expression)
     {
-        return expression.Items.Select(Evaluate).ToInternal();
+        return expression.Items
+            .Select(Evaluate)
+            .ToArray()
+            .ToInternal();
     }
 
     private object? Evaluate(IndexExpression expression)
@@ -232,18 +235,19 @@ public partial class Interpreter
         }
 
         // Ensure the index is an integer
-        if (index is not double @double)
+        if (index is double @double)
         {
-            throw new RuntimeException(expression.Bracket, "Array index must be an integer.");
+            // Check bounds
+            if (@double < 0 || @double >= value.Length)
+            {
+                throw new RuntimeException(expression.Bracket, "Array index out of bounds.");
+            }
+
+            return value[(int)@double];
         }
 
-        // Check bounds
-        if (@double < 0 || @double >= value.Length)
-        {
-            throw new RuntimeException(expression.Bracket, "Array index out of bounds.");
-        }
-
-        return value[(int)@double];
+        // TODO: Implement indexing by string
+        throw new RuntimeException(expression.Bracket, "Array index must be an integer.");
     }
 
     private object? Evaluate(PrefixExpression expression)
