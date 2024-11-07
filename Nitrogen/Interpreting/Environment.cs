@@ -1,6 +1,6 @@
-﻿using Nitrogen.Abstractions;
-using Nitrogen.Abstractions.Exceptions;
-using Nitrogen.Abstractions.Interpreting;
+﻿using Nitrogen.Core;
+using Nitrogen.Core.Exceptions;
+using Nitrogen.Core.Interpreting;
 using System.Collections;
 
 namespace Nitrogen.Interpreting;

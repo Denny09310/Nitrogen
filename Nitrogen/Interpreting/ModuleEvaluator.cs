@@ -1,6 +1,6 @@
-﻿using Nitrogen.Abstractions.Exceptions;
-using Nitrogen.Abstractions.Interpreting;
-using Nitrogen.Abstractions.Utils;
+﻿using Nitrogen.Core.Exceptions;
+using Nitrogen.Core.Interpreting;
+using Nitrogen.Core.Utils;
 using Nitrogen.Interpreting.Binding;
 using Nitrogen.Lexing;
 using Nitrogen.Parsing;

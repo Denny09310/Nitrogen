@@ -1,7 +1,7 @@
 ﻿using System.Text;
-using Nitrogen.Abstractions;
-using Nitrogen.Abstractions.Exceptions;
-using Nitrogen.Abstractions.Syntax.Statements.Abstractions;
+using Nitrogen.Core;
+using Nitrogen.Core.Exceptions;
+using Nitrogen.Core.Syntax.Statements.Abstractions;
 using Nitrogen.Interpreting;
 using Nitrogen.Interpreting.Binding;
 using Nitrogen.Lexing;

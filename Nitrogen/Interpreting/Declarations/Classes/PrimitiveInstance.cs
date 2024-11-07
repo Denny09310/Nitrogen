@@ -1,4 +1,4 @@
-﻿using Nitrogen.Abstractions.Interpreting.Declarations;
+﻿using Nitrogen.Core.Interpreting.Declarations;
 
 namespace Nitrogen.Interpreting.Declarations.Classes;
 

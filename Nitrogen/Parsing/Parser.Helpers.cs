@@ -1,5 +1,5 @@
-﻿using Nitrogen.Abstractions;
-using Nitrogen.Abstractions.Exceptions;
+﻿using Nitrogen.Core;
+using Nitrogen.Core.Exceptions;
 
 namespace Nitrogen.Parsing;
 

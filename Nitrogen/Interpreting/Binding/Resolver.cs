@@ -1,9 +1,9 @@
-﻿using Nitrogen.Abstractions;
-using Nitrogen.Abstractions.Exceptions;
-using Nitrogen.Abstractions.Syntax.Expressions;
-using Nitrogen.Abstractions.Syntax.Expressions.Abstractions;
-using Nitrogen.Abstractions.Syntax.Statements;
-using Nitrogen.Abstractions.Syntax.Statements.Abstractions;
+﻿using Nitrogen.Core;
+using Nitrogen.Core.Exceptions;
+using Nitrogen.Core.Syntax.Expressions;
+using Nitrogen.Core.Syntax.Expressions.Abstractions;
+using Nitrogen.Core.Syntax.Statements;
+using Nitrogen.Core.Syntax.Statements.Abstractions;
 using System.Diagnostics;
 
 namespace Nitrogen.Interpreting.Binding;

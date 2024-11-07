@@ -1,7 +1,7 @@
-﻿using Nitrogen.Abstractions.Exceptions;
-using Nitrogen.Abstractions.Syntax.Expressions;
-using Nitrogen.Abstractions.Syntax.Expressions.Abstractions;
-using Nitrogen.Abstractions.Syntax.Statements;
+﻿using Nitrogen.Core.Exceptions;
+using Nitrogen.Core.Syntax.Expressions;
+using Nitrogen.Core.Syntax.Expressions.Abstractions;
+using Nitrogen.Core.Syntax.Statements;
 
 namespace Nitrogen.Interpreting.Binding;
 

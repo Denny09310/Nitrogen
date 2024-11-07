@@ -1,4 +1,4 @@
-﻿using Nitrogen.Abstractions;
+﻿using Nitrogen.Core;
 using System.Globalization;
 
 namespace Nitrogen.Lexing;

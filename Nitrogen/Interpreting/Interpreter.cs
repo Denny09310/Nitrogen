@@ -1,10 +1,10 @@
-﻿using Nitrogen.Abstractions;
-using Nitrogen.Abstractions.Exceptions;
-using Nitrogen.Abstractions.Interpreting;
-using Nitrogen.Abstractions.Interpreting.Declarations;
-using Nitrogen.Abstractions.Syntax.Expressions.Abstractions;
-using Nitrogen.Abstractions.Syntax.Statements.Abstractions;
-using Nitrogen.Abstractions.Utils;
+﻿using Nitrogen.Core;
+using Nitrogen.Core.Exceptions;
+using Nitrogen.Core.Interpreting;
+using Nitrogen.Core.Interpreting.Declarations;
+using Nitrogen.Core.Syntax.Expressions.Abstractions;
+using Nitrogen.Core.Syntax.Statements.Abstractions;
+using Nitrogen.Core.Utils;
 
 namespace Nitrogen.Interpreting;
 
