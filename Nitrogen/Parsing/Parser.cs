@@ -375,6 +375,27 @@ public partial class Parser(List<Token> tokens)
             return new ArrayExpression(items);
         }
 
+        if (current.Kind is TokenKind.LeftBrace)
+        {
+            Dictionary<Token, object> items = [];
+            do
+            {
+                var key = Consume(TokenKind.String, "Expect key of type 'string'.");
+                Consume(TokenKind.Colon, "Expect ':' separator after dictionary key.");
+                var value = ParseExpression();
+
+                if (value is not LiteralExpression)
+                {
+                    throw new ParseException(key, "Expect literal as entry value.");
+                }
+
+                items.Add(key, value);
+            }
+            while(Match(TokenKind.Comma));
+            Consume(TokenKind.RightBrace, "Expect '}' after array expression.");
+            return new DictionaryExpression(items);
+        }
+
         if (current is { Kind: TokenKind.Number or TokenKind.String })
         {
             return new LiteralExpression(current.Value);
