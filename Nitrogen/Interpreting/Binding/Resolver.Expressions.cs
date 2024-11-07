@@ -27,6 +27,7 @@ public partial class Resolver
             case IndexExpression index: Resolve(index); break;
             case PrefixExpression prefix: Resolve(prefix); break;
             case PostfixExpression postfix: Resolve(postfix); break;
+            case DictionaryExpression dictionary: Resolve(dictionary); break;
 
             case BreakExpression:
                 if (_currentLoop != null) _currentLoop.Infinite = false;
@@ -192,5 +193,13 @@ public partial class Resolver
     private void Resolve(PostfixExpression expression)
     {
         Resolve(expression.Identifier);
+    }
+
+    private void Resolve(DictionaryExpression expression)
+    {
+        foreach (var item in expression.Value)
+        {
+            Resolve(item.Value);
+        }
     }
 }

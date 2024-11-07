@@ -20,7 +20,7 @@ internal static class ObjectExtensions
             // Handle arrays or classes
             return obj switch
             {
-                Array array => array.ToInternal(), // Recursively handle array
+                Array array => ToInternal(array), // Recursively handle array
                 _ when type.IsClass => new WrapperInstance(obj), // Wrap class instances
                 _ => obj
             };

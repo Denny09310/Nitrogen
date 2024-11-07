@@ -31,6 +31,7 @@ public partial class Interpreter
         IndexExpression expression => Evaluate(expression),
         PrefixExpression expression => Evaluate(expression),
         PostfixExpression expression => Evaluate(expression),
+        DictionaryExpression expression => Evaluate(expression),
         BreakExpression => throw new BreakException(),
         ContinueExpression => throw new ContinueException(),
         _ => throw new UnreachableException($"Expression {expr.GetType()} not recognized.")
@@ -216,38 +217,45 @@ public partial class Interpreter
         return constructor.Bind(instance).Call(this, args);
     }
 
-    private object? Evaluate(ArrayExpression expression)
+    private object?[] Evaluate(ArrayExpression expression)
     {
-        return expression.Items.Select(Evaluate)
-            .ToArray()
-            .ToInternal();
+        return expression.Items.Select(Evaluate).ToArray();
     }
 
     private object? Evaluate(IndexExpression expression)
     {
-        var array = Evaluate(expression.Array).Unwrap();
-        var index = Evaluate(expression.Index);
+        var iterable = Evaluate(expression.Array).Unwrap();
+        var index = Evaluate(expression.Index).Unwrap();
 
-        // Check that the array is indeed an array
-        if (array is not object?[] value)
+        switch (iterable)
         {
-            throw new RuntimeException(expression.Bracket, "Target is not an array.");
+            case object?[] array:
+
+                if (index is double @double)
+                {
+                    if (@double < 0 || @double >= array.Length)
+                    {
+                        throw new RuntimeException(expression.Bracket, "Array index out of bounds.");
+                    }
+
+                    return array[(int)@double];
+                }
+
+                throw new RuntimeException(expression.Bracket, "Array index must be a number.");
+
+            case Dictionary<string, object> dictionary:
+
+                if (index is string token && dictionary.TryGetValue(token, out var value))
+                {
+                    return value;
+                }
+
+                throw new RuntimeException(expression.Bracket, "Array index must be a string.");
+
+            default:
+
+                throw new RuntimeException(expression.Bracket, "Target is not an iterable.");
         }
-
-        // Ensure the index is an integer
-        if (index is double @double)
-        {
-            // Check bounds
-            if (@double < 0 || @double >= value.Length)
-            {
-                throw new RuntimeException(expression.Bracket, "Array index out of bounds.");
-            }
-
-            return value[(int)@double];
-        }
-
-        // TODO: Implement indexing by string
-        throw new RuntimeException(expression.Bracket, "Array index must be an integer.");
     }
 
     private object? Evaluate(PrefixExpression expression)
@@ -255,7 +263,7 @@ public partial class Interpreter
         var identifier = new Evaluation(Evaluate(expression.Identifier));
         var @operator = expression.Operator;
 
-        var currentValue = @operator.Kind switch
+        var current = @operator.Kind switch
         {
             TokenKind.PlusPlus => identifier + Evaluation.One,
             TokenKind.MinusMinus => identifier - Evaluation.One,
@@ -265,10 +273,10 @@ public partial class Interpreter
 
         if (expression.Identifier is IdentifierExpression identifierExpr)
         {
-            _environment.Assign(identifierExpr.Name, currentValue);
+            _environment.Assign(identifierExpr.Name, current);
         }
 
-        return currentValue;
+        return current;
     }
 
     private object? Evaluate(PostfixExpression expression)
@@ -300,5 +308,10 @@ public partial class Interpreter
         }
 
         return currentValue;
+    }
+
+    private Dictionary<string, object?> Evaluate(DictionaryExpression expression)
+    {
+        return expression.Value.ToDictionary(static x => x.Key.Lexeme, x => Evaluate(x.Value));
     }
 }
