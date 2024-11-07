@@ -61,7 +61,7 @@ public partial class Resolver
             return;
         }
 
-        if (!variable.Declared)
+        if (!variable.Defined)
         {
             Report(ExceptionLevel.Error, expression.Name, "Cannot read local variable in its own initializer.");
             return;

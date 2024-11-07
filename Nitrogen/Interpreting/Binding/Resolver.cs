@@ -37,12 +37,12 @@ public partial class Resolver(Interpreter interpreter, bool module = false)
         return _errors;
     }
 
-    private void Declare(string name, Variable? variable = null)
+    private void Define(string name, Variable? variable = null)
     {
         variable ??= new()
         {
-            Defined = true,
             Declared = true,
+            Defined = true,
             Used = true,
         };
 
@@ -50,24 +50,6 @@ public partial class Resolver(Interpreter interpreter, bool module = false)
 
         var scope = _scopes.Peek();
         scope.Add(name.GetHashCode(), variable);
-    }
-
-    private void Declare(Token name)
-    {
-        if (_scopes.Count == 0)
-        {
-            Report(ExceptionLevel.Error, name, "No scopes available.");
-            return;
-        }
-
-        var scope = _scopes.Peek();
-        if (!scope.TryGetValue(name.Lexeme.GetHashCode(), out var variable))
-        {
-            Report(ExceptionLevel.Error, name, $"Variable '{name.Lexeme}' not defined.");
-            return;
-        }
-
-        variable.Declared = true;
     }
 
     private void Define(Token name)
@@ -79,7 +61,25 @@ public partial class Resolver(Interpreter interpreter, bool module = false)
         }
 
         var scope = _scopes.Peek();
-        if (!scope.TryAdd(name.Lexeme.GetHashCode(), new Variable { Name = name, Defined = true }))
+        if (!scope.TryGetValue(name.Lexeme.GetHashCode(), out var variable))
+        {
+            Report(ExceptionLevel.Error, name, $"Variable '{name.Lexeme}' not declared.");
+            return;
+        }
+
+        variable.Defined = true;
+    }
+
+    private void Declare(Token name)
+    {
+        if (_scopes.Count == 0)
+        {
+            Report(ExceptionLevel.Error, name, "No scopes available.");
+            return;
+        }
+
+        var scope = _scopes.Peek();
+        if (!scope.TryAdd(name.Lexeme.GetHashCode(), new Variable { Name = name, Declared = true }))
         {
             Report(ExceptionLevel.Error, name, $"Variable with name '{name.Lexeme}' already declared in this scope.");
         }
@@ -103,7 +103,7 @@ public partial class Resolver(Interpreter interpreter, bool module = false)
 
         foreach (var item in global)
         {
-            Declare(item);
+            Define(item);
         }
     }
 
@@ -115,13 +115,13 @@ public partial class Resolver(Interpreter interpreter, bool module = false)
         {
             if (argument is AssignmentExpression assignment)
             {
-                Define(assignment.Name);
                 Declare(assignment.Name);
+                Define(assignment.Name);
             }
             else if (argument is IdentifierExpression identifier)
             {
-                Define(identifier.Name);
                 Declare(identifier.Name);
+                Define(identifier.Name);
             }
         }
     }
@@ -210,8 +210,8 @@ public partial class Resolver(Interpreter interpreter, bool module = false)
 
     private sealed class Variable
     {
-        public bool Declared { get; set; }
         public bool Defined { get; set; }
+        public bool Declared { get; set; }
         public Token Name { get; set; }
         public bool Used { get; set; }
     }

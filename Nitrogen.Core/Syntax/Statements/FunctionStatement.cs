@@ -1,5 +1,4 @@
-﻿using Nitrogen.Core;
-using Nitrogen.Core.Syntax.Expressions.Abstractions;
+﻿using Nitrogen.Core.Syntax.Expressions.Abstractions;
 using Nitrogen.Core.Syntax.Statements.Abstractions;
 
 namespace Nitrogen.Core.Syntax.Statements;

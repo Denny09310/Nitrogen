@@ -1,4 +1,5 @@
 ﻿using Nitrogen.Core.Exceptions;
+using Nitrogen.Core.Extensions;
 using Nitrogen.Core.Syntax.Expressions;
 using Nitrogen.Core.Syntax.Statements;
 using Nitrogen.Core.Syntax.Statements.Abstractions;
@@ -21,6 +22,9 @@ public partial class Interpreter
         VarStatement statement => Execute(statement),
         ClassStatement statement => Execute(statement),
         ImportStatement statement => Execute(statement),
+        TryStatement statement => Execute(statement),
+        CatchStatement statement => Execute(statement),
+        FinallyStatement statement => Execute(statement),
         _ => throw new UnreachableException($"Statement {stmt.GetType()} not recognized.")
     };
 
@@ -131,6 +135,51 @@ public partial class Interpreter
 
         _environment.Assign(statement.Name, @class);
 
+        return null;
+    }
+
+    private object? Execute(TryStatement statement)
+    {
+        try
+        {
+            Execute(statement.Body);
+        }
+        catch (RuntimeException ex)
+        {
+            if (statement.Catch != null)
+            {
+                statement.Catch.Exception = ex;
+                Execute(statement.Catch);
+            }
+        }
+        finally
+        {
+            if (statement.Finally != null)
+            {
+                Execute(statement.Finally);
+            }
+        }
+
+        return null;
+    }
+
+    private object? Execute(CatchStatement statement)
+    {
+        var environment = new Environment(_environment);
+        var exception = statement.Exception;
+
+        if (statement.Identifier != null && exception != null)
+        {
+            environment.Define(statement.Identifier.Name, exception.ToInternal());
+        }
+
+        Execute(statement.Body, environment);
+        return null;
+    }
+
+    private object? Execute(FinallyStatement statement)
+    {
+        Execute(statement.Body);
         return null;
     }
 }

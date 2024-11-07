@@ -26,6 +26,9 @@ public partial class Lexer
         ["extends"] = TokenKind.Extends,
         ["import"] = TokenKind.Import,
         ["from"] = TokenKind.From,
+        ["try"] = TokenKind.Try,
+        ["catch"] = TokenKind.Catch,
+        ["finally"] = TokenKind.Finally,
     };
 
     private static object? GetValue(TokenKind kind, string lexeme)
@@ -76,6 +79,7 @@ public partial class Lexer
     {
         switch (Peek())
         {
+            case 'r': _buffer.Append('\r'); break;
             case 'n': _buffer.Append('\n'); break;
             case 't': _buffer.Append('\t'); break;
             case '\\': _buffer.Append('\\'); break;

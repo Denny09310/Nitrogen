@@ -11,4 +11,5 @@ public interface IInterpreter
     object? Evaluate(IExpression expr);
     void Execute(List<IStatement> statements);
     void Execute(List<IStatement> statements, IEnvironment environment);
+    void Execute(IStatement statement, IEnvironment environment);
 }

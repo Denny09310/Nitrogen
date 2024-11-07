@@ -86,6 +86,9 @@ public enum TokenKind
     Extends,
     Import,
     From,
+    Try,
+    Catch,
+    Finally,
 
     #endregion Keywords
 

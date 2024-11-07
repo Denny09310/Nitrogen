@@ -38,7 +38,7 @@ public class FunctionDeclaration(FunctionStatement statement, IEnvironment closu
 
         try
         {
-            interpreter.Execute(_statement.Body is BlockStatement block ? block.Statements : [_statement.Body], new Environment(environment));
+            interpreter.Execute(_statement.Body, new Environment(environment));
         }
         catch (ReturnException ex)
         {

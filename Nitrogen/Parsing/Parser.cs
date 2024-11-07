@@ -138,6 +138,32 @@ public partial class Parser(List<Token> tokens)
         return parameters;
     }
 
+    private CatchStatement ParseCatchStatement()
+    {
+        var keyword = Peek(-1);
+
+        IExpression? identifier = null;
+        if (Match(TokenKind.LeftParenthesis))
+        {
+            identifier = ParseExpression();
+            Consume(TokenKind.RightParenthesis, "Expect ')' after catch initializer.");
+
+            if (identifier is not IdentifierExpression)
+            {
+                throw new ParseException(keyword, "The catch statement must have an identifier for the exception.");
+            }
+        }
+
+        var body = ParseStatement();
+
+        if (body is not BlockStatement)
+        {
+            throw new ParseException(keyword, "The catch statement must have a block body");
+        }
+
+        return new CatchStatement(keyword, identifier as IdentifierExpression, (BlockStatement)body);
+    }
+
     private ClassStatement ParseClassStatement()
     {
         var name = Consume(TokenKind.Identifier, "Expect name after class statement.");
@@ -171,6 +197,13 @@ public partial class Parser(List<Token> tokens)
     private IExpression ParseExpression()
     {
         return ParseAssignmentExpression();
+    }
+
+    private FinallyStatement ParseFinallyStatement()
+    {
+        var keyword = Peek(-1);
+        var body = ParseStatement();
+        return new FinallyStatement(keyword, body);
     }
 
     private ForStatement ParseForStatement()
@@ -391,7 +424,7 @@ public partial class Parser(List<Token> tokens)
 
                 items.Add(key, value);
             }
-            while(Match(TokenKind.Comma));
+            while (Match(TokenKind.Comma));
             Consume(TokenKind.RightBrace, "Expect '}' after array expression.");
             return new DictionaryExpression(items);
         }
@@ -419,6 +452,9 @@ public partial class Parser(List<Token> tokens)
         if (Match(TokenKind.While)) return ParseWhileStatement();
         if (Match(TokenKind.For)) return ParseForStatement();
         if (Match(TokenKind.If)) return ParseIfStatement();
+        if (Match(TokenKind.Try)) return ParseTryStatement();
+        if (Match(TokenKind.Catch)) return ParseCatchStatement();
+        if (Match(TokenKind.Finally)) return ParseFinallyStatement();
 
         if (Match(TokenKind.LeftBrace)) return ParseBlockStatement();
 
@@ -440,6 +476,38 @@ public partial class Parser(List<Token> tokens)
         Token member = Consume(TokenKind.Identifier, "Expect member name after super expression.");
 
         return new SuperExpression(current, member);
+    }
+
+    private TryStatement ParseTryStatement()
+    {
+        var keyword = Peek(-1);
+
+        var body = ParseStatement();
+
+        var @catch = Check(TokenKind.Catch)
+            ? ParseStatement()
+            : null;
+
+        var @finally = Check(TokenKind.Finally)
+            ? ParseStatement()
+            : null;
+
+        if (@catch == null && @finally == null)
+        {
+            throw new ParseException(keyword, "try statement must have either 'catch' or 'finally'.");
+        }
+
+        if (@catch != null && @catch is not CatchStatement)
+        {
+            throw new ParseException(keyword, "try statement must be followed by a 'catch' statement.");
+        }
+
+        if (@finally != null && @finally is not FinallyStatement)
+        {
+            throw new ParseException(keyword, "try statement must be followed by a 'finally' statement.");
+        }
+
+        return new TryStatement(keyword, body, @catch as CatchStatement, @finally as FinallyStatement);
     }
 
     private IExpression ParseUnaryExpression()

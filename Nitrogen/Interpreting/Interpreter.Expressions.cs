@@ -178,7 +178,7 @@ public partial class Interpreter
             throw new RuntimeException(expression.Name, "Only instances have properties.");
         }
 
-        var value = Evaluate(expression.Value);
+        var value = Evaluate(expression.Value).Unwrap();
         instance.Set(expression.Name, value);
 
         return value;

@@ -58,6 +58,20 @@ public partial class Interpreter : IInterpreter
         }
     }
 
+    public void Execute(IStatement statement, IEnvironment environment)
+    {
+        (var enclosing, _environment) = (_environment, environment);
+
+        try
+        {
+            Execute(statement);
+        }
+        finally
+        {
+            _environment = enclosing;
+        }
+    }
+
     public void Resolve(IExpression expression, int depth)
     {
         _locals.TryAdd(expression, depth);
