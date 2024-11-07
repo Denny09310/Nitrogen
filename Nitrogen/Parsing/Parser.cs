@@ -377,7 +377,7 @@ public partial class Parser(List<Token> tokens)
 
         if (current.Kind is TokenKind.LeftBrace)
         {
-            Dictionary<Token, object> items = [];
+            Dictionary<Token, IExpression> items = [];
             do
             {
                 var key = Consume(TokenKind.String, "Expect key of type 'string'.");
