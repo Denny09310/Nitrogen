@@ -197,7 +197,7 @@ public partial class Resolver
 
     private void Resolve(DictionaryExpression expression)
     {
-        foreach (var item in expression.Items)
+        foreach (var item in expression.Value)
         {
             Resolve(item.Value);
         }

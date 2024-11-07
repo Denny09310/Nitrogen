@@ -4,5 +4,5 @@ namespace Nitrogen.Abstractions.Syntax.Expressions;
 
 public class DictionaryExpression(IDictionary<Token, IExpression> items) : IExpression
 {
-    public IDictionary<Token, IExpression> Items { get; } = items;
+    public IDictionary<Token, IExpression> Value { get; } = items;
 }
