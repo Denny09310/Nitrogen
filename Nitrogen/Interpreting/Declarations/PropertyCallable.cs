@@ -1,4 +1,6 @@
-﻿using Nitrogen.Exceptions;
+﻿using Nitrogen.Abstractions.Base;
+using Nitrogen.Abstractions.Exceptions;
+using Nitrogen.Abstractions.Interpreting;
 using Nitrogen.Extensions;
 using System.Reflection;
 
@@ -27,7 +29,7 @@ public class PropertyCallable(PropertyInfo property) : CallableBase
         return this;
     }
 
-    public override object? Call(Interpreter interpreter, object?[] args)
+    public override object? Call(IInterpreter interpreter, object?[] args)
     {
         if (args.Length == 0)
         {
@@ -51,8 +53,7 @@ public class PropertyCallable(PropertyInfo property) : CallableBase
             throw new RuntimeException($"Property '{_name}' is not readable.");
         }
 
-        var value = _property.GetValue(_instance);
-        return value.ToInternal();
+        return _property.GetValue(_instance).ToInternal();
     }
 
     private void Set(object? value)

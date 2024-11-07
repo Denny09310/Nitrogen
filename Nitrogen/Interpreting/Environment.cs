@@ -1,10 +1,11 @@
-﻿using Nitrogen.Exceptions;
-using Nitrogen.Syntax;
+﻿using Nitrogen.Abstractions;
+using Nitrogen.Abstractions.Exceptions;
+using Nitrogen.Abstractions.Interpreting;
 using System.Collections;
 
 namespace Nitrogen.Interpreting;
 
-public class Environment : IEnumerable<string>
+public class Environment : IEnvironment
 {
     private readonly Dictionary<string, object?> _variables = [];
 
@@ -12,12 +13,12 @@ public class Environment : IEnumerable<string>
     {
     }
 
-    public Environment(Environment enclosing)
+    public Environment(IEnvironment enclosing)
     {
         Enclosing = enclosing;
     }
 
-    public Environment? Enclosing { get; private set; }
+    public IEnvironment? Enclosing { get; private set; }
 
     public void Assign(Token name, object? value)
     {
@@ -69,9 +70,9 @@ public class Environment : IEnumerable<string>
         return Ancestor(distance).Get(name);
     }
 
-    private Environment Ancestor(int distance)
+    private IEnvironment Ancestor(int distance)
     {
-        var environment = this;
+        IEnvironment environment = this;
         for (int i = 0; i < distance; i++)
         {
             environment = environment.Enclosing ?? throw new RuntimeException("Can't lookup variable.");

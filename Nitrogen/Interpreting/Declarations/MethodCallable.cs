@@ -1,4 +1,6 @@
-﻿using Nitrogen.Exceptions;
+﻿using Nitrogen.Abstractions.Base;
+using Nitrogen.Abstractions.Exceptions;
+using Nitrogen.Abstractions.Interpreting;
 using Nitrogen.Extensions;
 using System.Reflection;
 
@@ -27,17 +29,14 @@ public partial class MethodCallable(string name, List<MethodInfo> overloads) : C
         return this;
     }
 
-    public override object? Call(Interpreter interpreter, object?[] args)
+    public override object? Call(IInterpreter interpreter, object?[] args)
     {
-        args = args.Unwrap();
-
         // Select the overload based on the number of parameters
         var method = _overloads.Find(m => IsMatchingOverload(m, args))
             ?? throw new RuntimeException($"No overload found for method '{_name}' with {args.Length} parameters.");
 
         // Invoke the selected method
-        var result = method.Invoke(_instance, args);
-        return result.ToInternal();
+        return method.Invoke(_instance, args).ToInternal();
     }
 
     private static bool IsMatchingOverload(MethodInfo method, object?[] args)

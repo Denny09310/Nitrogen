@@ -1,8 +1,8 @@
-﻿using Nitrogen.Exceptions;
+﻿using Nitrogen.Abstractions.Exceptions;
+using Nitrogen.Abstractions.Syntax.Expressions;
+using Nitrogen.Abstractions.Syntax.Statements;
+using Nitrogen.Abstractions.Syntax.Statements.Abstractions;
 using Nitrogen.Interpreting.Declarations;
-using Nitrogen.Syntax.Abstractions;
-using Nitrogen.Syntax.Expressions;
-using Nitrogen.Syntax.Statements;
 
 using System.Diagnostics;
 
@@ -23,23 +23,6 @@ public partial class Interpreter
         ImportStatement statement => Execute(statement),
         _ => throw new UnreachableException($"Statement {stmt.GetType()} not recognized.")
     };
-
-    public void Execute(List<IStatement> statements, Environment environment)
-    {
-        (var enclosing, _environment) = (_environment, environment);
-
-        try
-        {
-            foreach (var statement in statements)
-            {
-                Execute(statement);
-            }
-        }
-        finally
-        {
-            _environment = enclosing;
-        }
-    }
 
     private object? Execute(ImportStatement statement)
     {
