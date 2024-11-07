@@ -1,13 +1,12 @@
 ﻿using Nitrogen.Abstractions.Exceptions;
 using Nitrogen.Abstractions.Extensions;
-using Nitrogen.Extensions;
 using System.Reflection;
 
 namespace Nitrogen.Abstractions.Interpreting.Declarations;
 
 public class PropertyCallable(PropertyInfo property) : ICallable
 {
-    private readonly string _name = property.Name.ToSnakeCase();
+    private readonly string _name = property.Name.ToLower();
     private readonly PropertyInfo _property = property;
 
     private object? _instance;

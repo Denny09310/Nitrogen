@@ -1,14 +1,12 @@
 ﻿using Nitrogen.Abstractions.Exceptions;
 using Nitrogen.Abstractions.Extensions;
-using Nitrogen.Abstractions.Interpreting;
-using Nitrogen.Extensions;
 using System.Reflection;
 
 namespace Nitrogen.Abstractions.Interpreting.Declarations;
 
 public partial class MethodCallable(string name, List<MethodInfo> overloads) : ICallable
 {
-    private readonly string _name = name.ToSnakeCase();
+    private readonly string _name = name.ToLower();
     private readonly List<MethodInfo> _overloads = overloads;
 
     private object? _instance;

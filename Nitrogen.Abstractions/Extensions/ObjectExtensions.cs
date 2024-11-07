@@ -20,7 +20,7 @@ public static class ObjectExtensions
             // Handle arrays or classes
             return obj switch
             {
-                Array array => array.ToInternal(), // Recursively handle array
+                IEnumerable<object> array => array.ToInternal(), // Recursively handle array
                 _ when type.IsClass => new WrapperInstance(obj), // Wrap class instances
                 _ => obj
             };
@@ -36,16 +36,16 @@ public static class ObjectExtensions
     }
 
     // ToInternal for arrays
-    public static object? ToInternal(this Array obj)
+    public static object? ToInternal(this IEnumerable<object> obj)
     {
-        var wrappedArray = new object?[obj.Length];
+        ICollection<object?> wrapped = [];
 
-        for (int i = 0; i < obj.Length; i++)
+        foreach (var item in obj)
         {
-            wrappedArray[i] = obj.GetValue(i).ToInternal(); // Use GetValue for array element access
+            wrapped.Add(ToInternal(item));
         }
 
-        return new WrapperInstance(wrappedArray);
+        return new WrapperInstance(wrapped);
     }
 
     public static object? Unwrap(this object? obj)
@@ -53,7 +53,7 @@ public static class ObjectExtensions
         return obj switch
         {
             WrapperInstance wrap => wrap.Instance.Unwrap(),
-            object[] array => array.Select(Unwrap).ToArray(),
+            IEnumerable<object> array => array.Select(Unwrap).ToArray(),
             _ => obj,
         };
     }

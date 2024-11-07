@@ -1,10 +1,8 @@
-﻿using Nitrogen.Extensions;
-
-namespace Nitrogen.Abstractions.Interpreting.Declarations;
+﻿namespace Nitrogen.Abstractions.Interpreting.Declarations;
 
 public class WrapperInstance(object instance) : NativeInstance
 {
-    private readonly string _name = instance.GetType().Name.ToSnakeCase();
+    private readonly string _name = instance.GetType().Name.ToLower();
 
     private Dictionary<string, MethodCallable>? _methods;
     private Dictionary<string, PropertyCallable>? _properties;

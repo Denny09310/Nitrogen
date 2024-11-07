@@ -1,5 +1,4 @@
 ﻿using Nitrogen.Abstractions.Exceptions;
-using Nitrogen.Extensions;
 using System.Reflection;
 
 namespace Nitrogen.Abstractions.Interpreting.Declarations;
@@ -29,7 +28,7 @@ public abstract class NativeInstance : IInstance
             .Where(m => !typeof(Task).IsAssignableFrom(m.ReturnType)) // Exclude async methods
             .GroupBy(m => m.Name)
             .ToDictionary(
-                m => m.Key.ToSnakeCase(),
+                m => m.Key.ToLower(),
                 m => new MethodCallable(m.Key, new(m)));
     }
 
@@ -38,7 +37,7 @@ public abstract class NativeInstance : IInstance
         return type
             .GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static)
             .ToDictionary(
-                p => p.Name.ToSnakeCase(),
+                p => p.Name.ToLower(),
                 p => new PropertyCallable(p));
     }
 

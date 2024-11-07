@@ -127,7 +127,15 @@ public partial class Interpreter
             throw new RuntimeException(expression.Paren, $"Call target is not callable.");
         }
 
-        var parameters = expression.Parameters.Select(Evaluate).ToArray();
+        var unwrapped = expression.Parameters
+            .Select(Evaluate)
+            .Unwrap();
+
+        if (unwrapped is not object?[] parameters)
+        {
+            throw new RuntimeException($"Unwrapping the function '{callable.Name}' parameters results in a mismatching error.");
+        }
+
         callable.Arity(parameters);
 
         return callable.Call(this, parameters);
@@ -217,9 +225,9 @@ public partial class Interpreter
         return constructor.Bind(instance).Call(this, args);
     }
 
-    private object?[] Evaluate(ArrayExpression expression)
+    private object? Evaluate(ArrayExpression expression)
     {
-        return expression.Items.Select(Evaluate).ToArray();
+        return expression.Items.Select(Evaluate).ToInternal();
     }
 
     private object? Evaluate(IndexExpression expression)
@@ -310,8 +318,10 @@ public partial class Interpreter
         return currentValue;
     }
 
-    private Dictionary<string, object?> Evaluate(DictionaryExpression expression)
+    private object? Evaluate(DictionaryExpression expression)
     {
-        return expression.Value.ToDictionary(static x => x.Key.Lexeme, x => Evaluate(x.Value));
+        return expression.Value
+            .ToDictionary(static x => x.Key.Lexeme, x => Evaluate(x.Value))
+            .ToInternal();
     }
 }
