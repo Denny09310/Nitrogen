@@ -1,15 +1,24 @@
-﻿using Nitrogen.Abstractions.Base;
-using Nitrogen.Abstractions.Exceptions;
+﻿using Nitrogen.Abstractions.Exceptions;
 using Nitrogen.Extensions;
 using System.Reflection;
 
-namespace Nitrogen.Interpreting.Declarations;
+namespace Nitrogen.Abstractions.Interpreting.Declarations;
 
-public abstract class NativeInstance : InstanceBase
+public abstract class NativeInstance : IInstance
 {
     public abstract Dictionary<string, MethodCallable> Methods { get; }
-    public abstract Dictionary<string, PropertyCallable> Properties { get; }
     public abstract string Name { get; }
+    public abstract Dictionary<string, PropertyCallable> Properties { get; }
+
+    public object? Get(Token member)
+    {
+        return Get(member.Lexeme);
+    }
+
+    public void Set(Token member, object? value)
+    {
+        Set(member.Lexeme, value);
+    }
 
     protected static Dictionary<string, MethodCallable> WrapMethods(Type type)
     {
@@ -39,11 +48,10 @@ public abstract class NativeInstance : InstanceBase
 
     protected virtual MethodCallable CreateMethod(MethodCallable method) => method;
 
-    protected override object? Get(string member)
+    protected object? Get(string member)
     {
         if (Properties.TryGetValue(member, out var getter))
         {
-            // We can pass null as the interpreter is not used for PropertyCallable
             return CallGetter(getter);
         }
 
@@ -55,14 +63,13 @@ public abstract class NativeInstance : InstanceBase
         throw new RuntimeException($"Property or method '{member}' not found.");
     }
 
-    protected override void Set(string member, object? value)
+    protected void Set(string member, object? value)
     {
         if (!Properties.TryGetValue(member, out PropertyCallable? setter))
         {
             throw new RuntimeException($"The class '{Name}' has not field '{member}'");
         }
 
-        // We can pass null as the interpreter is not used for PropertyCallable
         CallSetter(setter, value);
     }
 }

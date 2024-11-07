@@ -1,6 +1,6 @@
 ﻿using Nitrogen.Extensions;
 
-namespace Nitrogen.Interpreting.Declarations;
+namespace Nitrogen.Abstractions.Interpreting.Declarations;
 
 public class WrapperInstance(object instance) : NativeInstance
 {

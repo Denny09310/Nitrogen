@@ -16,7 +16,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nitrogen", "Nitrogen\Nitrogen.csproj", "{A11C7F0B-A2A5-43AE-B692-9EFC8F86F7B7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nitrogen.Abstractions", "Nitrogen.Abstractions\Nitrogen.Abstractions.csproj", "{916F9C56-1A74-4E53-B209-AC96358BB2BD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nitrogen.Abstractions", "Nitrogen.Abstractions\Nitrogen.Abstractions.csproj", "{916F9C56-1A74-4E53-B209-AC96358BB2BD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

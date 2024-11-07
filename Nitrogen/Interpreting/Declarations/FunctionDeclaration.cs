@@ -1,20 +1,19 @@
-﻿using Nitrogen.Abstractions.Base;
-using Nitrogen.Abstractions.Exceptions;
+﻿using Nitrogen.Abstractions.Exceptions;
 using Nitrogen.Abstractions.Interpreting;
 using Nitrogen.Abstractions.Syntax.Expressions;
 using Nitrogen.Abstractions.Syntax.Statements;
 
 namespace Nitrogen.Interpreting.Declarations;
 
-public class FunctionDeclaration(FunctionStatement statement, IEnvironment closure, bool isConstructor = false) : CallableBase
+public class FunctionDeclaration(FunctionStatement statement, IEnvironment closure, bool isConstructor = false) : IFunctionDeclaration
 {
     private readonly FunctionStatement _statement = statement;
 
     public IEnvironment Closure { get; } = closure;
 
-    public override string Name => _statement.Name.Lexeme;
+    public string Name => _statement.Name.Lexeme;
 
-    public override void Arity(object?[] args)
+    public void Arity(object?[] args)
     {
         var mandatory = _statement.Arguments.Where(argument => argument is IdentifierExpression).ToArray();
         var optionals = _statement.Arguments.Where(argument => argument is AssignmentExpression).ToArray();
@@ -25,14 +24,14 @@ public class FunctionDeclaration(FunctionStatement statement, IEnvironment closu
         }
     }
 
-    public FunctionDeclaration Bind(ClassInstance instance)
+    public IFunctionDeclaration Bind(IClassInstance instance)
     {
         var environment = new Environment(Closure);
         environment.Define("this", instance);
         return new FunctionDeclaration(_statement, environment);
     }
 
-    public override object? Call(IInterpreter interpreter, object?[] args)
+    public object? Call(IInterpreter interpreter, object?[] args)
     {
         var environment = new Environment(Closure);
         DefineArguments(interpreter, args, environment);

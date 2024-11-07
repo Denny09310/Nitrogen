@@ -1,9 +1,9 @@
 ﻿using Nitrogen.Abstractions;
 using Nitrogen.Abstractions.Exceptions;
+using Nitrogen.Abstractions.Extensions;
 using Nitrogen.Abstractions.Interpreting;
 using Nitrogen.Abstractions.Syntax.Expressions;
 using Nitrogen.Abstractions.Syntax.Expressions.Abstractions;
-using Nitrogen.Extensions;
 using Nitrogen.Interpreting.Declarations;
 
 using System.Diagnostics;

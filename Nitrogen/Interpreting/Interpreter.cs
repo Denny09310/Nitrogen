@@ -1,10 +1,10 @@
 ﻿using Nitrogen.Abstractions;
-using Nitrogen.Abstractions.Base;
 using Nitrogen.Abstractions.Exceptions;
 using Nitrogen.Abstractions.Interpreting;
+using Nitrogen.Abstractions.Interpreting.Declarations;
 using Nitrogen.Abstractions.Syntax.Expressions.Abstractions;
 using Nitrogen.Abstractions.Syntax.Statements.Abstractions;
-using Nitrogen.Interpreting.Declarations;
+using Nitrogen.Abstractions.Utils;
 
 namespace Nitrogen.Interpreting;
 
@@ -67,9 +67,7 @@ public partial class Interpreter : IInterpreter
     {
         var environment = new Environment();
 
-        var classes = typeof(Interpreter).Assembly
-            .ExportedTypes
-            .Where(IsGlobalClass);
+        var classes = TypeLoader.FindClasses(typeof(Interpreter));
 
         foreach (var @class in classes)
         {
@@ -81,13 +79,11 @@ public partial class Interpreter : IInterpreter
             environment.Define(instance.Name, instance);
         }
 
-        var functions = typeof(Interpreter).Assembly
-            .ExportedTypes
-            .Where(IsGlobalFunction);
+        var functions = TypeLoader.FindFunctions(typeof(Interpreter));
 
         foreach (var function in functions)
         {
-            if (Activator.CreateInstance(function) is not CallableBase instance)
+            if (Activator.CreateInstance(function) is not ICallable instance)
             {
                 throw new RuntimeException($"Type '{function.Name}' can't be instantiated into 'global scope'");
             }
@@ -96,22 +92,6 @@ public partial class Interpreter : IInterpreter
         }
 
         return environment;
-    }
-
-    private static bool IsGlobalClass(Type type)
-    {
-        return !type.IsAbstract
-            && type.Name != nameof(WrapperInstance)
-            && typeof(NativeInstance).IsAssignableFrom(type);
-    }
-
-    private static bool IsGlobalFunction(Type type)
-    {
-        return !type.IsAbstract
-            && type.Name != nameof(FunctionDeclaration)
-            && type.Name != nameof(MethodCallable)
-            && type.Name != nameof(PropertyCallable)
-            && typeof(CallableBase).IsAssignableFrom(type);
     }
 
     private object? LookupVariable(IExpression expression, Token name, bool global = true)

@@ -2,7 +2,7 @@
 
 namespace Nitrogen.Extensions;
 
-internal static partial class StringExtensions
+public static partial class StringExtensions
 {
     public static string ToSnakeCase(this string name)
     {

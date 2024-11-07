@@ -1,21 +1,20 @@
-﻿using Nitrogen.Abstractions.Base;
-using Nitrogen.Abstractions.Exceptions;
-using Nitrogen.Abstractions.Interpreting;
+﻿using Nitrogen.Abstractions.Exceptions;
+using Nitrogen.Abstractions.Extensions;
 using Nitrogen.Extensions;
 using System.Reflection;
 
-namespace Nitrogen.Interpreting.Declarations;
+namespace Nitrogen.Abstractions.Interpreting.Declarations;
 
-public class PropertyCallable(PropertyInfo property) : CallableBase
+public class PropertyCallable(PropertyInfo property) : ICallable
 {
     private readonly string _name = property.Name.ToSnakeCase();
     private readonly PropertyInfo _property = property;
 
     private object? _instance;
 
-    public override string Name => _name;
+    public string Name => _name;
 
-    public override void Arity(object?[] args)
+    public void Arity(object?[] args)
     {
         if (args.Length != 0 && args.Length != 1)
         {
@@ -29,7 +28,7 @@ public class PropertyCallable(PropertyInfo property) : CallableBase
         return this;
     }
 
-    public override object? Call(IInterpreter interpreter, object?[] args)
+    public object? Call(IInterpreter interpreter, object?[] args)
     {
         if (args.Length == 0)
         {

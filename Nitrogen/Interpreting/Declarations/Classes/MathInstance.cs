@@ -1,4 +1,6 @@
-﻿namespace Nitrogen.Interpreting.Declarations.Classes;
+﻿using Nitrogen.Abstractions.Interpreting.Declarations;
+
+namespace Nitrogen.Interpreting.Declarations.Classes;
 
 public class MathInstance : NativeInstance
 {

@@ -1,8 +1,8 @@
-﻿using Nitrogen.Interpreting.Declarations;
+﻿using Nitrogen.Abstractions.Interpreting.Declarations;
 
-namespace Nitrogen.Extensions;
+namespace Nitrogen.Abstractions.Extensions;
 
-internal static class ObjectExtensions
+public static class ObjectExtensions
 {
     // ToInternal for a single object
     public static object? ToInternal(this object? obj)
@@ -20,7 +20,7 @@ internal static class ObjectExtensions
             // Handle arrays or classes
             return obj switch
             {
-                Array array => ToInternal(array), // Recursively handle array
+                Array array => array.ToInternal(), // Recursively handle array
                 _ when type.IsClass => new WrapperInstance(obj), // Wrap class instances
                 _ => obj
             };

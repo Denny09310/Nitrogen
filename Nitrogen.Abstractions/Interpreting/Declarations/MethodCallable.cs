@@ -1,21 +1,21 @@
-﻿using Nitrogen.Abstractions.Base;
-using Nitrogen.Abstractions.Exceptions;
+﻿using Nitrogen.Abstractions.Exceptions;
+using Nitrogen.Abstractions.Extensions;
 using Nitrogen.Abstractions.Interpreting;
 using Nitrogen.Extensions;
 using System.Reflection;
 
-namespace Nitrogen.Interpreting.Declarations;
+namespace Nitrogen.Abstractions.Interpreting.Declarations;
 
-public partial class MethodCallable(string name, List<MethodInfo> overloads) : CallableBase
+public partial class MethodCallable(string name, List<MethodInfo> overloads) : ICallable
 {
     private readonly string _name = name.ToSnakeCase();
     private readonly List<MethodInfo> _overloads = overloads;
 
     private object? _instance;
 
-    public override string Name => _name;
+    public string Name => _name;
 
-    public override void Arity(object?[] args)
+    public void Arity(object?[] args)
     {
         if (!_overloads.Exists(m => m.GetParameters().Length == args.Length))
         {
@@ -29,7 +29,7 @@ public partial class MethodCallable(string name, List<MethodInfo> overloads) : C
         return this;
     }
 
-    public override object? Call(IInterpreter interpreter, object?[] args)
+    public object? Call(IInterpreter interpreter, object?[] args)
     {
         // Select the overload based on the number of parameters
         var method = _overloads.Find(m => IsMatchingOverload(m, args))
