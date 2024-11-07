@@ -253,6 +253,7 @@ public partial class Interpreter
                 throw new RuntimeException(expression.Bracket, "Array index must be a string.");
 
             default:
+
                 throw new RuntimeException(expression.Bracket, "Target is not an iterable.");
         }
     }
@@ -262,7 +263,7 @@ public partial class Interpreter
         var identifier = new Evaluation(Evaluate(expression.Identifier));
         var @operator = expression.Operator;
 
-        var currentValue = @operator.Kind switch
+        var current = @operator.Kind switch
         {
             TokenKind.PlusPlus => identifier + Evaluation.One,
             TokenKind.MinusMinus => identifier - Evaluation.One,
@@ -272,10 +273,10 @@ public partial class Interpreter
 
         if (expression.Identifier is IdentifierExpression identifierExpr)
         {
-            _environment.Assign(identifierExpr.Name, currentValue);
+            _environment.Assign(identifierExpr.Name, current);
         }
 
-        return currentValue;
+        return current;
     }
 
     private object? Evaluate(PostfixExpression expression)
