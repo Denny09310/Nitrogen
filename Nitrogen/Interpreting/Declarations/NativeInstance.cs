@@ -1,4 +1,5 @@
-﻿using Nitrogen.Exceptions;
+﻿using Nitrogen.Abstractions.Base;
+using Nitrogen.Abstractions.Exceptions;
 using Nitrogen.Extensions;
 using System.Reflection;
 

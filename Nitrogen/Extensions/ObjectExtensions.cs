@@ -48,25 +48,13 @@ internal static class ObjectExtensions
         return new WrapperInstance(wrappedArray);
     }
 
-    // Unwrap for single object
     public static object? Unwrap(this object? obj)
     {
-        if (obj is WrapperInstance wrapper)
+        return obj switch
         {
-            return wrapper.Instance.Unwrap();
-        }
-
-        return obj;
-    }
-
-    // Unwrap for arrays
-    public static object?[] Unwrap(this object?[] obj)
-    {
-        for (int i = 0; i < obj.Length; i++)
-        {
-            obj[i] = obj[i].Unwrap();
-        }
-
-        return obj;
+            WrapperInstance wrap => wrap.Instance.Unwrap(),
+            object[] array => array.Select(Unwrap).ToArray(),
+            _ => obj,
+        };
     }
 }

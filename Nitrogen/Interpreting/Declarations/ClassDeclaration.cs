@@ -1,5 +1,6 @@
-﻿using Nitrogen.Syntax;
-using Nitrogen.Syntax.Statements;
+﻿using Nitrogen.Abstractions;
+using Nitrogen.Abstractions.Interpreting;
+using Nitrogen.Abstractions.Syntax.Statements;
 
 namespace Nitrogen.Interpreting.Declarations;
 
@@ -11,7 +12,7 @@ public class ClassDeclaration(ClassStatement statement, ClassDeclaration? superc
 
     string ICallable.Name => Name.Lexeme;
 
-    public virtual object? Call(Interpreter interpreter, object?[] args)
+    public virtual object? Call(IInterpreter interpreter, object?[] args)
     {
         var instance = new ClassInstance(this);
         _constructor?.Bind(instance).Call(interpreter, args);

@@ -1,11 +1,11 @@
 ﻿using System.Text;
-using Nitrogen.Exceptions;
+using Nitrogen.Abstractions;
+using Nitrogen.Abstractions.Exceptions;
+using Nitrogen.Abstractions.Syntax.Statements.Abstractions;
 using Nitrogen.Interpreting;
 using Nitrogen.Interpreting.Binding;
 using Nitrogen.Lexing;
 using Nitrogen.Parsing;
-using Nitrogen.Syntax;
-using Nitrogen.Syntax.Abstractions;
 
 namespace Nitrogen.Runtime;
 

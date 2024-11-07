@@ -1,18 +1,21 @@
-﻿using Nitrogen.Exceptions;
+﻿using Nitrogen.Abstractions;
+using Nitrogen.Abstractions.Base;
+using Nitrogen.Abstractions.Exceptions;
+using Nitrogen.Abstractions.Interpreting;
+using Nitrogen.Abstractions.Syntax.Expressions.Abstractions;
+using Nitrogen.Abstractions.Syntax.Statements.Abstractions;
 using Nitrogen.Interpreting.Declarations;
-using Nitrogen.Syntax;
-using Nitrogen.Syntax.Abstractions;
 
 namespace Nitrogen.Interpreting;
 
-public partial class Interpreter
+public partial class Interpreter : IInterpreter
 {
     private readonly Environment _globals;
     private readonly ModuleLoader _loader;
     private readonly Dictionary<IExpression, int> _locals = [];
     private readonly InterpreterOptions _options = InterpreterOptions.Default;
 
-    private Environment _environment;
+    private IEnvironment _environment;
 
     public Interpreter() : this(InterpreterOptions.Default)
     {
@@ -26,7 +29,7 @@ public partial class Interpreter
         _loader = new ModuleLoader(Directory.GetCurrentDirectory());
     }
 
-    public Environment Environment => _environment;
+    public IEnvironment Environment => _environment;
     public Dictionary<IExpression, int> Locals => _locals;
     public IOutputSink Output => _options.OutputSink;
 
@@ -35,6 +38,23 @@ public partial class Interpreter
         foreach (var statement in statements)
         {
             Execute(statement);
+        }
+    }
+
+    public void Execute(List<IStatement> statements, IEnvironment environment)
+    {
+        (var enclosing, _environment) = (_environment, environment);
+
+        try
+        {
+            foreach (var statement in statements)
+            {
+                Execute(statement);
+            }
+        }
+        finally
+        {
+            _environment = enclosing;
         }
     }
 
