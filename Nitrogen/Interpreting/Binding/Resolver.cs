@@ -25,7 +25,7 @@ public partial class Resolver(Interpreter interpreter, bool module = false)
     public List<BindingException> Resolve(List<IStatement> statements)
     {
         BeginScope();
-        InitializeGlobalScope();
+        InitializeScope();
 
         foreach (var statement in statements)
         {
@@ -97,9 +97,9 @@ public partial class Resolver(Interpreter interpreter, bool module = false)
         }
     }
 
-    private void InitializeGlobalScope()
+    private void InitializeScope()
     {
-        var global = _interpreter.Environment.Enclosing ?? throw new RuntimeException("'global' scope not initialized.");
+        var global = _interpreter.Environment ?? throw new RuntimeException("'global' scope not initialized.");
 
         foreach (var item in global)
         {

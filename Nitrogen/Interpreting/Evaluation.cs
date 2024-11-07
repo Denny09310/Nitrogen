@@ -1,5 +1,5 @@
 ﻿using Nitrogen.Abstractions.Exceptions;
-using Nitrogen.Extensions;
+using Nitrogen.Abstractions.Extensions;
 using System.Globalization;
 
 namespace Nitrogen.Interpreting;

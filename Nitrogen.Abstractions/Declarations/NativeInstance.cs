@@ -1,9 +1,9 @@
 ﻿using Nitrogen.Abstractions.Base;
 using Nitrogen.Abstractions.Exceptions;
-using Nitrogen.Extensions;
+using Nitrogen.Abstractions.Extensions;
 using System.Reflection;
 
-namespace Nitrogen.Interpreting.Declarations;
+namespace Nitrogen.Abstractions.Declarations;
 
 public abstract class NativeInstance : InstanceBase
 {

@@ -1,11 +1,10 @@
 ﻿using Nitrogen.Abstractions;
 using Nitrogen.Abstractions.Exceptions;
+using Nitrogen.Abstractions.Extensions;
 using Nitrogen.Abstractions.Interpreting;
 using Nitrogen.Abstractions.Syntax.Expressions;
 using Nitrogen.Abstractions.Syntax.Expressions.Abstractions;
-using Nitrogen.Extensions;
 using Nitrogen.Interpreting.Declarations;
-
 using System.Diagnostics;
 
 namespace Nitrogen.Interpreting;
@@ -178,7 +177,7 @@ public partial class Interpreter
 
     private object? Evaluate(ThisExpression expression)
     {
-        return LookupVariable(expression, expression.Keyword, global: false);
+        return LookupVariable(expression, expression.Keyword);
     }
 
     private object? Evaluate(SuperExpression expression)

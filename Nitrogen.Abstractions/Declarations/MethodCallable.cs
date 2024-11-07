@@ -1,10 +1,10 @@
 ﻿using Nitrogen.Abstractions.Base;
 using Nitrogen.Abstractions.Exceptions;
+using Nitrogen.Abstractions.Extensions;
 using Nitrogen.Abstractions.Interpreting;
-using Nitrogen.Extensions;
 using System.Reflection;
 
-namespace Nitrogen.Interpreting.Declarations;
+namespace Nitrogen.Abstractions.Declarations;
 
 public partial class MethodCallable(string name, List<MethodInfo> overloads) : CallableBase
 {

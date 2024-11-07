@@ -3,7 +3,6 @@ using Nitrogen.Abstractions.Syntax.Expressions;
 using Nitrogen.Abstractions.Syntax.Statements;
 using Nitrogen.Abstractions.Syntax.Statements.Abstractions;
 using Nitrogen.Interpreting.Declarations;
-
 using System.Diagnostics;
 
 namespace Nitrogen.Interpreting;

@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace Nitrogen.Extensions;
+namespace Nitrogen.Abstractions.Extensions;
 
 internal static partial class StringExtensions
 {

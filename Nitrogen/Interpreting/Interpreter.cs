@@ -1,32 +1,24 @@
 ﻿using Nitrogen.Abstractions;
 using Nitrogen.Abstractions.Base;
+using Nitrogen.Abstractions.Declarations;
 using Nitrogen.Abstractions.Exceptions;
 using Nitrogen.Abstractions.Interpreting;
 using Nitrogen.Abstractions.Syntax.Expressions.Abstractions;
 using Nitrogen.Abstractions.Syntax.Statements.Abstractions;
-using Nitrogen.Interpreting.Declarations;
+using Nitrogen.Abstractions.Utils;
 
 namespace Nitrogen.Interpreting;
 
-public partial class Interpreter : IInterpreter
+public partial class Interpreter(InterpreterOptions options) : IInterpreter
 {
-    private readonly Environment _globals;
-    private readonly ModuleLoader _loader;
+    private readonly ModuleLoader _loader = new(Directory.GetCurrentDirectory());
     private readonly Dictionary<IExpression, int> _locals = [];
-    private readonly InterpreterOptions _options = InterpreterOptions.Default;
+    private readonly InterpreterOptions _options = options ?? throw new ArgumentNullException(nameof(options));
 
-    private IEnvironment _environment;
+    private IEnvironment _environment = InitializeGlobals();
 
     public Interpreter() : this(InterpreterOptions.Default)
     {
-    }
-
-    public Interpreter(InterpreterOptions options)
-    {
-        _globals = InitializeGlobals();
-        _environment = new Environment(_globals);
-        _options = options ?? throw new ArgumentNullException(nameof(options));
-        _loader = new ModuleLoader(Directory.GetCurrentDirectory());
     }
 
     public IEnvironment Environment => _environment;
@@ -67,9 +59,7 @@ public partial class Interpreter : IInterpreter
     {
         var environment = new Environment();
 
-        var classes = typeof(Interpreter).Assembly
-            .ExportedTypes
-            .Where(IsGlobalClass);
+        var classes = TypeLoader.FindClasses(typeof(Interpreter));
 
         foreach (var @class in classes)
         {
@@ -81,9 +71,7 @@ public partial class Interpreter : IInterpreter
             environment.Define(instance.Name, instance);
         }
 
-        var functions = typeof(Interpreter).Assembly
-            .ExportedTypes
-            .Where(IsGlobalFunction);
+        var functions = TypeLoader.FindFunctions(typeof(Interpreter));
 
         foreach (var function in functions)
         {
@@ -98,35 +86,14 @@ public partial class Interpreter : IInterpreter
         return environment;
     }
 
-    private static bool IsGlobalClass(Type type)
-    {
-        return !type.IsAbstract
-            && type.Name != nameof(WrapperInstance)
-            && typeof(NativeInstance).IsAssignableFrom(type);
-    }
-
-    private static bool IsGlobalFunction(Type type)
-    {
-        return !type.IsAbstract
-            && type.Name != nameof(FunctionDeclaration)
-            && type.Name != nameof(MethodCallable)
-            && type.Name != nameof(PropertyCallable)
-            && typeof(CallableBase).IsAssignableFrom(type);
-    }
-
-    private object? LookupVariable(IExpression expression, Token name, bool global = true)
+    private object? LookupVariable(IExpression expression, Token name)
     {
         if (_locals.TryGetValue(expression, out var distance))
         {
             return _environment.GetAt(name, distance);
         }
 
-        if (!global)
-        {
-            throw new RuntimeException(name, $"Global lookup not available for '{name.Lexeme}'");
-        }
-
-        return _globals.Get(name);
+        throw new RuntimeException(name, $"Global lookup not available for '{name.Lexeme}'");
     }
 
     private void Loop(Func<bool> condition, IStatement body, IExpression? increment = null)

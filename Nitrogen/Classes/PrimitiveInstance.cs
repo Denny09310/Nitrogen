@@ -1,4 +1,6 @@
-﻿namespace Nitrogen.Interpreting.Declarations.Classes;
+﻿using Nitrogen.Abstractions.Declarations;
+
+namespace Nitrogen.Classes;
 
 public class DoubleInstance : NativeInstance
 {

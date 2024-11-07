@@ -1,12 +1,13 @@
 ﻿using Nitrogen.Abstractions.Base;
 using Nitrogen.Abstractions.Exceptions;
 using Nitrogen.Abstractions.Interpreting;
+using Nitrogen.Abstractions.Interpreting.Declarations;
 using Nitrogen.Abstractions.Syntax.Expressions;
 using Nitrogen.Abstractions.Syntax.Statements;
 
 namespace Nitrogen.Interpreting.Declarations;
 
-public class FunctionDeclaration(FunctionStatement statement, IEnvironment closure, bool isConstructor = false) : CallableBase
+public class FunctionDeclaration(FunctionStatement statement, IEnvironment closure, bool isConstructor = false) : CallableBase, IFunctionDeclaration
 {
     private readonly FunctionStatement _statement = statement;
 
