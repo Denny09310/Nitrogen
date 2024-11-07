@@ -1,14 +1,16 @@
-﻿using Nitrogen.Exceptions;
-using Nitrogen.Syntax.Expressions;
-using Nitrogen.Syntax.Statements;
+﻿using Nitrogen.Abstractions.Base;
+using Nitrogen.Abstractions.Exceptions;
+using Nitrogen.Abstractions.Interpreting;
+using Nitrogen.Abstractions.Syntax.Expressions;
+using Nitrogen.Abstractions.Syntax.Statements;
 
 namespace Nitrogen.Interpreting.Declarations;
 
-public class FunctionDeclaration(FunctionStatement statement, Environment closure, bool isConstructor = false) : CallableBase
+public class FunctionDeclaration(FunctionStatement statement, IEnvironment closure, bool isConstructor = false) : CallableBase
 {
     private readonly FunctionStatement _statement = statement;
 
-    public Environment Closure { get; } = closure;
+    public IEnvironment Closure { get; } = closure;
 
     public override string Name => _statement.Name.Lexeme;
 
@@ -30,7 +32,7 @@ public class FunctionDeclaration(FunctionStatement statement, Environment closur
         return new FunctionDeclaration(_statement, environment);
     }
 
-    public override object? Call(Interpreter interpreter, object?[] args)
+    public override object? Call(IInterpreter interpreter, object?[] args)
     {
         var environment = new Environment(Closure);
         DefineArguments(interpreter, args, environment);
@@ -52,7 +54,7 @@ public class FunctionDeclaration(FunctionStatement statement, Environment closur
 
     public override string ToString() => $"function {Name}() {{...}}";
 
-    private void DefineArguments(Interpreter interpreter, object?[] args, Environment environment)
+    private void DefineArguments(IInterpreter interpreter, object?[] args, Environment environment)
     {
         foreach (var (index, argument) in _statement.Arguments.Select((a, i) => (i, a)))
         {

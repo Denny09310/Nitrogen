@@ -1,5 +1,5 @@
-﻿using Nitrogen.Exceptions;
-using Nitrogen.Syntax;
+﻿using Nitrogen.Abstractions;
+using Nitrogen.Abstractions.Exceptions;
 using System.Text;
 
 namespace Nitrogen.Lexing;

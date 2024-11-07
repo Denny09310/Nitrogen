@@ -1,8 +1,9 @@
-﻿using Nitrogen.Exceptions;
+﻿using Nitrogen.Abstractions.Exceptions;
+using Nitrogen.Abstractions.Interpreting;
+using Nitrogen.Abstractions.Syntax.Expressions.Abstractions;
 using Nitrogen.Interpreting.Binding;
 using Nitrogen.Lexing;
 using Nitrogen.Parsing;
-using Nitrogen.Syntax.Abstractions;
 
 namespace Nitrogen.Interpreting;
 
@@ -105,9 +106,9 @@ public class ModuleLoader(string @base)
     }
 }
 
-public class Module(Environment environment, IDictionary<IExpression, int> locals)
+public class Module(IEnvironment environment, IDictionary<IExpression, int> locals)
 {
-    public Environment Environment { get; set; } = environment;
+    public IEnvironment Environment { get; set; } = environment;
     public IDictionary<IExpression, int> Locals { get; } = locals;
 
     public static Module Create(Interpreter interpreter) => new(interpreter.Environment, interpreter.Locals);

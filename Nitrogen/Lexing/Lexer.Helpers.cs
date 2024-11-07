@@ -1,5 +1,4 @@
-﻿using Nitrogen.Syntax;
-
+﻿using Nitrogen.Abstractions;
 using System.Globalization;
 
 namespace Nitrogen.Lexing;

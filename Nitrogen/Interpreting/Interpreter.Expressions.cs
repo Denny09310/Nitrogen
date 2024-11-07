@@ -1,9 +1,10 @@
-﻿using Nitrogen.Exceptions;
+﻿using Nitrogen.Abstractions;
+using Nitrogen.Abstractions.Exceptions;
+using Nitrogen.Abstractions.Interpreting;
+using Nitrogen.Abstractions.Syntax.Expressions;
+using Nitrogen.Abstractions.Syntax.Expressions.Abstractions;
 using Nitrogen.Extensions;
 using Nitrogen.Interpreting.Declarations;
-using Nitrogen.Syntax;
-using Nitrogen.Syntax.Abstractions;
-using Nitrogen.Syntax.Expressions;
 
 using System.Diagnostics;
 
@@ -217,8 +218,7 @@ public partial class Interpreter
 
     private object? Evaluate(ArrayExpression expression)
     {
-        return expression.Items
-            .Select(Evaluate)
+        return expression.Items.Select(Evaluate)
             .ToArray()
             .ToInternal();
     }
